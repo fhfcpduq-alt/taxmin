@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세무회계 민 대표님 맞춤 계산기</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --surface-sub: #F1F5F9;
+      --border: #E2E8F0;
+      --border-focus: #1E293B;
+      --brand-navy: #1E293B;
+      --text-main: #0F172A;
+      --text-sub: #475569;
+      --text-muted: #94A3B8;
+      --primary: #2563EB;
+      --loss: #DC2626;
+      --loss-soft: #FEF2F2;
+      --loss-border: #FEE2E2;
+      --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; letter-spacing: -0.02em; }
+    body { background-color: var(--bg); color: var(--text-main); display: flex; justify-content: center; padding: 48px 16px 64px; min-height: 100vh; }
+    .wrapper { width: 100%; max-width: 540px; margin: 0 auto; }
+
+    /* Header */
+    .header { text-align: center; margin-bottom: 24px; }
+    .badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 14px; background: #EEF2F6; border: 1px solid #DCE4EC; border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--brand-navy); margin-bottom: 14px; }
+    .badge-dot { width: 6px; height: 6px; background: #3B82F6; border-radius: 50%; }
+    
+    .link-banner {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 10px 18px;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 12px;
+      color: #1D4ED8;
+      font-size: 14.5px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .link-banner:hover {
+      background: #DBEAFE;
+      border-color: #93C5FD;
+      transform: translateY(-1px);
+    }
+    .subtitle { font-size: 13.5px; color: var(--text-sub); line-height: 1.55; margin-top: 4px; }
+
+    /* Main Card */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 30px 26px; box-shadow: var(--card-shadow); margin-bottom: 22px; }
+
+    .field-group { margin-bottom: 20px; position: relative; }
+    .input-label { font-size: 13.5px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .status-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+    .status-found { background: #DCFCE7; color: #166534; }
+    .status-custom { background: var(--surface-sub); color: var(--text-sub); }
+
+    .input-box { position: relative; display: flex; align-items: center; }
+    .input-box input {
+      width: 100%; padding: 15px 16px; font-size: 16px; font-weight: 600;
+      color: var(--text-main); background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 12px; outline: none; transition: all 0.2s ease;
+    }
+    .input-box input.sales-val { padding-right: 36px; font-size: 20px; font-weight: 700; text-align: right; }
+    .input-box input:focus { border-color: var(--brand-navy); box-shadow: 0 0 0 3px rgba(42, 54, 71, 0.08); }
+    .input-box .unit { position: absolute; right: 16px; font-size: 16px; font-weight: 600; color: var(--text-muted); pointer-events: none; }
+
+    /* Loss Highlight */
+    .loss-banner {
+      background: var(--loss-soft); border: 1.5px solid var(--loss-border); border-radius: 16px;
+      padding: 22px 18px; margin-top: 24px; text-align: center;
+    }
+    .loss-tag { font-size: 13px; font-weight: 600; color: var(--loss); margin-bottom: 6px; }
+    .loss-amount { font-size: 32px; font-weight: 800; color: var(--loss); line-height: 1.1; margin-bottom: 8px; }
+    .loss-comment { font-size: 13px; font-weight: 500; color: #991B1B; line-height: 1.45; }
+
+    /* Comparison Grid */
+    .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+    .comp-card { background: var(--surface-sub); border-radius: 14px; padding: 16px; }
+    .comp-card.highlight { background: #F8FAFC; border: 1px solid var(--border); }
+    .comp-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .comp-rate { font-size: 11px; font-weight: 700; color: var(--text-sub); }
+    .comp-value { font-size: 18px; font-weight: 700; color: var(--text-main); margin-top: 6px; text-align: right; }
+    .comp-bar-bg { width: 100%; height: 6px; background: #E2E8F0; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+    .comp-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+    .bar-2026 { background: #475569; }
+    .bar-2027 { background: #2563EB; }
+    .bar-percent { font-size: 11px; color: var(--text-muted); margin-top: 5px; text-align: right; font-weight: 600; }
+
+    /* Policy Note */
+    .footer-note { padding: 4px 8px; font-size: 12.5px; color: var(--text-sub); line-height: 1.65; margin-bottom: 26px; text-align: left; }
+    .footer-note ul { list-style: none; }
+    .footer-note li { position: relative; padding-left: 14px; margin-bottom: 5px; }
+    .footer-note li::before { content: "•"; position: absolute; left: 0; color: var(--text-muted); font-size: 14px; }
+    .footer-note b { color: var(--text-main); }
+
+    /* Footer Branding */
+    .firm-footer {
+      padding-top: 24px; border-top: 1px solid var(--border); text-align: center;
+    }
+    .firm-footer .firm-name { font-size: 14.5px; font-weight: 700; color: var(--brand-navy); margin-bottom: 6px; }
+    .firm-footer .firm-info { font-size: 12px; color: var(--text-sub); line-height: 1.65; margin-bottom: 10px; }
+    .firm-footer .firm-info span { display: inline-block; margin: 0 4px; }
+    .firm-footer .copyright { font-size: 11px; color: #94A3B8; letter-spacing: 0.02em; }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <header class="header">
+    <div>
+      <div class="badge">
+        <span class="badge-dot"></span>
+        세무회계 민 대표님 맞춤 계산기
+      </div>
+    </div>
+    <div>
+      <a href="https://blog.naver.com/tax-min" target="_blank" class="link-banner">
+        📖 신용카드발행세액공제 개정 내용 자세히 확인하기 ➔
+      </a>
+    </div>
+    <p class="subtitle">대표님의 직전 매출 데이터를 기반으로 2027년 개정 세법 적용 시 예상되는 세액공제 변동 및 추가 납부세액을 계산합니다.</p>
+  </header>
+
+  <div class="card">
+    <!-- Business Name Field -->
+    <div class="field-group">
+      <label class="input-label" for="companyInput">
+        <span>사업자명 (상호)</span>
+        <span class="status-badge status-custom" id="dbStatus">조회 대기</span>
+      </label>
+      <div class="input-box">
+        <input 
+          type="text" 
+          id="companyInput" 
+          placeholder="(사업자명 띄어쓰기 없이 입력)" 
+          autocomplete="off" 
+          oninput="searchCompany(this.value)" 
+          onchange="searchCompany(this.value)"
+        >
+      </div>
+    </div>
+
+    <!-- Sales Amount Field -->
+    <div class="field-group" style="margin-bottom: 12px;">
+      <label class="input-label" for="salesInput">
+        <span>연간 카드·현금영수증 매출액 (부가세 제외)</span>
+        <span style="font-size: 11px; color: var(--text-muted);">직접 수정 가능</span>
+      </label>
+      <div class="input-box">
+        <input type="text" id="salesInput" class="sales-val" placeholder="0" inputmode="numeric" oninput="handleManualSales(this.value)">
+        <span class="unit">원</span>
+      </div>
+    </div>
+
+    <!-- Loss Banner -->
+    <div class="loss-banner">
+      <div class="loss-tag">2027년 연간 세액공제 감소액 (추가 세부담)</div>
+      <div class="loss-amount" id="lossAmount">₩0</div>
+      <div class="loss-comment" id="lossComment">사업자명을 입력하거나 매출액을 입력해 주세요.</div>
+    </div>
+
+    <!-- Comparison Grid -->
+    <div class="comparison-grid">
+      <div class="comp-card">
+        <div class="comp-title">
+          <span>2026년 (기존)</span>
+          <span class="comp-rate">1.3% / 1천만 한도</span>
+        </div>
+        <div class="comp-value" id="val2026">₩0</div>
+        <div class="comp-bar-bg">
+          <div class="comp-bar-fill bar-2026" id="bar2026" style="width: 0%;"></div>
+        </div>
+        <div class="bar-percent" id="pct2026">한도 0%</div>
+      </div>
+
+      <div class="comp-card highlight">
+        <div class="comp-title">
+          <span>2027년 (개정)</span>
+          <span class="comp-rate">1.2% / 5백만 한도</span>
+        </div>
+        <div class="comp-value" id="val2027">₩0</div>
+        <div class="comp-bar-bg">
+          <div class="comp-bar-fill bar-2027" id="bar2027" style="width: 0%;"></div>
+        </div>
+        <div class="bar-percent" id="pct2027">한도 0%</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-note">
+    <ul>
+      <li>발급세액공제는 공급대가(부가세 포함) 기준 산출되므로 입력하신 공급가액에 부가세(10%)가 자동 가산되어 계산됩니다.</li>
+      <li><b>적용 배제 업종 안내:</b> 직전연도 공급가액 10억 원 이하 개인사업자라도 <b>제조업, 도매업, 부동산임대업 등 일부 업종</b>은 세법상 신용카드 발급세액공제 적용이 불가능합니다. (주로 소비자 대상 소매·음식·숙박·서비스업 등 적용)</li>
+      <li>모든 법인사업자는 공급가액 규모와 무관하게 공제 대상에서 제외됩니다.</li>
+      <li>발급세액공제는 부가가치세 납부세액 한도로 적용되므로 환급세액 발생 시에는 공제되지 않습니다.</li>
+    </ul>
+  </footer>
+
+  <div class="firm-footer">
+    <div class="firm-name">세무회계 민</div>
+    <div class="firm-info">
+      서울시 강서구 공항대로 194, 717~718호<br>
+      <span>E: tax-min@naver.com</span> | <span>F: 0303-3443-7700</span>
+    </div>
+    <div class="copyright">Copyright © Tax Accounting Min. All Rights Reserved.</div>
+  </div>
+</div>
+
+<script>
+  // 사업장별 직전기수 매출액(부가세 제외 공급가액) DB
+  const clientDatabase = [
+    { name: "이자카야 갱", sales: 500000000 },
+    { name: "동양솥밥 인천서구청라점", sales: 500000000 },
+    { name: "세무회계 민", sales: 600000000 }
+  ];
+
+  const fmt = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  function searchCompany(query) {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      document.getElementById('dbStatus').className = 'status-badge status-custom';
+      document.getElementById('dbStatus').innerText = '조회 대기';
+      document.getElementById('salesInput').value = '';
+      render(0);
+      return;
+    }
+
+    const target = trimmed.replace(/\s+/g, '').toLowerCase();
+    const match = clientDatabase.find(c => c.name.replace(/\s+/g, '').toLowerCase() === target);
+
+    if (match) {
+      document.getElementById('salesInput').value = fmt(match.sales);
+      document.getElementById('dbStatus').className = 'status-badge status-found';
+      document.getElementById('dbStatus').innerText = '데이터 연동 완료';
+      render(match.sales);
+    } else {
+      document.getElementById('dbStatus').className = 'status-badge status-custom';
+      document.getElementById('dbStatus').innerText = '직접 입력 모드';
+    }
+  }
+
+  function handleManualSales(val) {
+    let num = parseInt(val.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(num)) num = 0;
+    document.getElementById('salesInput').value = num ? fmt(num) : '';
+    document.getElementById('dbStatus').className = 'status-badge status-custom';
+    document.getElementById('dbStatus').innerText = '금액 직접 수정됨';
+    render(num);
+  }
+
+  function render(salesExclVat) {
+    const supplyTotal = salesExclVat * 1.1;
+
+    const c2026 = Math.min(10000000, Math.floor(supplyTotal * 0.013));
+    const c2027 = Math.min(5000000, Math.floor(supplyTotal * 0.012));
+    const loss = c2026 - c2027;
+
+    document.getElementById('lossAmount').innerText = '₩' + fmt(loss);
+    document.getElementById('val2026').innerText = '₩' + fmt(c2026);
+    document.getElementById('val2027').innerText = '₩' + fmt(c2027);
+
+    const pct2026 = Math.min(100, Math.round((c2026 / 10000000) * 100));
+    const pct2027 = Math.min(100, Math.round((c2027 / 5000000) * 100));
+
+    document.getElementById('bar2026').style.width = pct2026 + '%';
+    document.getElementById('pct2026').innerText = '한도 ' + pct2026 + '%';
+
+    document.getElementById('bar2027').style.width = pct2027 + '%';
+    document.getElementById('pct2027').innerText = '한도 ' + pct2027 + '% (최대 500만)';
+
+    let comment = '';
+    if (salesExclVat === 0) {
+      comment = '사업자명을 입력하거나 매출액을 입력해 주세요.';
+    } else if (supplyTotal <= 416666666) {
+      comment = '공제율 0.1%p 인하만 적용되어 세부담 영향이 비교적 경미한 구간입니다.';
+    } else if (supplyTotal < 769230769) {
+      comment = '2027년 개정 한도(500만 원) 100% 도달로 세액공제 손실이 급격히 늘어나는 구간입니다.';
+    } else {
+      comment = '개정 한도 축소로 매년 최대 500만 원의 부가가치세 추가 세부담이 발생합니다.';
+    }
+    document.getElementById('lossComment').innerText = comment;
+  }
+</script>
+
+</body>
+</html>
