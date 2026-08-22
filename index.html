@@ -19,6 +19,12 @@
       --loss-text: #B91C1C;
       --loss-bg: #FEF2F2;
       --loss-border: #FCA5A5;
+      --warn-bg: #FFFBEB;
+      --warn-border: #FDE68A;
+      --warn-text: #92400E;
+      --info-bg: #EFF6FF;
+      --info-border: #BFDBFE;
+      --info-text: #1E40AF;
       --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
     }
 
@@ -29,8 +35,9 @@
     /* Header */
     .header { text-align: center; margin-bottom: 24px; }
     .badge {
-      display: inline-block; padding: 6px 14px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 12px;
+      display: inline-block; padding: 7px 18px; background: var(--surface); border: 1.5px solid var(--border-dark);
+      border-radius: 22px; font-size: 14.5px; font-weight: 700; color: var(--text-main); margin-bottom: 12px;
+      letter-spacing: -0.01em;
     }
     .subtitle { font-size: 13.5px; color: var(--text-sub); line-height: 1.6; margin-bottom: 12px; }
     .link-text {
@@ -45,11 +52,15 @@
 
     .field-group { margin-bottom: 18px; position: relative; }
     .input-label { font-size: 13px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .label-left { display: flex; align-items: center; gap: 8px; }
+    .biz-name-tag { font-size: 12.5px; font-weight: 700; color: var(--brand); }
+    
     .status-badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; transition: all 0.2s ease; }
     .status-standby { background: var(--surface-sub); color: var(--text-muted); border: 1px solid var(--border); }
     .status-loading { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
     .status-found { background: #F1F5F9; color: var(--text-main); border: 1px solid var(--border); }
     .status-notfound { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .status-custom { background: var(--surface-sub); color: var(--text-muted); border: 1px solid var(--border); }
 
     .input-box { position: relative; display: flex; align-items: center; }
     .input-box input {
@@ -61,14 +72,18 @@
     .input-box input:focus { border-color: var(--brand); }
     .input-box .unit { position: absolute; right: 16px; font-size: 15px; font-weight: 600; color: var(--text-muted); pointer-events: none; }
 
-    .biz-result-tag {
-      font-size: 12px; font-weight: 600; color: var(--brand); margin-top: 6px; display: none; padding-left: 2px;
+    /* Custom Notice Box */
+    .notice-box {
+      margin-top: 10px; padding: 12px 14px; border-radius: 10px; font-size: 12.5px; line-height: 1.55; display: none;
     }
+    .notice-warn { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text); }
+    .notice-info { background: var(--info-bg); border: 1px solid var(--info-border); color: var(--info-text); }
+    .notice-loss { background: var(--loss-bg); border: 1px solid var(--loss-border); color: var(--loss-text); }
 
     /* Loss Highlight */
     .loss-banner {
       background: var(--loss-bg); border: 1px solid var(--loss-border); border-radius: 12px;
-      padding: 20px 16px; margin-top: 22px; text-align: center;
+      padding: 20px 16px; margin-top: 20px; text-align: center;
     }
     .loss-tag { font-size: 12.5px; font-weight: 600; color: var(--loss-text); margin-bottom: 4px; }
     .loss-amount { font-size: 30px; font-weight: 800; color: var(--loss-text); line-height: 1.1; margin-bottom: 6px; }
@@ -116,7 +131,7 @@
 
 <div class="wrapper">
   <header class="header">
-    <div class="badge">세무회계 민 대표님 맞춤 계산기</div>
+    <div class="badge">세무회계민 거래처 전용 계산기</div>
     <p class="subtitle">대표님의 직전 매출 데이터를 기반으로 2027년 개정 세법 적용 시 예상되는 세액공제 변동 및 추가 납부세액을 계산합니다.</p>
     <div>
       <a href="https://blog.naver.com/tax-min" target="_blank" class="link-text">
@@ -129,7 +144,10 @@
     <!-- Business Number Field -->
     <div class="field-group">
       <label class="input-label" for="bizInput">
-        <span>사업자등록번호 (10자리)</span>
+        <div class="label-left">
+          <span>사업자등록번호 (10자리)</span>
+          <span class="biz-name-tag" id="bizNameTag" style="display: none;">[사업자명: <b id="bizNameText">-</b>]</span>
+        </div>
         <span class="status-badge status-standby" id="dbStatus">조회 대기</span>
       </label>
       <div class="input-box">
@@ -143,7 +161,9 @@
           oninput="handleBizNumberInput(this)"
         >
       </div>
-      <div class="biz-result-tag" id="bizResultTag">확인된 사업장: <b>-</b></div>
+      
+      <!-- Special Custom Notes & Guidance -->
+      <div class="notice-box" id="specialNoticeBox"></div>
     </div>
 
     <!-- Sales Amount Field (26년 상반기 매출액 - 공급대가 기준) -->
@@ -241,12 +261,1759 @@
 </div>
 
 <script>
-  // 사업장별 사업자등록번호 및 26년도 상반기 매출액(공급대가 기준) DB
+  // 엑셀 DB 250개 업체 전체 데이터
   const clientDatabase = [
-    { bizNo: "1234567890", name: "이자카야 갱", halfSales: 250000000 },
-    { bizNo: "2345678901", name: "동양솥밥 인천서구청라점", halfSales: 250000000 },
-    { bizNo: "3456789012", name: "세무회계 민", halfSales: 300000000 }
-  ];
+  {
+    "biz": "6616800294",
+    "name": "교토신",
+    "halfSales": 0,
+    "status": "매출액 저조",
+    "note": ""
+  },
+  {
+    "biz": "5531301954",
+    "name": "기생_익선동",
+    "halfSales": 85184500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2092851866",
+    "name": "엠에스씨",
+    "halfSales": 0,
+    "status": "직전 10억 이상",
+    "note": ""
+  },
+  {
+    "biz": "4563800604",
+    "name": "오늘도 공간",
+    "halfSales": 378811712,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8840602349",
+    "name": "와이에스씨",
+    "halfSales": 0,
+    "status": "직전 10억 이상",
+    "note": ""
+  },
+  {
+    "biz": "2330702344",
+    "name": "우르",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "7400901508",
+    "name": "유로켐텍",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "7241700064",
+    "name": "B2B",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "8890502522",
+    "name": "아마스빈 은계점",
+    "halfSales": 84672678,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6790502134",
+    "name": "조아죽네",
+    "halfSales": 12918000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7744600526",
+    "name": "거상",
+    "halfSales": 0,
+    "status": "영세위주업자",
+    "note": ""
+  },
+  {
+    "biz": "6340102787",
+    "name": "이엠산업",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "4312401553",
+    "name": "더벤티 장한평역점",
+    "halfSales": 152987707,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8974101158",
+    "name": "노이",
+    "halfSales": 127612000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1710402536",
+    "name": "병달이네",
+    "halfSales": 0,
+    "status": "매출 0",
+    "note": ""
+  },
+  {
+    "biz": "1073718786",
+    "name": "엠엘디",
+    "halfSales": 31210000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1595700534",
+    "name": "탑슈트",
+    "halfSales": 367554592,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7050801361",
+    "name": "피조물",
+    "halfSales": 54170340,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2557400407",
+    "name": "타이니컴퍼니",
+    "halfSales": 2474000,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "8266400350",
+    "name": "합정 지튼",
+    "halfSales": 104667532,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8740901761",
+    "name": "망원 지튼",
+    "halfSales": 92439297,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4501701712",
+    "name": "베이비버블세븐 안산점",
+    "halfSales": 40460435,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2412301502",
+    "name": "유미드림",
+    "halfSales": 0,
+    "status": "매출액 저조",
+    "note": ""
+  },
+  {
+    "biz": "8902101407",
+    "name": "개과천선",
+    "halfSales": 68723342,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1441900786",
+    "name": "커밍투유",
+    "halfSales": 186800207,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2543301133",
+    "name": "디에이치 글로벌",
+    "halfSales": 16487070,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2951202384",
+    "name": "프렙",
+    "halfSales": 0,
+    "status": "매출 0",
+    "note": ""
+  },
+  {
+    "biz": "1682301769",
+    "name": "성남분당정자81",
+    "halfSales": 42722125,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2960502676",
+    "name": "아벡재이",
+    "halfSales": 100255200,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8014501010",
+    "name": "제이엠인터내셔널",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "4933500164",
+    "name": "애씨",
+    "halfSales": 0,
+    "status": "직전 10억 이상",
+    "note": ""
+  },
+  {
+    "biz": "8383100807",
+    "name": "라클로에",
+    "halfSales": 158910860,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2993800938",
+    "name": "이자카야 갱",
+    "halfSales": 181790500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2262592221",
+    "name": "짐투짐 헬스장",
+    "halfSales": 98180561,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8930402354",
+    "name": "라디안루키",
+    "halfSales": 205350469,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7922201401",
+    "name": "곱분이곱창",
+    "halfSales": 339192952,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3081497667",
+    "name": "비에이글",
+    "halfSales": 244106225,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2473001338",
+    "name": "루하종합인테리어설비",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2021405291",
+    "name": "훈카츠",
+    "halfSales": 141579000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1022864075",
+    "name": "고향 엄마손 생바지락 칼국수 서울영등포점",
+    "halfSales": 280308273,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7930202967",
+    "name": "제이에이치씨",
+    "halfSales": 0,
+    "status": "매출 0",
+    "note": ""
+  },
+  {
+    "biz": "3971802057",
+    "name": "조아죽네 신쭈꾸미",
+    "halfSales": 245785127,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2871802013",
+    "name": "파티파티",
+    "halfSales": 5370000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7785800496",
+    "name": "밍도릿",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "8732301537",
+    "name": "서쫑알",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "7622300747",
+    "name": "오리tv",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "4276100676",
+    "name": "완도",
+    "halfSales": 59854000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6962401636",
+    "name": "우리밍",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "2850402586",
+    "name": "이채이",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "6181335052",
+    "name": "콩닭콩닭",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "4566600515",
+    "name": "아르크",
+    "halfSales": 184600299,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7310302613",
+    "name": "알엑스더마",
+    "halfSales": 0,
+    "status": "폐업",
+    "note": ""
+  },
+  {
+    "biz": "2420702256",
+    "name": "이지안",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "8931002224",
+    "name": "플라워하우스",
+    "halfSales": 0,
+    "status": "에어비앤비",
+    "note": ""
+  },
+  {
+    "biz": "8394300948",
+    "name": "라이스투미츄",
+    "halfSales": 69278220,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2382301258",
+    "name": "허니페이퍼",
+    "halfSales": 0,
+    "status": "현금누락업종",
+    "note": ""
+  },
+  {
+    "biz": "1942501699",
+    "name": "베베커피",
+    "halfSales": 100462491,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1100226785",
+    "name": "홍대스타일",
+    "halfSales": 18923750,
+    "status": "유",
+    "note": "하반기 매출 높음"
+  },
+  {
+    "biz": "7516300011",
+    "name": "이레미디어",
+    "halfSales": 0,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2173001036",
+    "name": "기브온컨텐츠",
+    "halfSales": 0,
+    "status": "에어비앤비",
+    "note": ""
+  },
+  {
+    "biz": "6912102056",
+    "name": "커튼더라인",
+    "halfSales": 59694200,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3795600766",
+    "name": "영수전자",
+    "halfSales": 0,
+    "status": "제조업",
+    "note": ""
+  },
+  {
+    "biz": "2793601230",
+    "name": "떡잎",
+    "halfSales": 75821150,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5033795337",
+    "name": "바롤로",
+    "halfSales": 0,
+    "status": "폐업",
+    "note": ""
+  },
+  {
+    "biz": "1020650981",
+    "name": "ds정보통신",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "6711101753",
+    "name": "브라이드그라피",
+    "halfSales": 64990000,
+    "status": "유",
+    "note": "현금매출누락업종"
+  },
+  {
+    "biz": "8921202278",
+    "name": "원동한식뷔페",
+    "halfSales": 53992000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5613701456",
+    "name": "정민",
+    "halfSales": 87192000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1790602738",
+    "name": "강남홈즈 공인중개사사무소",
+    "halfSales": 11690640,
+    "status": "유",
+    "note": "현금매출누락업종"
+  },
+  {
+    "biz": "5757300662",
+    "name": "BJ공다츠",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "1460202889",
+    "name": "스튜디오 이데아",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2380803229",
+    "name": "소유나",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "7190602235",
+    "name": "무모한상점",
+    "halfSales": 123903608,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1101475125",
+    "name": "에이투스튜디오",
+    "halfSales": 13887000,
+    "status": "유",
+    "note": "현금매출누락업종"
+  },
+  {
+    "biz": "3730602572",
+    "name": "크롬컴퍼니",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "3290102376",
+    "name": "투핑거스",
+    "halfSales": 367020801,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5605500953",
+    "name": "묘수 양평점",
+    "halfSales": 51130500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2104067303",
+    "name": "묘수 영등포구청점",
+    "halfSales": 137947322,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2095600899",
+    "name": "디비두 (브레인웍스 와이프)",
+    "halfSales": 0,
+    "status": "직전 10억 이상",
+    "note": ""
+  },
+  {
+    "biz": "1074697181",
+    "name": "코리디아",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2576900734",
+    "name": "백남옥손만두",
+    "halfSales": 94822707,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2252801693",
+    "name": "루모스안경점",
+    "halfSales": 116389040,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2027060567",
+    "name": "오구",
+    "halfSales": 77371812,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5654201165",
+    "name": "택스민 컨설팅",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "3824400997",
+    "name": "이주휘",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2131623385",
+    "name": "킹 당구클럽",
+    "halfSales": 71219966,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7092901413",
+    "name": "아e아e",
+    "halfSales": 24348405,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5524401182",
+    "name": "코리아 PC 건설",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "1161702470",
+    "name": "일품들깨수제비",
+    "halfSales": 34626150,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7792801638",
+    "name": "한솥도시락 파주운정역점",
+    "halfSales": 325846102,
+    "status": "",
+    "note": ""
+  },
+  {
+    "biz": "6561502412",
+    "name": "카페프리헷 김포고촌점",
+    "halfSales": 47556812,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1563001712",
+    "name": "제이제이코스튬",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2674800866",
+    "name": "세탁을위한사람들 홈플러스영등포점",
+    "halfSales": 88137214,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5493101662",
+    "name": "미태리 신도림테크노마트점",
+    "halfSales": 96313600,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4875800794",
+    "name": "카페로커",
+    "halfSales": 75290572,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2767400501",
+    "name": "갤러리",
+    "halfSales": 117876660,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2800103366",
+    "name": "더편한 풋앤 바디",
+    "halfSales": 31600200,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2766400818",
+    "name": "행복한 밥상",
+    "halfSales": 51238130,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8413701046",
+    "name": "와이티디자인",
+    "halfSales": 76154482,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4011625452",
+    "name": "모두의 텃밭",
+    "halfSales": 393606930,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7475800828",
+    "name": "참 필라테스",
+    "halfSales": 37523000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4211901644",
+    "name": "투에이위드",
+    "halfSales": 82423097,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3152801787",
+    "name": "논두렁우렁쌈밥",
+    "halfSales": 250503500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6400603224",
+    "name": "신진정밀기계",
+    "halfSales": 0,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3213201571",
+    "name": "담꾹 시흥물왕점",
+    "halfSales": 0,
+    "status": "제조업",
+    "note": ""
+  },
+  {
+    "biz": "1063051589",
+    "name": "하루순대국밥",
+    "halfSales": 56419200,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2063993602",
+    "name": "어도러블헤어",
+    "halfSales": 123824750,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5090354101",
+    "name": "더날 한복",
+    "halfSales": 211141500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2862601340",
+    "name": "더나인(THE9) / 동백",
+    "halfSales": 40870500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5263301421",
+    "name": "숲길 편백가구",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "3463101670",
+    "name": "루마썬팅 검단유현점",
+    "halfSales": 125750000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8633000728",
+    "name": "맘&찬",
+    "halfSales": 103920837,
+    "status": "유",
+    "note": "과·면세 겸업 사업자기 때문에 오차가 매우 큼"
+  },
+  {
+    "biz": "7122701754",
+    "name": "우진앤코 (WJ&Co.)",
+    "halfSales": 0,
+    "status": "매출 작음",
+    "note": ""
+  },
+  {
+    "biz": "8053901137",
+    "name": "여성전용 비버짐 헬스장PT",
+    "halfSales": 76132140,
+    "status": "유",
+    "note": "현금매출누락업종"
+  },
+  {
+    "biz": "8541702252",
+    "name": "매일기획",
+    "halfSales": 0,
+    "status": "매출 0",
+    "note": ""
+  },
+  {
+    "biz": "8614800988",
+    "name": "모두 화도점",
+    "halfSales": 5638084,
+    "status": "매출 작음",
+    "note": ""
+  },
+  {
+    "biz": "5500802834",
+    "name": "모두 다산점",
+    "halfSales": 40059372,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3104801102",
+    "name": "아우어리틀룸",
+    "halfSales": 45467665,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5882202024",
+    "name": "제이비모터스",
+    "halfSales": 44428000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7151002735",
+    "name": "솜 음악연습실",
+    "halfSales": 6132000,
+    "status": "매출 작음",
+    "note": "현금매출누락업종"
+  },
+  {
+    "biz": "4684501114",
+    "name": "이지PC",
+    "halfSales": 68994551,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4873001877",
+    "name": "앙호두 덕정역점",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "3690402448",
+    "name": "넥스트코리아",
+    "halfSales": 350738070,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2070676840",
+    "name": "제로스토어 상봉점",
+    "halfSales": 110243650,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8236400803",
+    "name": "헬스걸 피트니스",
+    "halfSales": 301363100,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2870703087",
+    "name": "필라테스 리핏",
+    "halfSales": 84516600,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1895400951",
+    "name": "빽다방구로KT점",
+    "halfSales": 106779873,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7553101587",
+    "name": "카페 655321",
+    "halfSales": 17038086,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7873401421",
+    "name": "제로스토어 회기점",
+    "halfSales": 109295665,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2510601652",
+    "name": "응급실국물떡볶이",
+    "halfSales": 217767581,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6190907663",
+    "name": "제로스토어 장안사거리점",
+    "halfSales": 75446668,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5274800583",
+    "name": "다크젤리 (다다익선 지인)",
+    "halfSales": 77320971,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7960503286",
+    "name": "오마로마켓",
+    "halfSales": 69356830,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8912002265",
+    "name": "양지무역상사",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "5660503249",
+    "name": "틴트랩 남부법원점",
+    "halfSales": 61068000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6082577437",
+    "name": "뱃살도둑 오산시청점",
+    "halfSales": 370460938,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1112086441",
+    "name": "제로스토어 어린이대공원점",
+    "halfSales": 91536242,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7940603308",
+    "name": "제로스토어 건대입구점",
+    "halfSales": 91965383,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8882401706",
+    "name": "오아컴퍼니",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "3563100678",
+    "name": "리얼플레이스",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "6084121928",
+    "name": "야미용이",
+    "halfSales": 94912652,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6116800552",
+    "name": "제로스토어 외대점",
+    "halfSales": 87461677,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7550303675",
+    "name": "제로스토어 홍대연남점",
+    "halfSales": 96261081,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2085900771",
+    "name": "오슬랑 커피",
+    "halfSales": 108533542,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7672502142",
+    "name": "제로스토어 서울대입구역점",
+    "halfSales": 126626033,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8842002331",
+    "name": "여시미",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "2833701503",
+    "name": "끄을림 망원",
+    "halfSales": 78568912,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8722202462",
+    "name": "오늘도 공간 홍대입구역점",
+    "halfSales": 225152860,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1990303481",
+    "name": "프린트카페 신풍역점",
+    "halfSales": 29311630,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7410103459",
+    "name": "프린트카페 장안점",
+    "halfSales": 36535267,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5277100621",
+    "name": "제로스토어 경성대부경대점",
+    "halfSales": 108787114,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2680403557",
+    "name": "온카츠",
+    "halfSales": 136938991,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8572102296",
+    "name": "남녀공학",
+    "halfSales": 29190500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6893001890",
+    "name": "141스튜디오",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "1634800865",
+    "name": "로다엔터테인먼트",
+    "halfSales": 6335000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4234401244",
+    "name": "빵잎",
+    "halfSales": 4729549,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5170303597",
+    "name": "이라333",
+    "halfSales": 0,
+    "status": "BJ",
+    "note": ""
+  },
+  {
+    "biz": "4691402558",
+    "name": "아담떡공방",
+    "halfSales": 0,
+    "status": "직전 10억 이상",
+    "note": ""
+  },
+  {
+    "biz": "5884501188",
+    "name": "제로스토어 하남미사점",
+    "halfSales": 68822245,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2094901245",
+    "name": "노룬산떡볶이",
+    "halfSales": 544230368,
+    "status": "유",
+    "note": "직전 기수 10억 이상 조심"
+  },
+  {
+    "biz": "1545300448",
+    "name": "1월10일",
+    "halfSales": 5037895,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1966000800",
+    "name": "천씨씨커피 김포학운점",
+    "halfSales": 126289609,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3700603460",
+    "name": "다온",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "5576100754",
+    "name": "비지오 코퍼레이션",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2161425490",
+    "name": "백미 마오코야",
+    "halfSales": 74636754,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2070971977",
+    "name": "동재",
+    "halfSales": 142391000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3731402766",
+    "name": "괄호",
+    "halfSales": 96185700,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8641702604",
+    "name": "신촌버거",
+    "halfSales": 178177672,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8420902986",
+    "name": "제로스토어 사당역점",
+    "halfSales": 73728230,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5162402324",
+    "name": "제로스토어 이수역점",
+    "halfSales": 103970064,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1723401390",
+    "name": "백남옥 달인 손만두 감일점",
+    "halfSales": 133168897,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3456700833",
+    "name": "앙호두 구월아시아드점",
+    "halfSales": 34747353,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7563401562",
+    "name": "친신마라탕 마두점 (곱분이곱창 사모님) 26'4월부터",
+    "halfSales": 253669646,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8917900547",
+    "name": "제로스토어 중앙대점",
+    "halfSales": 77213988,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1306986169",
+    "name": "동양솥밥 인천서구청라점",
+    "halfSales": 294756233,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8560603440",
+    "name": "사과당 마포공덕점",
+    "halfSales": 197956914,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "6360803476",
+    "name": "비우라 필라테스",
+    "halfSales": 60974415,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1603600219",
+    "name": "지식사(개인)",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "4202601993",
+    "name": "화락바베큐치킨 원주단구점",
+    "halfSales": 119428887,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1466600734",
+    "name": "제로스토어 상수점",
+    "halfSales": 89122360,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2540503593",
+    "name": "제로스토어 장안현대벤처빌점",
+    "halfSales": 44744336,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1773701493",
+    "name": "연부동산공인중개사사무소",
+    "halfSales": 109571478,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3201702410",
+    "name": "제로스토어 숙명여대점",
+    "halfSales": 75089062,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8091902367",
+    "name": "제로스토어 숭실대점",
+    "halfSales": 67079519,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2681702581",
+    "name": "제로스토어 봉천중앙점",
+    "halfSales": 79863340,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4432601434",
+    "name": "플렉스 체대입시 일산교육원",
+    "halfSales": 77127000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2281602698",
+    "name": "학의폰마트",
+    "halfSales": 2535130,
+    "status": "유",
+    "note": "세금계산서가 주인 사업자입니다."
+  },
+  {
+    "biz": "6932401767",
+    "name": "디자인시대 : 감",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2091631213",
+    "name": "자마모터스",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "6542701948",
+    "name": "위드토푸_두부랑",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "2551802511",
+    "name": "모두의 텃밭 용인보라점",
+    "halfSales": 238215630,
+    "status": "유",
+    "note": "과·면세 겸업 사업자기 때문에 오차가 매우 큼"
+  },
+  {
+    "biz": "4530303309",
+    "name": "도일",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "6021064755",
+    "name": "씨오네트윅스(CO NETWORKS)",
+    "halfSales": 0,
+    "status": "직전 10억 이상",
+    "note": ""
+  },
+  {
+    "biz": "8466800712",
+    "name": "모티브PT",
+    "halfSales": 17750000,
+    "status": "유",
+    "note": "현금매출누락업종"
+  },
+  {
+    "biz": "3523901327",
+    "name": "앙호두 성수점",
+    "halfSales": 57089410,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3162302367",
+    "name": "이월서가",
+    "halfSales": 61139550,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4633300816",
+    "name": "홍셰프돈까스",
+    "halfSales": 143757177,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1137400568",
+    "name": "제로스토어 신설동역점",
+    "halfSales": 91544254,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4140865377",
+    "name": "파스타러드",
+    "halfSales": 43615777,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8661003478",
+    "name": "사운드윈도우",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "1213993510",
+    "name": "비에이글 시청(비에이글2)",
+    "halfSales": 106153876,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1053392313",
+    "name": "두두 망원점",
+    "halfSales": 107941771,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3416800600",
+    "name": "정인바바라",
+    "halfSales": 0,
+    "status": "제조업",
+    "note": ""
+  },
+  {
+    "biz": "2031556956",
+    "name": "제로스토어 군자점",
+    "halfSales": 12133500,
+    "status": "유",
+    "note": "상반기 개업이 늦어 정확하지 않음"
+  },
+  {
+    "biz": "4582401621",
+    "name": "스타일리쉬",
+    "halfSales": 71949000,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7033501643",
+    "name": "제로스토어 경희대점",
+    "halfSales": 65616582,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "3301203181",
+    "name": "엠디(MD유통)",
+    "halfSales": 13229500,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2486400924",
+    "name": "조은체조",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "7700503377",
+    "name": "제로스토어 수유역점",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "1343250648",
+    "name": "허그",
+    "halfSales": 14808700,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1337500439",
+    "name": "휴대폰할인매장 검단점",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "2201107786",
+    "name": "제로스토어 홍제점",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "1181604818",
+    "name": "주덕 크리에이터",
+    "halfSales": 0,
+    "status": "Only 세금계산서",
+    "note": ""
+  },
+  {
+    "biz": "2402702205",
+    "name": "루만두",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "4462502089",
+    "name": "유미타코 연신내점",
+    "halfSales": 93938780,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "7730204108",
+    "name": "제로스토어 합정점",
+    "halfSales": 69042718,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "2904601105",
+    "name": "제로스토어 뚝섬점",
+    "halfSales": 59377256,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4061202946",
+    "name": "무드바레",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "4292002191",
+    "name": "나희채 한복",
+    "halfSales": 0,
+    "status": "제조업",
+    "note": ""
+  },
+  {
+    "biz": "4980103195",
+    "name": "문여사 그날의 반찬",
+    "halfSales": 336457445,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "8592302184",
+    "name": "천씨씨커피 화성월문점",
+    "halfSales": 0,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "4113013283",
+    "name": "제로스토어 동덕여대점",
+    "halfSales": 0,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "5990503967",
+    "name": "강원도 달인어죽",
+    "halfSales": 677500,
+    "status": "유",
+    "note": "상반기 개업이 늦어 정확하지 않음"
+  },
+  {
+    "biz": "8616400746",
+    "name": "슈퍼맨누수설비",
+    "halfSales": 14465000,
+    "status": "유",
+    "note": "세금계산서가 주인 사업자입니다."
+  },
+  {
+    "biz": "7970303757",
+    "name": "몰입(MOLIP) 관리형스터디센터",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": ""
+  },
+  {
+    "biz": "7190902065",
+    "name": "오유비필라테스",
+    "halfSales": 99503400,
+    "status": "유",
+    "note": ""
+  },
+  {
+    "biz": "1072216580",
+    "name": "이태우",
+    "halfSales": 22194000,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "4730402785",
+    "name": "오늘의꽃과사진",
+    "halfSales": 5233630,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "5047600434",
+    "name": "민포토",
+    "halfSales": 55347002,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "5016224935",
+    "name": "백지",
+    "halfSales": 44267100,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "1084496366",
+    "name": "헬로퍼피",
+    "halfSales": 22483500,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "3901402475",
+    "name": "파인드헤어",
+    "halfSales": 35634000,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "5151704054",
+    "name": "스너그헤어",
+    "halfSales": 40106961,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "4930902222",
+    "name": "해피테일",
+    "halfSales": 10271000,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "4642101853",
+    "name": "티투스 티하우스",
+    "halfSales": 3089600,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "2493101821",
+    "name": "해주김밥",
+    "halfSales": 34404072,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "4605800805",
+    "name": "멍 부띠끄",
+    "halfSales": 22911550,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "2531402837",
+    "name": "늘한결",
+    "halfSales": 19807298,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "8412202094",
+    "name": "미,오 (미오2)",
+    "halfSales": 0,
+    "status": "제조업",
+    "note": "간이"
+  },
+  {
+    "biz": "5071804462",
+    "name": "뽀뽀뽀",
+    "halfSales": 0,
+    "status": "매출 없음",
+    "note": "홈택스 자료 집계가 되지 않음 / 간이"
+  },
+  {
+    "biz": "7510104004",
+    "name": "온카츠 오산점",
+    "halfSales": 69768121,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "2340503662",
+    "name": "엔어스 네일",
+    "halfSales": 33924000,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "6350703632",
+    "name": "제로스토어 먹골역점",
+    "halfSales": 25085230,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "3621202457",
+    "name": "마구마구상점",
+    "halfSales": 85084950,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "1314801057",
+    "name": "스피크이지",
+    "halfSales": 244071149,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "4560602713",
+    "name": "서아네일",
+    "halfSales": 21772000,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "7973200901",
+    "name": "민주네미용실",
+    "halfSales": 30525021,
+    "status": "유",
+    "note": "간이"
+  },
+  {
+    "biz": "6902202079",
+    "name": "클로저스냅",
+    "halfSales": 20346500,
+    "status": "유",
+    "note": "현금매출누락업종 / 간이"
+  },
+  {
+    "biz": "1234199380",
+    "name": "필라테스 고요",
+    "halfSales": 10466800,
+    "status": "유",
+    "note": "현금매출누락업종 / 간이"
+  },
+  {
+    "biz": "5094901086",
+    "name": "짐그릿",
+    "halfSales": 0,
+    "status": "유",
+    "note": "현금매출누락업종 / 간이"
+  }
+];
 
   const fmt = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
@@ -265,38 +2032,101 @@
     inputEl.value = formatBizNumber(inputEl.value);
 
     const statusEl = document.getElementById('dbStatus');
-    const tagEl = document.getElementById('bizResultTag');
+    const nameTagEl = document.getElementById('bizNameTag');
+    const nameTextEl = document.getElementById('bizNameText');
+    const noticeEl = document.getElementById('specialNoticeBox');
 
     if (searchTimer) clearTimeout(searchTimer);
 
     if (raw.length < 10) {
       statusEl.className = 'status-badge status-standby';
       statusEl.innerText = raw.length === 0 ? '조회 대기' : `${raw.length}/10자리 입력 중`;
-      tagEl.style.display = 'none';
+      nameTagEl.style.display = 'none';
+      noticeEl.style.display = 'none';
       return;
     }
 
-    // 10자리가 완성되면 조회 시작 (1초 로딩 효과)
     statusEl.className = 'status-badge status-loading';
     statusEl.innerText = '조회 중...';
 
     searchTimer = setTimeout(() => {
-      const match = clientDatabase.find(c => c.bizNo.replace(/[^0-9]/g, '') === raw);
+      const match = clientDatabase.find(c => c.biz === raw);
 
       if (match) {
-        document.getElementById('salesInput').value = fmt(match.halfSales);
         statusEl.className = 'status-badge status-found';
         statusEl.innerText = '조회 완료';
-        tagEl.style.display = 'block';
-        tagEl.innerHTML = `확인된 사업장: <b>${match.name}</b>`;
+        
+        nameTextEl.innerText = match.name;
+        nameTagEl.style.display = 'inline-block';
+        
+        document.getElementById('salesInput').value = match.halfSales > 0 ? fmt(match.halfSales) : '0';
+        
+        processBusinessStatus(match);
         render(match.halfSales);
       } else {
         statusEl.className = 'status-badge status-notfound';
         statusEl.innerText = '등록 번호 없음';
-        tagEl.style.display = 'none';
+        nameTagEl.style.display = 'none';
+        noticeEl.style.display = 'none';
         document.getElementById('lossComment').innerText = '등록된 사업자번호가 없습니다. 아래 매출액을 직접 입력해주세요.';
       }
     }, 1000);
+  }
+
+  function processBusinessStatus(item) {
+    const noticeEl = document.getElementById('specialNoticeBox');
+    let noticeHtml = [];
+    let noticeClass = 'notice-info';
+
+    const st = item.status.trim();
+    if (st === '매출액 저조' || st === '매출 작음') {
+      noticeHtml.push('<b>매출액 저조 안내:</b> 현재 카드·현금영수증 매출액 규모가 작아 공제율 인하 및 한도 축소로 인한 직접적인 세부담 영향이 미미합니다.');
+    } else if (st === '직전 10억 이상') {
+      noticeHtml.push('<b>직전 10억 초과 안내:</b> 직전연도 공급가액 10억 원을 초과하는 사업자는 세법상 신용카드 발급세액공제 적용 대상에서 제외됩니다.');
+      noticeClass = 'notice-loss';
+    } else if (st === 'Only 세금계산서') {
+      noticeHtml.push('<b>세금계산서 위주 사업장:</b> 신용카드 및 현금영수증 매출이 없고 세금계산서 위주로 거래되어 발급세액공제 해당 사항이 없습니다.');
+    } else if (st === '매출 0' || st === '매출 없음' || st === 'BJ') {
+      noticeHtml.push('<b>매출 미집계 안내:</b> 상반기 카드·현금영수증 매출이 집계되지 않아 손실액 확인이 어렵습니다. 실제 발생 매출액을 아래 칸에 입력하시면 계산됩니다.');
+    } else if (st === '제조업') {
+      noticeHtml.push('<b>적용 제외 업종:</b> 제조업 등 일부 업종은 세법 규정상 신용카드 발급세액공제 대상에서 제외됩니다.');
+      noticeClass = 'notice-loss';
+    } else if (st === '폐업') {
+      noticeHtml.push('<b>폐업 사업장:</b> 폐업 사업장은 향후 개정 세법 적용 대상에서 제외됩니다.');
+    }
+
+    const note = item.note || '';
+    if (note.includes('간이')) {
+      noticeHtml.push('<b>간이과세자 안내:</b> 간이과세자는 일반과세자에 비해 전반적인 세부담은 적으나, 신용카드 발급세액공제율 인하 및 한도 축소로 인해 실제 납부세액이 다소 증가할 수 있습니다.');
+    }
+    if (note.includes('하반기 매출 높음')) {
+      noticeHtml.push('<b>참고 사항:</b> 해당 사업장은 하반기 매출 비중이 높아 상반기 단순 연환산(×2) 금액보다 실제 세액공제 손실액이 더 크게 발생할 수 있습니다.');
+      noticeClass = 'notice-warn';
+    }
+    if (note.includes('현금매출누락업종')) {
+      noticeHtml.push('<b>참고 사항:</b> 현금매출 비중 및 결제수단 구성에 따라 실제 공제액 산출에 상당한 차이가 발생할 수 있습니다.');
+      noticeClass = 'notice-warn';
+    }
+    if (note.includes('과·면세 겸업')) {
+      noticeHtml.push('<b>참고 사항:</b> 과세·면세 겸업 사업장이므로 면세 매출 비율에 따라 계산 오차가 발생할 수 있습니다.');
+      noticeClass = 'notice-warn';
+    }
+    if (note.includes('직전 기수 10억 이상')) {
+      noticeHtml.push('<b>참고 사항:</b> 직전연도 공급가액 10억 원 초과 여부에 따라 신용카드 세액공제 적용 여부가 달라지므로 주의가 필요합니다.');
+      noticeClass = 'notice-warn';
+    }
+    if (note.includes('상반기 개업')) {
+      noticeHtml.push('<b>참고 사항:</b> 상반기 개업 시기 차이로 인해 단순 2배 연환산 금액에 오차가 있을 수 있습니다.');
+      noticeClass = 'notice-warn';
+    }
+
+    if (noticeHtml.length > 0) {
+      noticeEl.className = 'notice-box ' + noticeClass;
+      noticeEl.innerHTML = noticeHtml.join('<br style="margin-bottom:6px;">');
+      noticeEl.style.display = 'block';
+    } else {
+      noticeEl.style.display = 'none';
+    }
   }
 
   function handleManualSales(inputEl) {
