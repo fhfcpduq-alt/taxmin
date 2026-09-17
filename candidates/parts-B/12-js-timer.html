@@ -1,0 +1,99 @@
+
+/* ================= 00 타이머 ================= */
+var tbarLabel = $('tbarLabel'), tbarLive = $('tbarLive'), tbarLine = $('tbarLine');
+var digits = $$('.d', $('tbarTime'));
+var lastStr = '', lastMinAnnounced = -1, timerId = 0, endHooks = [];
+function remaining(){ return Math.max(0, state.total - Math.floor((Date.now() - state.start) / 1000)); }
+function endEvent(){
+  if (state.ended) return;
+  state.ended = true;
+  page.classList.add('is-ended'); page.classList.remove('is-alert');
+  tbarLabel.textContent = '이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  tbarLive.textContent = '이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  tbarLine.style.transform = 'scaleX(0)';
+  $('f_coupon').value = ''; $('f_seconds').value = '0';
+  if (timerId) { clearInterval(timerId); timerId = 0; }
+  endHooks.forEach(function(fn){ safe(fn); });
+}
+function renderTimer(){
+  var r = remaining();
+  state.secondsLeft = r;
+  if (r <= 0) { endEvent(); return; }
+  var m = Math.floor(r / 60), s = r % 60;
+  var str = (m < 10 ? '0' : '') + m + (s < 10 ? '0' : '') + s;
+  if (str !== lastStr) {
+    for (var i = 0; i < 4; i++) { if (digits[i].textContent !== str.charAt(i)) digits[i].textContent = str.charAt(i); }
+    lastStr = str;
+  }
+  var approx = Math.ceil(r / 60);
+  if (approx !== lastMinAnnounced) { lastMinAnnounced = approx; tbarLive.textContent = '남은 시간 약 ' + approx + '분'; }
+  tbarLine.style.transform = 'scaleX(' + (r / state.total).toFixed(4) + ')';
+  if (r < 300 && !page.classList.contains('is-alert')) {
+    page.classList.add('is-alert');
+    tbarLabel.textContent = '5분 남았어요 — 카톡 한 줄이면 돼요';
+  }
+}
+if (remaining() <= 0) { page.classList.add('no-anim'); endEvent(); }
+else {
+  renderTimer();
+  timerId = setInterval(renderTimer, 1000);
+}
+doc.addEventListener('visibilitychange', function(){ if (!doc.hidden) renderTimer(); });
+win.addEventListener('pageshow', function(){ renderTimer(); });
+
+/* 타이머 바 쿠폰 칩 */
+$('tbarChip').addEventListener('click', function(){
+  var btn = this;
+  if (!state.coupon) return;
+  copyText(state.coupon).then(function(ok){ if (ok) flashLabel(btn, '복사됨', 1500); });
+});
+
+/* ================= 01 히어로 컷 선 ================= */
+var hero = doc.querySelector('.hero'), l2 = $('l2'), heroCut = $('heroCut'), cutLine = $('heroCutLine'), tipMotion = $('heroTipMotion');
+var TAN = Math.tan(5 * Math.PI / 180);
+var lastW = 0, lastH = 0, heroStarted = false;
+function layoutCut(){
+  var hr = hero.getBoundingClientRect(), lr = l2.getBoundingClientRect();
+  var vw = doc.documentElement.clientWidth || win.innerWidth;
+  var cx = lr.left - hr.left + lr.width / 2, cy = lr.top - hr.top + lr.height / 2;
+  var x1 = -0.05 * vw - hr.left, x2 = 1.05 * vw - hr.left;
+  var y1 = cy + (cx - x1) * TAN, y2 = cy - (x2 - cx) * TAN;
+  cutLine.setAttribute('x1', x1.toFixed(1)); cutLine.setAttribute('y1', y1.toFixed(1));
+  cutLine.setAttribute('x2', x2.toFixed(1)); cutLine.setAttribute('y2', y2.toFixed(1));
+  var len = Math.ceil(Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)));
+  heroCut.style.setProperty('--cut-len', String(len));
+  tipMotion.setAttribute('path', 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' L' + x2.toFixed(1) + ' ' + y2.toFixed(1));
+  l2.style.setProperty('--rise', (lr.width / 2 * TAN).toFixed(1) + 'px');
+  lastW = win.innerWidth; lastH = win.innerHeight;
+}
+function startHero(){
+  if (heroStarted) return;
+  heroStarted = true;
+  layoutCut();
+  if (reduced) {
+    page.classList.add('no-anim');
+    page.classList.add('is-drawn', 'is-cut', 'is-idle');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ page.classList.remove('no-anim'); }); });
+    return;
+  }
+  page.classList.add('is-drawn');
+  safe(function(){ tipMotion.beginElement(); });
+  setTimeout(function(){ page.classList.add('is-cut'); }, 650);
+  setTimeout(function(){ page.classList.add('is-idle'); }, 850);
+}
+(function scheduleHero(){
+  var t0 = Date.now();
+  function go(){ var wait = Math.max(0, 150 - (Date.now() - t0)); setTimeout(startHero, wait); }
+  var p = safe(function(){
+    return Promise.all([doc.fonts.load('400 40px "Black Han Sans"'), doc.fonts.load('900 40px Montserrat')]);
+  }, null);
+  if (p && p.then) p.then(go, go); else go();
+  setTimeout(startHero, 1500);
+})();
+safe(function(){ doc.fonts.ready.then(function(){ if (heroStarted) layoutCut(); }); });
+win.addEventListener('resize', function(){
+  var w = win.innerWidth, h = win.innerHeight;
+  if (w === lastW && Math.abs(h - lastH) < 120) { lastH = h; return; }
+  layoutCut();
+});
+win.addEventListener('orientationchange', function(){ setTimeout(layoutCut, 250); });

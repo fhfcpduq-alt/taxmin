@@ -1,0 +1,56 @@
+<div class="page" id="page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="tcBadgeBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16243A"/><stop offset="1" stop-color="#070D18"/></linearGradient>
+    <symbol id="tc-badge" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="98" fill="url(#tcBadgeBg)"/>
+      <circle cx="100" cy="100" r="98" fill="none" stroke="#1F2F49" stroke-width="2"/>
+      <text x="100" y="88" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">TAX</text>
+      <text x="100" y="150" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">CUT</text>
+      <line x1="34" y1="122" x2="166" y2="94" stroke="#3DDC84" stroke-width="6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="tc-wordmark" viewBox="0 0 420 150">
+      <text x="210" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="700" font-size="18" fill="#3DDC84" letter-spacing="7">TAXCUT</text>
+      <text x="210" y="118" text-anchor="middle" font-family="'Black Han Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif" font-weight="400" font-size="104" fill="#FFFFFF">택스컷</text>
+      <line x1="22" y1="102" x2="398" y2="70" stroke="#3DDC84" stroke-width="7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ic-kakao" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3C6.48 3 2 6.53 2 10.9c0 2.8 1.86 5.26 4.66 6.66l-1.03 3.83c-.08.3.26.55.52.38l4.56-3.04c.42.05.85.07 1.29.07 5.52 0 10-3.53 10-7.9S17.52 3 12 3z"/></symbol>
+  </defs>
+</svg>
+
+<!-- 00 상단 고정 타이머 바 -->
+<div class="tbar" id="tbar">
+  <svg class="badge" aria-hidden="true" focusable="false"><use href="#tc-badge"/></svg>
+  <div class="tbar-text">
+    <span class="tbar-label" id="tbarLabel"><span class="short">첫 달 기장료 무료까지</span><span class="long">첫 달 기장료 무료까지 남은 시간</span></span>
+    <span class="tbar-time num" id="tbarTime" aria-hidden="true"><span class="d">2</span><span class="d">9</span><span class="c">:</span><span class="d">5</span><span class="d">9</span></span>
+    <span class="sr-only" aria-live="polite" id="tbarLive">남은 시간 약 30분</span>
+  </div>
+  <button type="button" class="chip" id="tbarChip" aria-label="쿠폰코드 복사"><span data-code>TC-0000</span></button>
+  <a class="tbar-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao aria-label="카카오톡 상담"><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg></a>
+  <div class="tbar-line" id="tbarLine" aria-hidden="true"></div>
+</div>
+
+<!-- 01 히어로 -->
+<header class="hero" id="top">
+  <svg class="hero-cut" id="heroCut" aria-hidden="true" focusable="false">
+    <line id="heroCutLine" x1="0" y1="0" x2="0" y2="0"/>
+    <circle class="tip" r="5"><animateMotion id="heroTipMotion" dur="0.65s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1" path="M0 0 L0 0"/></circle>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="logo-row">
+        <svg class="badge" role="img" aria-label="택스컷 로고" focusable="false"><use href="#tc-badge"/></svg>
+        <svg class="wordmark" viewBox="0 0 420 150" role="img" aria-label="택스컷" focusable="false"><use href="#tc-wordmark"/></svg>
+        <span class="firm">세무회계 민</span>
+      </div>
+      <p class="hero-eyebrow">첫 창업 사장님을 위한 세무 기장 서비스</p>
+      <h1 class="hl">
+        <span class="l1">첫 달 기장료,</span>
+        <span class="l2 num" id="l2"><span class="base" aria-hidden="true">55,000<span class="won">원</span></span><span class="piece piece-top">55,000<span class="won">원</span></span><span class="piece piece-bot" aria-hidden="true">55,000<span class="won">원</span></span></span>
+        <span class="l3"><span class="zero num">0</span><span class="won">원</span><span class="rest">으로</span></span>
+        <span class="l4">잘라드릴게요.</span>
+      </h1>
+      <p class="cond">이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</p>
+      <p class="sub">세무를 몰라도 괜찮아요, 사장님. 카톡 한 줄로 세무사와 상담하고, 계약은 온라인으로 끝나요. 아래 카드를 긁으면 첫 달 0원 쿠폰이 나와요.</p>
+    </div>

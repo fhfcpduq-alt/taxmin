@@ -1,0 +1,980 @@
+<!--
+  택스컷 랜딩페이지 · 후보 C (인앱 브라우저 성능·안정성 우선 빌드)
+  폰트: Black Han Sans(한글 헤드라인) + Montserrat 700/900(숫자·타이머·아이브로우) + Noto Sans KR 400/700(본문) — Google Fonts link 1개, 시스템 폴백 스택 포함
+  3D: CSS 3D만 사용(스크래치 카드 perspective 틸트 + translateZ 층 + deviceorientation). 외부 스크립트 0개, 컨페티는 자체 캔버스 60개
+  설정: 스크립트 첫 줄 window.TAXCUT_CONFIG — RESERVATION_ENDPOINT에 Apps Script 웹앱 URL을 넣으면 webhook 모드, 비우면 local(테스트) 모드
+-->
+
+
+<title>택스컷 첫달 0원</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Montserrat:wght@700;900&family=Noto+Sans+KR:wght@400;700&display=swap">
+<style>
+:root{
+  --navy-950:#070D18;--navy-900:#0B1526;--navy-800:#16243A;--navy-700:#1F2F49;--navy-500:#3A4B66;
+  --ink:#FFFFFF;--ink-soft:#C9D2E3;--ink-mute:#8F9DB5;
+  --green:#3DDC84;--green-deep:#1FB86A;--green-ink:#0E8F4F;
+  --paper:#F4F6FA;--paper-2:#E6EAF2;--paper-line:#CBD3E1;--paper-mute:#4E5D78;
+  --kakao:#FEE500;--kakao-ink:#191919;
+  --alert:#FFB020;--error:#B42318;
+  --foil-hi:#E9EDF3;--foil-mid:#C7CDD8;--foil-lo:#AEB6C4;
+  --cut-angle:-5deg;
+  --disp:'Black Han Sans','Do Hyeon','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --body:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --mont:Montserrat,'Arial Black',Arial,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;padding:48px 0 0;background:var(--navy-900);color:var(--ink-soft);font:400 15px/1.55 var(--body);font-synthesis:none;overscroll-behavior-y:none;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,p,figure,ul,ol{margin:0}
+h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.1;letter-spacing:-.01em;color:var(--ink)}
+a{color:var(--green)}
+button{font:inherit;color:inherit;margin:0}
+svg,canvas{display:block}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.paper :focus-visible{outline-color:var(--green-ink)}
+.num{font-family:var(--mont);font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.wrap{max-width:1120px;margin:0 auto;padding-left:16px;padding-right:16px}
+section,[id]{scroll-margin-top:64px}
+.eyebrow{display:flex;align-items:center;gap:10px;font:700 11px/1 var(--mont);letter-spacing:.3em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+.rule{display:inline-block;width:24px;height:2px;background:currentColor;transform:rotate(var(--cut-angle)) scaleX(0);transform-origin:0 50%;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.in .rule{transform:rotate(var(--cut-angle)) scaleX(1)}
+.paper{background:var(--paper);color:var(--navy-900)}
+.paper h2,.paper h3{color:var(--navy-900)}
+.paper .eyebrow{color:var(--green-ink)}
+.h2{font-size:30px}
+.lead{max-width:34ch;margin-top:10px}
+@media(min-width:768px){body{font-size:16px;line-height:1.6}.wrap{padding-left:32px;padding-right:32px}}
+@media(min-width:1024px){.h2{font-size:44px}}
+/* links with the cut-line underline */
+.ul-link{position:relative;display:inline-block;color:var(--green);font-weight:700;text-decoration:none;padding-bottom:2px}
+.ul-link::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform-origin:left}
+.ul-link:hover::after,.ul-link:active::after{animation:sweep .2s cubic-bezier(.2,.8,.2,1)}
+.paper .ul-link{color:var(--navy-900)}
+.paper .ul-link::after{background:var(--green-ink)}
+@keyframes sweep{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* kakao buttons — yellow only, no green decoration */
+.kbtn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--kakao);color:var(--kakao-ink);text-decoration:none;font:700 16px/1 var(--body);transition:transform .1s}
+.kbtn:active{transform:scale(.98)}
+.kbtn svg{width:22px;height:22px;flex:none}
+.kbtn-lg{height:56px;width:100%}
+.kbtn-sq{width:36px;height:36px;flex:none}
+.kbtn-sq svg{width:20px;height:20px}
+.kcap{font-size:12px;color:var(--ink-mute);text-align:center;margin-top:8px}
+.knote{font-size:11px;color:var(--ink-mute);text-align:center;margin-top:6px;line-height:1.45}
+.paper .kcap,.paper .knote{color:var(--paper-mute)}
+/* outline button with 3px green underline */
+.obtn{position:relative;display:flex;align-items:center;justify-content:center;height:56px;width:100%;border:1.5px solid var(--ink);background:none;color:var(--ink);font:700 16px/1 var(--body);text-decoration:none;cursor:pointer;padding:0}
+.obtn::after{content:"";position:absolute;left:-1.5px;right:-1.5px;bottom:-1.5px;height:3px;background:var(--green);transform-origin:left}
+.obtn:hover::after,.obtn:active::after{animation:sweep .2s cubic-bezier(.2,.8,.2,1)}
+/* 00 timer bar */
+.tbar{position:fixed;top:0;left:0;right:0;height:48px;z-index:50;background:var(--navy-800);border-bottom:1px solid var(--navy-700)}
+.tbar-in{display:flex;align-items:center;gap:10px;height:47px;padding:0 12px;max-width:1120px;margin:0 auto}
+.tbar-txt{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;line-height:1.2}
+.tbar-lbl{font-size:11px;color:var(--ink-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbar-lbl .w600{display:none}
+.tbar-num{font-size:20px;color:var(--ink);line-height:1}
+.tbar-num .d{display:inline-block;min-width:.62em;text-align:center}
+.tline{position:absolute;left:0;right:0;bottom:0;height:3px;pointer-events:none}
+.tline i,.tline b{position:absolute;left:0;top:0;width:100%;height:3px}
+.tline i{background:var(--green);transform-origin:left}
+.tline b::after{content:"";position:absolute;right:-3px;top:0;width:6px;height:3px;background:var(--green);transform:skewX(var(--cut-angle))}
+.tbar.live .tline i,.tbar.live .tline b{transition:transform 1s linear}
+.chip{font-family:var(--mont);font-weight:900;font-size:13px;letter-spacing:-.02em;color:var(--green);background:none;border:1.5px dashed var(--green);padding:0 8px;height:28px;cursor:pointer;white-space:nowrap}
+.tbar.warn .tbar-num{color:var(--alert);animation:pulse 1s ease-in-out infinite}
+.tbar.warn .tline i,.tbar.warn .tline b::after{background:var(--alert)}
+@keyframes pulse{50%{opacity:.35}}
+.tbar.ended .tbar-num{display:none}
+.tbar.ended .tbar-lbl{white-space:normal;font-size:12px;line-height:1.3;color:var(--ink-soft)}
+@media(min-width:600px){.tbar-lbl .w600{display:inline}.tbar-in{padding:0 16px}}
+@media(min-width:768px){.tbar-in{padding:0 32px}}
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);background:var(--ink);color:var(--navy-900);font-weight:700;font-size:14px;padding:10px 16px;z-index:60;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s,visibility .2s}
+.toast.on{visibility:visible;opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+/* 01 hero */
+.hero{position:relative;overflow:clip;padding:56px 0 40px}
+.hero::before{content:"";position:absolute;left:0;right:0;top:0;height:360px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 1px,transparent 1px 9px);-webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent);pointer-events:none}
+.hero-cut{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:1;visibility:hidden}
+.hero-cut.on{visibility:visible}
+.hero-cut line{stroke:var(--green);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .65s cubic-bezier(.2,.8,.2,1) .15s}
+.hero-grid{position:relative}
+.hero-txt{position:relative}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.wm{width:110px;height:39px}
+.firm{margin-left:auto;font-size:11px;color:var(--ink-mute)}
+.eb-ko{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;margin-bottom:12px}
+.h1>span{display:block}
+.l1{font-size:clamp(30px,8.5vw,44px)}
+.l2{font-size:clamp(48px,14vw,72px);line-height:1;margin:4px 0;transition:opacity .3s}
+.l2 .won{font-family:var(--disp);font-size:.6em}
+.cut-done .l2{opacity:.55}
+.l3{white-space:nowrap;line-height:1;margin:6px 0 4px}
+.l3 .z{display:inline-block;transform:scale(.96);transform-origin:left bottom;transition:transform .2s}
+.cut-done .l3 .z{transform:scale(1)}
+.l3 .z .num{font-size:clamp(56px,17vw,88px);color:var(--green)}
+.l3 .z .won{font-family:var(--disp);font-size:clamp(39px,11.9vw,62px);color:var(--green)}
+.l3 .rest{font-family:var(--disp);font-size:clamp(26px,7.5vw,34px);margin-left:4px}
+@media(max-width:379px){.l3 .z .num{font-size:60px}.l3 .z .won{font-size:42px}}
+.l4{font-size:clamp(26px,7.5vw,34px)}
+.cond{margin:22px 0 14px;padding-left:12px;border-left:2px solid var(--green);font-weight:700;font-size:14px;color:var(--ink);max-width:34ch;line-height:1.5}
+.sub{max-width:34ch;color:var(--ink-soft);margin-bottom:16px}
+.hero-card{position:relative;z-index:2}
+.confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:5}
+/* scratch card — the only 3D object and the only rounded object */
+.card-scene{perspective:900px;perspective-origin:50% 40%;width:min(368px,100%);-webkit-user-select:none;user-select:none}
+.card-float{transform-style:preserve-3d}
+.card-float.idle{animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotateY(0)}25%{transform:translateY(-4px) rotateY(3deg)}50%{transform:translateY(0) rotateY(0)}75%{transform:translateY(4px) rotateY(0)}}
+.card{position:relative;padding-bottom:62.5%;transform-style:preserve-3d;will-change:transform;transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg))}
+.card>*,.card::before{position:absolute;inset:0;border-radius:14px}
+.card::before{content:"";background:var(--navy-950);border:1px solid var(--navy-700);transform:translateZ(-6px)}
+.card-shadow{background:var(--navy-950);box-shadow:0 14px 18px 4px var(--navy-950);opacity:.75;transform:translateZ(-30px) scale(.96)}
+.card-face{background:var(--paper);color:var(--navy-900);overflow:hidden;transform:translateZ(0)}
+.stub{position:absolute;left:0;top:0;bottom:0;width:40px;border-right:1.5px dashed var(--paper-line);display:flex;align-items:center;justify-content:center}
+.stub span{font:700 8px/1 var(--mont);letter-spacing:.2em;color:var(--paper-mute);writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
+.face-in{position:absolute;left:40px;right:0;top:0;bottom:0;padding:12px 14px 10px}
+.face-top{display:flex;justify-content:space-between;align-items:center}
+.face-eb{font:700 10px/1 var(--mont);letter-spacing:.3em;color:var(--green-ink)}
+.face-title{font-family:var(--disp);font-size:22px;line-height:1.1;margin-top:8px;color:var(--navy-900)}
+.face-zero{position:relative;display:inline-block;line-height:1;margin-top:2px;color:var(--navy-900)}
+.face-zero .num{font-size:56px}
+.face-zero .won{font-family:var(--disp);font-size:28px;margin-left:2px}
+.face-ul{position:absolute;left:0;right:0;bottom:2px;height:5px;background:var(--green-ink);transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.revealed .face-ul{transform:scaleX(1)}
+.face-code{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1.5px dashed var(--navy-700);padding:5px 6px 5px 10px;margin-top:8px;font-size:12px;color:var(--paper-mute)}
+.face-code b{font-size:18px;color:var(--navy-900);margin-left:4px}
+.copy{border:1.5px solid var(--navy-700);background:none;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer;color:var(--navy-900);line-height:1}
+.face-foot{font-size:12px;color:var(--paper-mute);margin-top:6px}
+.face-end{display:none;font-family:var(--disp);font-size:20px;line-height:1.2;color:var(--navy-900);margin-top:16px}
+.card-face.ended .face-title,.card-face.ended .face-zero,.card-face.ended .face-code,.card-face.ended .face-foot{display:none}
+.card-face.ended .face-end{display:block}
+.stamp{position:absolute;right:12px;top:40%;font-family:var(--disp);font-size:20px;line-height:1;color:var(--navy-900);background:var(--green);padding:6px 10px;transform:rotate(-8deg)}
+.stamp.pop{animation:stampIn .25s cubic-bezier(.2,.8,.2,1) both}
+@keyframes stampIn{from{transform:rotate(-8deg) scale(2);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:1}}
+.end-mark{position:absolute;right:12px;top:10px;font-size:10px;font-weight:700;color:var(--error);border:1.5px solid var(--error);padding:2px 5px;transform:rotate(-8deg);line-height:1.2}
+.card-foil{width:100%;height:100%;transform:translateZ(14px);touch-action:none;cursor:crosshair;transition:opacity .35s;-webkit-touch-callout:none}
+.card-foil.gone{opacity:0;pointer-events:none}
+.card-prompt{transform:translateZ(15px);pointer-events:none;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 20px 0 56px;transition:opacity .15s}
+.card-prompt.off{opacity:0}
+.card-prompt strong{font-family:var(--disp);font-weight:400;font-size:24px;color:var(--navy-900);line-height:1.1}
+.card-prompt .rule{width:48px;color:var(--green-ink);transform:rotate(var(--cut-angle)) scaleX(1);margin:8px 0}
+.card-prompt small{font-size:12px;color:var(--navy-700)}
+.card-hint{inset:auto;left:16%;bottom:16%;width:28px;height:28px;transform:translateZ(16px);pointer-events:none;color:var(--navy-900)}
+.card-hint.go{animation:swipe 1.2s cubic-bezier(.4,0,.2,1) both}
+@keyframes swipe{from{transform:translateZ(16px) translate(0,0)}to{transform:translateZ(16px) translate(min(200px,52vw),max(-110px,-28vw))}}
+.card-cut{width:100%;height:100%;transform:translateZ(28px);pointer-events:none;overflow:visible;transition:opacity .35s}
+.card-cut line{stroke:var(--green);stroke-width:4;stroke-linecap:round;stroke-dasharray:190;stroke-dashoffset:190;transition:stroke-dashoffset .35s cubic-bezier(.2,.8,.2,1)}
+.card-cut.draw line{stroke-dashoffset:0}
+.card-cut.gone{opacity:0}
+.card-glare{transform:translateZ(29px);pointer-events:none;overflow:hidden}
+.card-glare::before{content:"";position:absolute;inset:-60%;background:linear-gradient(115deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.12) 50%,rgba(255,255,255,0) 60%);transform:translate(var(--gx,0px),var(--gy,0px))}
+.card.still *{transition:none!important;animation:none!important}
+.card-scene .sr-btn{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.card-scene .sr-btn:focus{position:static;width:auto;height:auto;margin:8px 0 0;clip:auto;white-space:normal;padding:8px 12px;border:1.5px solid var(--green);background:none;color:var(--green);font-weight:700}
+.ncv{margin-top:12px}
+@media(max-width:359px){.face-zero .num{font-size:44px}.face-zero .won{font-size:22px}.face-title{font-size:18px}.face-code b{font-size:15px}.card-prompt strong{font-size:20px}}
+@supports not (transform-style:preserve-3d){.card{transform:none!important}.card::before,.card-shadow{display:none}.card-float.idle{animation:none}}
+/* below the card */
+.skip{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;font-size:14px;padding:0}
+.skip::after{bottom:10px}
+.tap-open{display:block;background:none;border:0;padding:8px 0;font-size:13px;color:var(--green);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.cta-slot{max-height:0;overflow:hidden;visibility:hidden;transition:max-height .3s ease}
+.cta-slot.open{visibility:visible}
+.cta-slot-in{padding-top:16px}
+.cta-slot .obtn{margin-top:14px}
+.coupon-say{font-size:12px;color:var(--ink-mute);margin-top:12px;text-align:center}
+.coupon-say b{color:var(--ink)}
+@media(min-width:1024px){
+  .hero{padding:72px 0 64px}
+  .hero-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;align-items:start}
+  .hero-txt{grid-column:1/8}
+  .hero-card{grid-column:8/13;justify-self:end;width:420px;margin-top:56px}
+  .card-scene{width:420px}
+}
+/* 02 price — receipt */
+.price{position:relative;padding:44px 0 40px;margin-top:8px}
+.price::before{content:"";position:absolute;left:0;right:0;top:-8px;height:8px;background:conic-gradient(from 135deg at 50% 0,var(--paper) 0 90deg,transparent 0) 0 0/16px 8px repeat-x}
+.price-line{font-weight:700;font-size:18px;margin:18px 0 20px}
+.big55{position:relative;display:inline-block;line-height:1;white-space:nowrap;color:var(--navy-900)}
+.big55 .num{font-size:clamp(64px,19vw,160px)}
+.big55 .won{font-family:var(--disp);font-size:40px;margin-left:4px}
+.strike{position:absolute;left:-3%;width:106%;top:50%;height:8px;margin-top:-4px;background:var(--green-ink);transform:rotate(var(--cut-angle)) scaleX(0);transform-origin:0 50%;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.in .strike{transform:rotate(var(--cut-angle)) scaleX(1)}
+.first{display:flex;align-items:baseline;gap:12px;line-height:1;margin-top:8px;color:var(--navy-900)}
+.first .fm{font-family:var(--disp);font-size:24px}
+.first .z{position:relative;display:inline-block}
+.first .num{font-size:clamp(80px,30vw,120px)}
+.first .won{font-family:var(--disp);font-size:40px;margin-left:2px}
+.first .ul{position:absolute;left:0;right:0;bottom:4px;height:6px;background:var(--green-ink);transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.8,.2,1) .5s}
+.in .first .ul{transform:scaleX(1)}
+.rtable{width:100%;border-collapse:collapse;margin-top:24px;font-size:15px}
+.rtable th,.rtable td{padding:12px 10px;border-bottom:1px solid var(--paper-line);text-align:left;font-weight:400}
+.rtable tr:first-child th,.rtable tr:first-child td{border-top:1px solid var(--paper-line)}
+.rtable tr:nth-child(even) th,.rtable tr:nth-child(even) td{background:var(--paper-2)}
+.rtable td{text-align:right;font-weight:700}
+.fn{font-size:13px;color:var(--paper-mute);margin-top:12px;display:flex;gap:8px;align-items:flex-start}
+.fn::before{content:"";flex:none;width:16px;height:2px;background:var(--green-ink);margin-top:9px}
+.cond-sm{font-size:13px;font-weight:700;margin-top:14px}
+.rcpt-foot{margin-top:20px;padding-top:12px;border-top:1.5px dashed var(--paper-line);font-size:13px}
+@media(min-width:1024px){.price{padding:64px 0}.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}.rtable{margin-top:0}}
+/* 03 why */
+.why{padding:56px 0}
+.pts{list-style:none;padding:0;display:grid;gap:32px;margin-top:32px}
+.pt{position:relative;padding-top:14px}
+.pt .rule{position:absolute;left:0;top:0;width:28px;transform:rotate(var(--cut-angle)) scaleX(1)}
+.pt-n{position:absolute;right:0;top:6px;font-size:36px;color:var(--green);opacity:.4;line-height:1}
+.pt h3{font-size:22px;margin-bottom:6px;position:relative}
+.pt h3 a{color:inherit;text-decoration:underline;text-decoration-color:var(--green);text-decoration-thickness:2px;text-underline-offset:4px}
+.pt p{max-width:34ch}
+@media(min-width:1024px){.pts{grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--navy-700);border-left:1px solid var(--navy-700)}.pt{padding:28px 28px 32px;border-right:1px solid var(--navy-700);border-bottom:1px solid var(--navy-700)}.pt .rule{left:28px;top:14px}.pt-n{right:24px;top:20px}}
+/* 04 steps */
+.steps{background:var(--navy-800);padding:56px 0}
+.stw{position:relative;margin-top:28px}
+.steps ol{list-style:none;padding:0}
+.rail{position:absolute;left:20px;top:6px;bottom:6px;width:3px;z-index:0;background:var(--green);transform:scaleY(0);transform-origin:top;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.in .rail{transform:scaleY(1)}
+.step{position:relative;display:grid;grid-template-columns:64px 1fr;gap:6px;padding-bottom:28px}
+.step:last-child{padding-bottom:0}
+.step-n{position:relative;z-index:1;font-size:36px;line-height:1;color:var(--green);padding-top:2px}
+.step h3{font-size:22px;margin-bottom:4px}
+.step p{max-width:34ch}
+.note{font-size:13px;color:var(--ink-mute);margin-top:24px}
+.steps .ul-link{margin-top:14px;font-size:15px}
+@media(min-width:1024px){.steps ol{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}.rail{top:20px;left:0;right:0;bottom:auto;width:auto;height:3px;transform:scaleX(0);transform-origin:left}.in .rail{transform:scaleX(1)}.step{display:block;padding:0}.step-n{margin-bottom:12px;width:max-content;padding:0 12px 0 0;background:var(--navy-800)}}
+/* 05 faq */
+.faq{padding:48px 0 56px}
+.faq .h2{margin-bottom:24px}
+.faq details{border-top:1px solid var(--paper-line)}
+.faq details:last-of-type{border-bottom:1px solid var(--paper-line)}
+.faq details[open]{background:var(--paper-2)}
+.faq summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:8px 6px;font-weight:700;font-size:16px;cursor:pointer;list-style:none;color:var(--navy-900)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";flex:none;width:16px;height:2px;background:var(--green-ink);transform:rotate(45deg);transition:transform .15s}
+.faq details[open] summary::after{transform:rotate(90deg)}
+.faq .a{padding:0 6px 16px;font-size:15px;line-height:1.6;color:var(--paper-mute);max-width:60ch}
+/* 06 final cta */
+.cta{padding:56px 0}
+.cta .h2{margin-bottom:8px}
+.cta .kbtn-lg{margin-top:24px}
+.reserve{padding:48px 0 56px}
+.reserve-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{font-family:var(--mont);font-weight:900;font-size:13px;letter-spacing:-.02em;color:var(--green-ink);border:1.5px dashed var(--green-ink);padding:4px 8px}
+.testpill{display:inline-block;background:var(--paper-2);color:var(--paper-mute);font-size:12px;font-weight:700;padding:4px 10px;margin-top:10px}
+.form{margin-top:24px;display:grid;gap:18px}
+.f label{display:block;font-weight:700;font-size:14px;margin-bottom:6px;color:var(--navy-900)}
+.f input:not([type=checkbox]),.f select,.f textarea{display:block;width:100%;height:48px;border:1.5px solid var(--navy-700);border-radius:6px;background:var(--paper-2);padding:0 12px;font:inherit;color:var(--navy-900);-webkit-appearance:none;appearance:none;margin:0}
+.f textarea{height:auto;padding:10px 12px;min-height:64px;resize:vertical}
+.f select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%231F2F49' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.f :focus-visible{outline:2px solid var(--green-ink);outline-offset:2px}
+.f input:disabled{opacity:.5}
+.f .sub-f{margin-top:10px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:400;margin-top:10px;cursor:pointer}
+.chk input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--green-ink)}
+.chk.main{font-weight:700;margin-top:0}
+.err{display:none;font-size:13px;color:var(--error);margin-top:6px}
+.f.bad .err{display:block}
+.f.bad input:not([type=checkbox]),.f.bad select{border-color:var(--error)}
+.pn{font-size:12px;color:var(--paper-mute);line-height:1.5;margin-top:8px}
+.pn a{color:var(--navy-900);text-decoration-color:var(--green-ink);text-decoration-thickness:2px;text-underline-offset:3px}
+.sbtn{position:relative;height:56px;width:100%;background:var(--navy-900);color:var(--ink);border:0;font:700 16px/1 var(--body);cursor:pointer}
+.sbtn::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--green-ink);transform-origin:left}
+.sbtn:hover::after,.sbtn:active::after{animation:sweep .2s cubic-bezier(.2,.8,.2,1)}
+.sbtn:disabled{opacity:.6;cursor:default}
+.panel{border:1.5px solid var(--navy-700);padding:20px;margin-top:24px;color:var(--navy-900)}
+.panel h3{font-size:24px;margin-bottom:14px;line-height:1.2}
+.panel p{margin-bottom:14px}
+.fail{border-color:var(--error)}
+.fail h3{font-size:18px;font-family:var(--body);font-weight:700;color:var(--error)}
+@media(min-width:1024px){.cta-grid{display:grid;grid-template-columns:5fr 7fr}.cta,.reserve{padding:64px 0}.cta .wrap{padding-right:48px}.reserve .wrap{padding-left:48px}}
+/* 07 footer */
+.foot{background:var(--navy-950);padding:40px 0 96px;font-size:13px;color:var(--ink-soft)}
+.foot .wm{width:90px;height:32px;margin-bottom:12px}
+.trust{margin:16px 0;color:var(--ink-mute);line-height:1.7}
+.flinks{display:flex;gap:18px;flex-wrap:wrap;margin:14px 0}
+.flinks .ul-link{font-size:13px}
+.privacy{border-top:1px solid var(--navy-700);padding-top:16px;margin-top:16px;font-size:12px;color:var(--ink-mute);line-height:1.6}
+.privacy strong{color:var(--ink-soft)}
+.notice{font-size:12px;color:var(--ink-mute);margin-top:16px;line-height:1.6}
+.notice ol{margin-top:4px;padding-left:18px}
+@media(min-width:768px){.foot{padding-bottom:40px}}
+/* 08 bottom fixed cta bar (mobile) */
+.bbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--navy-800);border-top:1px solid var(--navy-700);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;transform:translateY(100%);transition:transform .2s ease}
+.bbar.show{transform:none}
+.bbar .kbtn{flex:0 0 58%;height:44px;font-size:15px}
+.bbar .obtn{flex:1;height:44px;font-size:15px}
+@media(min-width:768px){.bbar{display:none}}
+</style>
+
+
+<svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="tc-badge" viewBox="0 0 200 200">
+    <defs><linearGradient id="tcBadgeBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16243A"/><stop offset="1" stop-color="#070D18"/></linearGradient></defs>
+    <circle cx="100" cy="100" r="98" fill="url(#tcBadgeBg)"/>
+    <circle cx="100" cy="100" r="98" fill="none" stroke="#1F2F49" stroke-width="2"/>
+    <text x="100" y="88" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">TAX</text>
+    <text x="100" y="150" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">CUT</text>
+    <line x1="34" y1="122" x2="166" y2="94" stroke="#3DDC84" stroke-width="6" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="tc-wordmark" viewBox="0 0 420 150">
+    <text x="210" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="700" font-size="18" fill="#3DDC84" letter-spacing="7">TAXCUT</text>
+    <text x="210" y="118" text-anchor="middle" font-family="'Black Han Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif" font-weight="900" font-size="104" fill="#FFFFFF">택스컷</text>
+    <line x1="22" y1="102" x2="398" y2="70" stroke="#3DDC84" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="tc-kakao" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.8 5.2 4.6 6.6L5.5 21l4.4-2.6c.7.1 1.4.2 2.1.2 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></symbol>
+  <symbol id="tc-coin" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="#3DDC84" stroke="currentColor" stroke-width="2"/><path d="M8 17l12-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+</svg>
+
+<header class="tbar" id="tbar">
+  <div class="tbar-in">
+    <svg width="24" height="24" aria-hidden="true"><use href="#tc-badge"/></svg>
+    <div class="tbar-txt">
+      <span class="tbar-lbl" id="tLbl">첫 달 기장료 무료까지<span class="w600"> 남은 시간</span></span>
+      <span class="tbar-num num" id="tNum" aria-hidden="true"><span class="d">2</span><span class="d">9</span>:<span class="d">5</span><span class="d">9</span></span>
+    </div>
+    <span class="sr" aria-live="polite" id="tLive">남은 시간 약 30분</span>
+    <button class="chip" id="chip" type="button" hidden aria-label="쿠폰코드 복사" data-code>TC-0000</button>
+    <a class="kbtn kbtn-sq" data-kakao href="https://pf.kakao.com/_Mxojqs/chat" aria-label="카카오톡 상담"><svg aria-hidden="true"><use href="#tc-kakao"/></svg></a>
+  </div>
+  <div class="tline" aria-hidden="true"><i id="tBar"></i><b id="tTip"></b></div>
+</header>
+
+<main>
+<section class="hero" id="hero" aria-labelledby="h1">
+  <svg class="hero-cut" id="heroCut" aria-hidden="true"><line id="cutLine" x1="0" y1="0" x2="0" y2="0"/></svg>
+  <canvas class="confetti" id="confetti" hidden aria-hidden="true"></canvas>
+  <div class="wrap hero-grid">
+    <div class="hero-txt">
+      <div class="logo-row">
+        <svg width="32" height="32" role="img" aria-label="택스컷 로고"><use href="#tc-badge"/></svg>
+        <svg class="wm" role="img" aria-label="택스컷"><use href="#tc-wordmark"/></svg>
+        <span class="firm">세무회계 민</span>
+      </div>
+      <p class="eb-ko">첫 창업 사장님을 위한 세무 기장 서비스</p>
+      <h1 class="h1" id="h1">
+        <span class="l1">첫 달 기장료,</span>
+        <span class="l2" id="l2"><span class="num">55,000</span><span class="won">원</span></span>
+        <span class="l3"><span class="z"><span class="num">0</span><span class="won">원</span></span><span class="rest">으로</span></span>
+        <span class="l4">잘라드릴게요.</span>
+      </h1>
+      <p class="cond">이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</p>
+      <p class="sub">세무를 몰라도 괜찮아요, 사장님. 카톡 한 줄로 세무사와 상담하고, 계약은 온라인으로 끝나요. 아래 카드를 긁으면 첫 달 0원 쿠폰이 나와요.</p>
+    </div>
+    <div class="hero-card">
+      <div class="card-scene" id="scene">
+        <div class="card-float" id="cardFloat">
+          <div class="card" id="card">
+            <div class="card-shadow" aria-hidden="true"></div>
+            <div class="card-face" id="face">
+              <div class="stub" aria-hidden="true"><span>TAXCUT · 1ST MONTH FREE</span></div>
+              <div class="face-in">
+                <div class="face-top"><span class="face-eb">TAXCUT COUPON</span><svg width="24" height="24" aria-hidden="true"><use href="#tc-badge"/></svg></div>
+                <p class="face-title">첫 달 기장료</p>
+                <p class="face-zero"><span class="num">0</span><span class="won">원</span><i class="face-ul" aria-hidden="true"></i></p>
+                <p class="face-end">이벤트 종료 · 상담은 계속 가능해요</p>
+                <div class="face-code"><span>코드 <b class="num" data-code>TC-0000</b></span><button type="button" class="copy" id="copyBtn">복사</button></div>
+                <p class="face-foot">상담 때 이 코드를 말씀해 주세요</p>
+                <span class="stamp" id="stamp" hidden aria-hidden="true">첫 달 0원</span>
+                <span class="end-mark" id="endMark" hidden>시간 종료</span>
+              </div>
+            </div>
+            <canvas class="card-foil" id="foil" aria-hidden="true"></canvas>
+            <div class="card-prompt" id="prompt" aria-hidden="true"><strong>여기를 긁어보세요</strong><i class="rule"></i><small>손가락으로 문지르면 첫 달 기장료가 잘려요</small></div>
+            <svg class="card-hint" id="hint" aria-hidden="true"><use href="#tc-coin"/></svg>
+            <svg class="card-cut" id="cardCut" viewBox="0 0 160 100" preserveAspectRatio="none" hidden aria-hidden="true"><line x1="-6" y1="90" x2="166" y2="10"/></svg>
+            <div class="card-glare" aria-hidden="true"></div>
+          </div>
+        </div>
+        <button type="button" class="sr-btn" id="kbReveal">키보드로 쿠폰 열기</button>
+      </div>
+      <button type="button" class="obtn ncv" id="noCanvas" hidden>탭해서 쿠폰 열기</button>
+      <a class="ul-link skip" data-kakao href="https://pf.kakao.com/_Mxojqs/chat">긁지 않아도 돼요 · 바로 카톡 상담 →</a>
+      <button type="button" class="tap-open" id="tapOpen" hidden>긁기 어려우세요? 탭해서 열기</button>
+      <div class="cta-slot" id="ctaSlot" aria-hidden="true">
+        <div class="cta-slot-in">
+          <a class="kbtn kbtn-lg" data-kakao href="https://pf.kakao.com/_Mxojqs/chat"><svg aria-hidden="true"><use href="#tc-kakao"/></svg>카톡으로 바로 상담하기</a>
+          <p class="kcap">질문 한 줄부터 괜찮아요</p>
+          <a class="obtn" data-reserve href="#reserve">전화 상담 예약하기</a>
+          <p class="coupon-say" id="couponSay">쿠폰코드 <b class="num" data-code>TC-0000</b>을 상담 때 말씀해 주세요</p>
+          <p class="knote">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="price paper io" id="price" aria-labelledby="priceH">
+  <div class="wrap">
+    <p class="eyebrow">PRICE<i class="rule" aria-hidden="true"></i></p>
+    <h2 class="h2" id="priceH">요금, 솔직하게.</h2>
+    <p class="price-line">1개월 기장료 55,000원 (부가세 포함)</p>
+    <div class="price-grid">
+      <div>
+        <p class="big55"><span class="num">55,000</span><span class="won">원</span><i class="strike" aria-hidden="true"></i></p>
+        <p class="first"><span class="fm">첫 달</span><span class="z"><span class="num">0</span><span class="won">원</span><i class="ul" aria-hidden="true"></i></span></p>
+      </div>
+      <div>
+        <table class="rtable">
+          <tbody>
+            <tr><th scope="row">첫 달 기장료</th><td>0원</td></tr>
+            <tr><th scope="row">둘째 달부터</th><td>55,000원 (부가세 포함)</td></tr>
+            <tr><th scope="row">매출액 구간</th><td>상담 시 안내</td></tr>
+          </tbody>
+        </table>
+        <p class="fn">※ 매출액에 따라 달라질 수 있습니다.</p>
+        <p class="fn">※ 2개월째부터는 기장료가 정상 청구돼요.</p>
+        <p class="cond-sm">이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</p>
+        <p class="rcpt-foot"><a class="ul-link" id="rcptLink" href="#scene">쿠폰은 위의 카드를 긁으면 나와요 ↑</a><span id="rcptCode" hidden>쿠폰 <b class="num" data-code>TC-0000</b> 적용</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="why io" id="why" aria-labelledby="whyH">
+  <div class="wrap">
+    <p class="eyebrow">WHY TAXCUT<i class="rule" aria-hidden="true"></i></p>
+    <h2 class="h2" id="whyH">처음이라 모르는 게 당연해요.</h2>
+    <p class="lead">지어낸 숫자 대신, 실제로 하는 것만 적었어요.</p>
+    <ul class="pts">
+      <li class="pt"><i class="rule" aria-hidden="true"></i><span class="pt-n num" aria-hidden="true">01</span><h3>카톡으로 편하게</h3><p>영수증 사진 한 장, 질문 한 줄. 카톡으로 보내주시면 돼요. 전화 통화가 어색해도 괜찮아요.</p></li>
+      <li class="pt"><i class="rule" aria-hidden="true"></i><span class="pt-n num" aria-hidden="true">02</span><h3>세무사가 직접</h3><p>상담부터 신고까지 세무사가 직접 봐요.</p></li>
+      <li class="pt"><i class="rule" aria-hidden="true"></i><span class="pt-n num" aria-hidden="true">03</span><h3>첫 창업 사장님 맞춤</h3><p>사업자등록 전이어도, 매출이 아직 없어도 상담부터 시작하세요.</p></li>
+      <li class="pt"><i class="rule" aria-hidden="true"></i><span class="pt-n num" aria-hidden="true">04</span><h3><a data-yt href="https://www.youtube.com/@taxcut_min" target="_blank" rel="noopener">유튜브 택스컷</a></h3><p>세금 이야기는 유튜브 @taxcut_min에서 계속 드려요.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="steps io" id="how" aria-labelledby="howH">
+  <div class="wrap">
+    <p class="eyebrow">HOW IT WORKS<i class="rule" aria-hidden="true"></i></p>
+    <h2 class="h2" id="howH">30분이면 돼요.</h2>
+    <div class="stw">
+      <i class="rail" aria-hidden="true"></i>
+    <ol>
+      <li class="step"><span class="step-n num" aria-hidden="true">01</span><div><h3>카톡 또는 전화 상담</h3><p>궁금한 것부터 편하게 물어보세요.</p></div></li>
+      <li class="step"><span class="step-n num" aria-hidden="true">02</span><div><h3>온라인 계약</h3><p>방문 없이 온라인으로 계약해요.</p></div></li>
+      <li class="step"><span class="step-n num" aria-hidden="true">03</span><div><h3>기장 시작, 첫 달 0원</h3><p>자료만 보내주시면 장부는 저희가 만들어요.</p></div></li>
+    </ol>
+    </div>
+    <p class="note">01~02가 이 페이지에서 30분 안에 끝나면 첫 달이 0원이에요.</p>
+    <a class="ul-link" data-kakao href="https://pf.kakao.com/_Mxojqs/chat">지금 1단계 시작하기 → 카톡 상담</a>
+  </div>
+</section>
+
+<section class="faq paper io" id="faq" aria-labelledby="faqH">
+  <div class="wrap">
+    <p class="eyebrow">FAQ<i class="rule" aria-hidden="true"></i></p>
+    <h2 class="h2" id="faqH">자주 묻는 질문</h2>
+    <details><summary>기장이 뭔가요?</summary><p class="a">매달 매출·매입 자료를 정리해 장부를 만들고, 부가세·종합소득세 신고까지 이어지는 세무 관리예요. 사장님은 자료만 보내주시면 돼요.</p></details>
+    <details><summary>매출이 아직 없어도 되나요?</summary><p class="a">네. 사업자등록 전이거나 매출이 0원이어도 상담부터 시작하실 수 있어요. 시작 시점은 상담 때 같이 정해요.</p></details>
+    <details><summary>30분 조건은 어떻게 확인하나요?</summary><p class="a">이 페이지 상단 타이머가 기준이에요. 타이머가 남아 있을 때 상담과 계약이 완료되면 첫 달 기장료가 무료예요. 카톡이나 예약 폼에 쿠폰코드를 남겨주시면 확인이 빨라요.</p></details>
+    <details><summary>첫 달 이후 비용은?</summary><p class="a">1개월 기장료 55,000원 (부가세 포함)이 기본이고, 매출액에 따라 달라질 수 있습니다. 정확한 금액은 상담 때 안내드려요.</p></details>
+    <!-- 고객사 확인 필요: 계약 기간·해지 조건 -->
+    <details><summary>계약 기간은?</summary><p class="a">계약 기간과 해지 조건은 상담 시 안내드려요.</p></details>
+  </div>
+</section>
+
+<div class="cta-grid">
+<section class="cta" id="kakao" aria-labelledby="ctaH">
+  <div class="wrap">
+    <h2 class="h2" id="ctaH">카톡이 제일 빨라요</h2>
+    <p class="lead">영업시간 내 순서대로 답장드려요.</p>
+    <a class="kbtn kbtn-lg" data-kakao href="https://pf.kakao.com/_Mxojqs/chat"><svg aria-hidden="true"><use href="#tc-kakao"/></svg>카톡으로 바로 상담하기</a>
+    <p class="kcap">질문 한 줄부터 괜찮아요</p>
+    <p class="knote">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+  </div>
+</section>
+
+<section class="reserve paper" id="reserve" aria-labelledby="resH">
+  <div class="wrap">
+    <div class="reserve-head"><h2 class="h2" id="resH">전화로 예약할게요</h2><span class="pill" id="resPill" hidden data-code>TC-0000</span></div>
+    <span class="testpill" id="testPill" hidden>테스트 모드: 이 기기에만 저장됨</span>
+    <div class="panel fail" id="failPanel" hidden role="alert">
+      <h3>예약이 잘 안 됐어요. 카톡으로 바로 상담해 주세요</h3>
+      <a class="kbtn kbtn-lg" data-kakao href="https://pf.kakao.com/_Mxojqs/chat"><svg aria-hidden="true"><use href="#tc-kakao"/></svg>카톡으로 바로 상담하기</a>
+      <p class="knote">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+    </div>
+    <form class="form" id="form" novalidate autocomplete="on">
+      <div class="f"><label for="f-name">이름 또는 상호</label><input id="f-name" name="name" type="text" required autocomplete="name" maxlength="40" aria-describedby="e-name"><p class="err" id="e-name">이름 또는 상호를 입력해 주세요</p></div>
+      <div class="f"><label for="f-tel">연락처</label><input id="f-tel" name="tel" type="tel" inputmode="tel" required autocomplete="tel" placeholder="010-0000-0000" maxlength="13" aria-describedby="e-tel"><p class="err" id="e-tel">010으로 시작하는 휴대폰 번호를 입력해 주세요</p></div>
+      <div class="f"><label for="f-rev">매출액</label><select id="f-rev" name="revenue" required aria-describedby="e-rev"><option value="">선택해 주세요</option><option>아직 매출 없음</option><option>연 3천만원 미만</option><option>3천만~8천만원</option><option>8천만~2억원</option><option>2억~5억원</option><option>5억원 이상</option></select><p class="err" id="e-rev">매출액을 선택해 주세요</p></div>
+      <div class="f"><label for="f-biz">업종</label><select id="f-biz" name="industry" required aria-describedby="e-biz"><option value="">선택해 주세요</option><option>온라인쇼핑몰·스마트스토어</option><option>카페·음식점</option><option>프리랜서·콘텐츠</option><option>배달·서비스</option><option>도소매</option><option>제조</option><option>기타</option></select>
+        <div class="sub-f" id="bizEtcWrap" hidden><label for="f-bizEtc">업종 직접 입력</label><input id="f-bizEtc" name="industryEtc" type="text" maxlength="40" placeholder="예: 반려동물 용품 제작"></div>
+        <p class="err" id="e-biz">업종을 선택해 주세요</p></div>
+      <div class="f"><label for="f-date">사업자등록일</label><input id="f-date" name="regDate" type="date" required aria-describedby="e-date"><label class="chk" for="f-noReg"><input id="f-noReg" name="noReg" type="checkbox">아직 등록 전</label><p class="err" id="e-date">사업자등록일을 선택하거나 '아직 등록 전'에 체크해 주세요</p></div>
+      <div class="f"><label for="f-time">상담 가능 시간</label><select id="f-time" name="time" required aria-describedby="e-time"><option value="">선택해 주세요</option><option>평일 오전 9~12시</option><option>평일 오후 12~3시</option><option>평일 오후 3~6시</option><option>저녁 6시 이후</option><option>주말·공휴일</option></select><p class="err" id="e-time">상담 가능 시간을 선택해 주세요</p></div>
+      <div class="f"><label for="f-memo">메모(선택)</label><textarea id="f-memo" name="memo" rows="2" maxlength="300" placeholder="예: 오후 2시 이후가 편해요"></textarea></div>
+      <!-- 고객사 확인 필요: 개인정보 수집 항목·보유기간 -->
+      <div class="f"><label class="chk main" for="f-agree"><input id="f-agree" name="agree" type="checkbox" required aria-describedby="e-agree">개인정보 수집·이용 동의(필수)</label>
+        <p class="pn">수집 항목: 이름·상호, 연락처, 매출액, 업종, 사업자등록일, 상담 가능 시간 / 목적: 전화상담 예약 및 안내 / 보유기간: 상담 완료 후 1년 또는 동의 철회 시 파기 · <a href="#privacy">개인정보처리방침</a></p>
+        <p class="err" id="e-agree">개인정보 수집·이용에 동의해 주세요</p></div>
+      <input type="hidden" name="coupon" id="h-coupon" value="">
+      <input type="hidden" name="secondsLeft" id="h-sec" value="">
+      <input type="hidden" name="source" id="h-src" value="">
+      <input type="hidden" name="submittedAt" id="h-at" value="">
+      <button class="sbtn" type="submit" id="sbtn">예약 신청하기</button>
+    </form>
+    <div class="panel" id="okPanel" hidden>
+      <h3 id="okH" tabindex="-1">예약 완료! 영업시간 내 순서대로 전화드릴게요</h3>
+      <p>기다리기 어려우시면 카톡으로 먼저 말씀해 주세요.</p>
+      <a class="kbtn kbtn-lg" data-kakao href="https://pf.kakao.com/_Mxojqs/chat"><svg aria-hidden="true"><use href="#tc-kakao"/></svg>카톡으로 바로 상담하기</a>
+      <p class="knote">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<footer class="foot" id="footer">
+  <div class="wrap">
+    <svg class="wm" role="img" aria-label="택스컷"><use href="#tc-wordmark"/></svg>
+    <p>세무회계 민 · 택스컷</p>
+    <!-- 고객사 확인 필요: 아래 신뢰 블록은 플레이스홀더 -->
+    <p class="trust">세무사 [성명]<br>주소 [사무소 주소]<br>사업자등록번호 [000-00-00000]<br>대표전화 [000-0000-0000]</p>
+    <p class="flinks">
+      <a class="ul-link" data-site href="https://taxmin.kr" target="_blank" rel="noopener">taxmin.kr</a>
+      <a class="ul-link" data-yt href="https://www.youtube.com/@taxcut_min" target="_blank" rel="noopener">유튜브 @taxcut_min</a>
+      <a class="ul-link" href="#privacy">개인정보처리방침</a>
+    </p>
+    <div class="privacy" id="privacy">
+      <p><strong>개인정보처리방침</strong></p>
+      <p>수집 항목: 이름·상호, 연락처, 매출액, 업종, 사업자등록일, 상담 가능 시간</p>
+      <p>목적: 전화상담 예약 및 안내</p>
+      <p>보유기간: 상담 완료 후 1년 또는 동의 철회 시 파기</p>
+      <p>문의: 상담 시 안내</p>
+    </div>
+    <div class="notice">
+      <p>이벤트 유의사항</p>
+      <ol>
+        <li>이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</li>
+        <li>기장료는 매출액에 따라 달라질 수 있습니다</li>
+        <li>타이머는 이 기기에서 페이지를 처음 연 시각 기준입니다</li>
+      </ol>
+    </div>
+  </div>
+</footer>
+
+<div class="bbar" id="bbar">
+  <a class="kbtn" data-kakao href="https://pf.kakao.com/_Mxojqs/chat"><svg aria-hidden="true"><use href="#tc-kakao"/></svg>카톡 상담</a>
+  <a class="obtn" data-reserve href="#reserve">예약하기</a>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+window.TAXCUT_CONFIG = { KAKAO_URL:'https://pf.kakao.com/_Mxojqs/chat', EVENT_MINUTES:30, RESERVATION_MODE:'auto', RESERVATION_ENDPOINT:'', WEBHOOK_JSON:false, YOUTUBE_URL:'https://www.youtube.com/@taxcut_min', SITE_URL:'https://taxmin.kr' };
+(function(){
+'use strict';
+var C=window.TAXCUT_CONFIG,D=document,W=window;
+var $=function(s,r){return (r||D).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||D).querySelectorAll(s))};
+function safe(fn,fb){try{return fn()}catch(e){return fb}}
+var RM=safe(function(){return W.matchMedia('(prefers-reduced-motion: reduce)').matches},false);
+var cs=safe(function(){return W.getComputedStyle(D.documentElement)},null);
+function tok(n,fb){var v=cs?cs.getPropertyValue(n):'';v=v&&v.trim();return v||fb}
+/* guarded storage: localStorage with in-memory fallback (sandboxed iframes / private mode may throw) */
+var mem={};
+var store={
+  get:function(k){var v=null;try{v=W.localStorage.getItem(k)}catch(e){}if(v==null)v=Object.prototype.hasOwnProperty.call(mem,k)?mem[k]:null;return v},
+  set:function(k,v){v=String(v);mem[k]=v;try{W.localStorage.setItem(k,v)}catch(e){}},
+  del:function(k){delete mem[k];try{W.localStorage.removeItem(k)}catch(e){}}
+};
+function vibrate(ms){safe(function(){if(navigator.vibrate)navigator.vibrate(ms)})}
+function copyText(t,cb){
+  var done=function(ok){if(cb)cb(!!ok)};
+  var fallback=function(){done(safe(function(){var ta=D.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:-9999px;font-size:16px';D.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);var r=D.execCommand('copy');D.body.removeChild(ta);return r},false))};
+  var ok=safe(function(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){done(true)},fallback);return true}return false},false);
+  if(!ok)fallback();
+}
+var toastEl=$('#toast'),toastT=0;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('on')},2000)}
+/* event state — remaining time is always derived from the stored start timestamp, never decremented */
+var TOTAL=Math.max(60,(+C.EVENT_MINUTES||30)*60);
+var start=parseInt(store.get('taxcut_event_start'),10);
+if(!start||isNaN(start)||start>Date.now()){start=Date.now();store.set('taxcut_event_start',start)}
+function remaining(){return Math.max(0,TOTAL-Math.floor((Date.now()-start)/1000))}
+var S={code:store.get('taxcut_coupon')||'',revealed:store.get('taxcut_revealed')==='1',ended:remaining()<=0};
+if(!/^TC-\d{4}$/.test(S.code))S.code='';
+function genCode(){
+  var n=safe(function(){var a=new Uint32Array(1);W.crypto.getRandomValues(a);return a[0]%10000},null);
+  if(n==null)n=Math.floor(Math.random()*10000);
+  return 'TC-'+('000'+n).slice(-4);
+}
+/* shared DOM refs */
+var chip=$('#chip'),resPill=$('#resPill'),hCoupon=$('#h-coupon'),hSec=$('#h-sec'),rcptLink=$('#rcptLink'),rcptCode=$('#rcptCode'),couponSay=$('#couponSay'),face=$('#face'),endMark=$('#endMark');
+function applyCode(){
+  var has=!!S.code;
+  $$('[data-code]').forEach(function(el){el.textContent=S.code||'TC-0000'});
+  chip.hidden=!(has&&!S.ended);
+  resPill.hidden=!(has&&!S.ended);
+  hCoupon.value=(has&&!S.ended)?S.code:'';
+  couponSay.hidden=!has;
+  rcptLink.hidden=has||S.ended;
+  rcptCode.hidden=!(has&&!S.ended);
+}
+/* kakao links: same-window inside in-app browsers, new tab elsewhere; copy coupon on tap */
+var INAPP=/Instagram|FBAN|FBAV|KAKAOTALK|DaangnMarket|TowneersApp|Daangn/i.test(navigator.userAgent||'');
+$$('a[data-kakao]').forEach(function(a){
+  a.href=C.KAKAO_URL;
+  if(INAPP){a.removeAttribute('target');a.removeAttribute('rel')}else{a.target='_blank';a.rel='noopener'}
+  a.addEventListener('click',function(){if(S.revealed&&S.code)copyText(S.code,function(ok){if(ok)toast('쿠폰코드 복사됨')})});
+});
+$$('a[data-yt]').forEach(function(a){a.href=C.YOUTUBE_URL});
+$$('a[data-site]').forEach(function(a){a.href=C.SITE_URL});
+function goReserve(e){
+  if(e)e.preventDefault();
+  var sec=$('#reserve'),name=$('#f-name');
+  safe(function(){sec.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})},null);
+  setTimeout(function(){safe(function(){name.focus({preventScroll:true})})},RM?50:450);
+}
+$$('a[data-reserve]').forEach(function(a){a.addEventListener('click',goReserve)});
+/* coupon chip + copy button */
+function copyUI(btn,label){copyText(S.code,function(ok){if(!ok)return;var old=label;btn.textContent='복사됨';setTimeout(function(){btn.textContent=old},1500)})}
+chip.addEventListener('click',function(){copyUI(chip,S.code)});
+$('#copyBtn').addEventListener('click',function(){copyUI(this,'복사')});
+/* 00 timer bar */
+var tbar=$('#tbar'),tLbl=$('#tLbl'),tLive=$('#tLive'),tBarEl=$('#tBar'),tTip=$('#tTip'),digits=$$('#tNum .d');
+var lastStr='',lastMin=-1,warned=false,live=false;
+function setLine(p){tBarEl.style.transform='scaleX('+p+')';tTip.style.transform='translateX('+(-(1-p)*100)+'%)'}
+function renderTimer(){
+  var r=remaining();
+  if(r<=0){if(!S.ended||!tbar.classList.contains('ended'))endEvent();return}
+  if(live)setLine(r/TOTAL);
+  var m=Math.floor(r/60),s=r%60,str=(m<10?'0':'')+m+(s<10?'0':'')+s;
+  if(str!==lastStr){for(var i=0;i<4;i++){if(digits[i].textContent!==str.charAt(i))digits[i].textContent=str.charAt(i)}lastStr=str}
+  var mc=Math.ceil(r/60);
+  if(mc!==lastMin){lastMin=mc;tLive.textContent='남은 시간 약 '+mc+'분'}
+  if(r<300&&!warned){warned=true;tbar.classList.add('warn');tLbl.textContent='5분 남았어요 — 카톡 한 줄이면 돼요'}
+}
+function endEvent(){
+  S.ended=true;
+  tbar.classList.remove('warn');tbar.classList.add('ended');
+  tLbl.textContent='이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  tLive.textContent='이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  setLine(0);
+  hSec.value='0';
+  if(S.revealed&&S.code){applyCode();endMark.hidden=false}
+  else{face.classList.add('ended');applyCode()}
+}
+renderTimer();
+setTimeout(function(){live=true;tbar.classList.add('live');renderTimer()},1000);
+setInterval(renderTimer,1000);
+D.addEventListener('visibilitychange',function(){if(!D.hidden)renderTimer()});
+W.addEventListener('pageshow',renderTimer);
+/* 01 hero cut line — geometry from l2's rect, injected into an absolute SVG line */
+var hero=$('#hero'),heroCut=$('#heroCut'),cutLine=$('#cutLine'),l2=$('#l2'),cutStarted=false;
+function placeCut(mode){
+  var hr=hero.getBoundingClientRect(),lr=l2.getBoundingClientRect();
+  var w=hr.width,cy=lr.top-hr.top+lr.height/2;
+  var x1=-w*.05,x2=w*1.05,dy=(x2-x1)*Math.tan(5*Math.PI/180),L=Math.sqrt((x2-x1)*(x2-x1)+dy*dy);
+  cutLine.setAttribute('x1',x1.toFixed(1));cutLine.setAttribute('y1',(cy+dy/2).toFixed(1));
+  cutLine.setAttribute('x2',x2.toFixed(1));cutLine.setAttribute('y2',(cy-dy/2).toFixed(1));
+  cutLine.style.strokeDasharray=L;
+  if(mode==='geom')return;
+  heroCut.classList.add('on');
+  if(mode==='anim'&&!RM){
+    cutLine.style.transition='none';cutLine.style.strokeDashoffset=L;
+    W.requestAnimationFrame(function(){W.requestAnimationFrame(function(){cutLine.style.transition='';cutLine.style.strokeDashoffset=0;setTimeout(function(){hero.classList.add('cut-done')},800)})});
+  }else{cutLine.style.transition='none';cutLine.style.strokeDashoffset=0;hero.classList.add('cut-done')}
+}
+function startCut(){if(cutStarted)return;cutStarted=true;placeCut('anim')}
+if(D.fonts&&D.fonts.ready){D.fonts.ready.then(function(){if(cutStarted)placeCut('geom');else startCut()})}
+setTimeout(startCut,400);
+/* 4 scratch card — canvas foil, single rAF loop for tilt + scratch batching */
+var scene=$('#scene'),floatEl=$('#cardFloat'),card=$('#card'),foil=$('#foil'),prompt=$('#prompt'),hint=$('#hint'),cardCut=$('#cardCut'),stamp=$('#stamp'),ctaSlot=$('#ctaSlot'),tapOpen=$('#tapOpen');
+var ctx=safe(function(){return foil.getContext('2d',{willReadFrequently:true})},null);
+var off=D.createElement('canvas'),offCtx=safe(function(){return off.getContext('2d',{willReadFrequently:true})},null);
+var DPR=Math.min(W.devicePixelRatio||1,1.5),foilOn=!!(ctx&&offCtx),cw=0,ch=0;
+function paintFoil(){
+  cw=card.offsetWidth;ch=card.offsetHeight;if(!cw||!ch)return;
+  foil.width=Math.round(cw*DPR);foil.height=Math.round(ch*DPR);
+  off.width=Math.max(1,Math.round(foil.width/4));off.height=Math.max(1,Math.round(foil.height/4));
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalCompositeOperation='source-over';
+  var g=ctx.createLinearGradient(0,0,cw,ch);g.addColorStop(0,tok('--foil-hi','#E9EDF3'));g.addColorStop(.5,tok('--foil-mid','#C7CDD8'));g.addColorStop(1,tok('--foil-lo','#AEB6C4'));
+  ctx.fillStyle=g;ctx.fillRect(0,0,cw,ch);
+  ctx.strokeStyle='rgba(11,21,38,.05)';ctx.lineWidth=1;ctx.beginPath();
+  for(var x=-ch;x<cw;x+=4){ctx.moveTo(x,ch);ctx.lineTo(x+ch,0)}
+  ctx.stroke();
+  ctx.save();ctx.translate(cw/2,ch/2);ctx.rotate(-5*Math.PI/180);ctx.fillStyle='rgba(11,21,38,.06)';ctx.font='900 11px Montserrat,"Arial Black",Arial,sans-serif';ctx.textBaseline='middle';
+  for(var y=-ch,row=0;y<ch;y+=22,row++){for(var tx2=-cw-(row%2?32:0);tx2<cw;tx2+=64){ctx.fillText('TAXCUT',tx2,y)}}
+  ctx.restore();
+  /* 지우기 스트로크는 반드시 불투명해야 함 — 위 그레인 선의 반투명 strokeStyle이 남으면 5%씩만 지워진다 */
+  ctx.setTransform(1,0,0,1,0,0);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#000';ctx.globalCompositeOperation='destination-out';
+}
+/* tilt state */
+var tx=0,ty=0,ttx=0,tty=0,raf=0,running=false,tiltLock=false,sceneRect=null;
+var IOS_PERM=safe(function(){return typeof W.DeviceOrientationEvent!=='undefined'&&typeof W.DeviceOrientationEvent.requestPermission==='function'},false);
+function applyTilt(){
+  var st=card.style;st.setProperty('--tx',tx.toFixed(2)+'deg');st.setProperty('--ty',ty.toFixed(2)+'deg');
+  st.setProperty('--gx',(-ty*2.4).toFixed(1)+'px');st.setProperty('--gy',(tx*2.4).toFixed(1)+'px');
+}
+function snapTilt(){tiltLock=true;ttx=tty=tx=ty=0;floatEl.classList.remove('idle');applyTilt()}
+function kick(){if(!running&&!D.hidden){running=true;raf=W.requestAnimationFrame(loop)}}
+function loop(now){
+  running=false;
+  flushScratch(now);
+  var more=false;
+  if(!tiltLock){var dx=ttx-tx,dy=tty-ty;
+    if(Math.abs(dx)>.03||Math.abs(dy)>.03){tx+=dx*.12;ty+=dy*.12;applyTilt();more=true}
+    else if(tx!==ttx||ty!==tty){tx=ttx;ty=tty;applyTilt()}}
+  if(more||pts.length||needSample)kick();
+}
+function setTiltFromPoint(cx,cy){
+  if(!sceneRect)sceneRect=scene.getBoundingClientRect();
+  var px=(cx-sceneRect.left)/sceneRect.width-.5,py=(cy-sceneRect.top)/sceneRect.height-.5;
+  ttx=Math.max(-8,Math.min(8,-py*16));tty=Math.max(-10,Math.min(10,px*20));kick();
+}
+scene.addEventListener('pointermove',function(e){if(scratching||tiltLock||S.revealed)return;if(e.pointerType==='mouse'||IOS_PERM)setTiltFromPoint(e.clientX,e.clientY)},{passive:true});
+scene.addEventListener('pointerleave',function(){if(!tiltLock){ttx=0;tty=0;kick()}sceneRect=null});
+var ob=null,og=null;
+if(!IOS_PERM&&!RM&&W.DeviceOrientationEvent){
+  W.addEventListener('deviceorientation',function(e){
+    if(tiltLock||S.revealed||D.hidden||e.beta==null||e.gamma==null)return;
+    if(ob==null){ob=e.beta;og=e.gamma;return}
+    var b=e.beta-ob,g=e.gamma-og;
+    if(Math.abs(b)<2)b=0;if(Math.abs(g)<2)g=0;
+    ttx=Math.max(-8,Math.min(8,-b/2));tty=Math.max(-10,Math.min(10,g/2));kick();
+  },{passive:true});
+}
+/* scratch: pointer capture, one rect read per stroke, rAF-batched destination-out strokes, mid-stroke sampling */
+var scratching=false,pid=null,rL=0,rT=0,sx=1,sy=1,last=[0,0],pts=[],moves=0,lastSample=0,needSample=false,radius=22,promptOff=false,touched=false,lastInput=Date.now();
+function onDown(e){
+  if(S.revealed||!foilOn)return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  scratching=true;touched=true;pid=e.pointerId;moves=0;lastInput=Date.now();
+  safe(function(){foil.setPointerCapture(e.pointerId)});
+  snapTilt();stopHint();
+  var r=foil.getBoundingClientRect();rL=r.left;rT=r.top;sx=foil.width/r.width;sy=foil.height/r.height;
+  radius=e.pointerType==='mouse'?16:22;
+  last=[(e.clientX-rL)*sx,(e.clientY-rT)*sy];pts.push(last[0],last[1]);
+  e.preventDefault();kick();
+}
+function onMove(e){
+  if(!scratching||e.pointerId!==pid)return;
+  moves++;lastInput=Date.now();
+  var ev=e.getCoalescedEvents?safe(function(){return e.getCoalescedEvents()},null):null;
+  if(ev&&ev.length){for(var i=0;i<ev.length;i++)pts.push((ev[i].clientX-rL)*sx,(ev[i].clientY-rT)*sy)}
+  else pts.push((e.clientX-rL)*sx,(e.clientY-rT)*sy);
+  kick();
+}
+function onUp(e){
+  if(!scratching||e.pointerId!==pid)return;
+  scratching=false;pid=null;tiltLock=false;
+  safe(function(){foil.releasePointerCapture(e.pointerId)});
+  needSample=true;kick();
+}
+function flushScratch(now){
+  if(pts.length){
+    ctx.lineWidth=radius*2*sx;ctx.beginPath();ctx.moveTo(last[0],last[1]);
+    for(var i=0;i<pts.length;i+=2)ctx.lineTo(pts[i],pts[i+1]);
+    ctx.stroke();last=[pts[pts.length-2],pts[pts.length-1]];pts.length=0;
+    if(moves>=3&&now-lastSample>120){lastSample=now;sample()}
+  }
+  if(needSample){needSample=false;if(moves>=3)sample()}
+}
+function sample(){
+  if(S.revealed)return;
+  offCtx.clearRect(0,0,off.width,off.height);offCtx.drawImage(foil,0,0,off.width,off.height);
+  var d=offCtx.getImageData(0,0,off.width,off.height).data,c=0;
+  for(var i=3;i<d.length;i+=4)if(d[i]<128)c++;
+  var p=c/(d.length/4);
+  if(p>.1&&!promptOff){promptOff=true;prompt.classList.add('off')}
+  if(p>=.45)reveal(false);
+}
+/* hint glyph: drag once at t+900ms, again at t+2.5s, replay after 12s of no input */
+var hintOn=true;
+function playHint(){if(!hintOn||touched||S.revealed||RM||D.hidden)return;hint.classList.add('go')}
+hint.addEventListener('animationend',function(){hint.classList.remove('go')});
+function stopHint(){hintOn=false;hint.setAttribute('hidden','')}
+/* reveal sequence (~900ms), everything that moves is at or below the card */
+function openSlot(instant){
+  ctaSlot.setAttribute('aria-hidden','false');ctaSlot.classList.add('open');
+  if(instant||RM){ctaSlot.style.maxHeight='none';return}
+  ctaSlot.style.maxHeight=ctaSlot.scrollHeight+'px';
+  setTimeout(function(){ctaSlot.style.maxHeight='none';safe(function(){$('#ctaSlot .kbtn').scrollIntoView({block:'nearest',behavior:'smooth'})})},330);
+}
+function reveal(instant){
+  if(S.revealed)return;
+  S.revealed=true;scratching=false;tiltLock=false;ttx=tty=0;
+  var ended=S.ended||remaining()<=0;
+  if(!ended){if(!S.code)S.code=genCode();store.set('taxcut_coupon',S.code)}
+  store.set('taxcut_revealed','1');
+  stopHint();tapOpen.hidden=true;prompt.classList.add('off');floatEl.classList.remove('idle');
+  if(ended){S.ended=true;face.classList.add('ended')}
+  applyCode();
+  if(instant||RM){foil.classList.add('gone');face.classList.add('revealed');if(!ended)stamp.hidden=false;openSlot(true);return}
+  cardCut.removeAttribute('hidden');
+  W.requestAnimationFrame(function(){cardCut.classList.add('draw')});
+  setTimeout(function(){foil.classList.add('gone');cardCut.classList.add('gone')},300);
+  setTimeout(function(){face.classList.add('revealed')},450);
+  setTimeout(function(){if(!ended){stamp.hidden=false;stamp.classList.add('pop')}},650);
+  setTimeout(function(){if(!ended)confetti();vibrate(40)},700);
+  setTimeout(function(){openSlot(false)},750);
+}
+/* hand-rolled confetti: 60 rects, token colors only, 1.2s, canvas removed within 1.5s */
+function confetti(){
+  var cv=$('#confetti'),c=safe(function(){return cv.getContext('2d')},null);if(!c)return;
+  var w=hero.clientWidth,h=hero.clientHeight;
+  cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);cv.hidden=false;
+  var r=card.getBoundingClientRect(),hr=hero.getBoundingClientRect(),ox=r.left-hr.left+r.width/2,oy=r.top-hr.top+r.height/2;
+  var cols=[tok('--green','#3DDC84'),tok('--green-deep','#1FB86A'),tok('--paper','#F4F6FA'),tok('--ink','#FFFFFF')],P=[],i;
+  for(i=0;i<60;i++){var a=-Math.PI/2+(Math.random()-.5)*1.7,v=240+Math.random()*300;
+    P.push({x:ox,y:oy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,w:5+Math.random()*5,h:3+Math.random()*4,r:Math.random()*6.28,vr:(Math.random()-.5)*14,col:cols[i&3]})}
+  var t0=0,prev=0,done=false;
+  function frame(t){
+    if(done)return;
+    if(!t0){t0=t;prev=t}
+    var el=(t-t0)/1000,dt=Math.min(.05,(t-prev)/1000);prev=t;
+    if(el>1.2){done=true;cv.hidden=true;return}
+    c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.globalAlpha=el>.9?Math.max(0,1-(el-.9)/.3):1;
+    for(var j=0;j<P.length;j++){var p=P[j];p.vy+=900*dt;p.vx*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
+      var cs=Math.cos(p.r)*DPR,sn=Math.sin(p.r)*DPR;c.setTransform(cs,sn,-sn,cs,p.x*DPR,p.y*DPR);c.fillStyle=p.col;c.fillRect(-p.w/2,-p.h/2,p.w,p.h)}
+    W.requestAnimationFrame(frame);
+  }
+  W.requestAnimationFrame(frame);
+  setTimeout(function(){done=true;cv.hidden=true;cv.width=1;cv.height=1},1500);
+}
+/* init card state */
+function initCard(){
+  if(foilOn){
+    paintFoil();
+    foil.addEventListener('pointerdown',onDown);
+    foil.addEventListener('pointermove',onMove);
+    foil.addEventListener('pointerup',onUp);
+    foil.addEventListener('pointercancel',onUp);
+    foil.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+    foil.addEventListener('touchstart',function(e){if(e.touches.length>1)e.preventDefault()},{passive:false});
+    foil.addEventListener('contextmenu',function(e){e.preventDefault()});
+  }else{
+    foil.hidden=true;prompt.hidden=true;hint.setAttribute('hidden','');
+    var nc=$('#noCanvas');nc.hidden=false;nc.addEventListener('click',function(){reveal(false)});
+  }
+  $('#kbReveal').addEventListener('click',function(){reveal(false)});
+  tapOpen.addEventListener('click',function(){reveal(false)});
+  if(S.revealed){
+    card.classList.add('still');
+    stopHint();prompt.classList.add('off');foil.hidden=true;face.classList.add('revealed');
+    if(S.ended&&!S.code)face.classList.add('ended');
+    if(S.code){stamp.hidden=false;if(S.ended)endMark.hidden=false}
+    applyCode();openSlot(true);
+    setTimeout(function(){card.classList.remove('still')},100);
+    return;
+  }
+  if(S.ended)face.classList.add('ended');
+  setTimeout(function(){if(!touched&&!S.revealed&&!RM)floatEl.classList.add('idle')},1000);
+  setTimeout(playHint,900);setTimeout(playHint,2500);
+  setInterval(function(){if(!S.revealed&&!touched&&Date.now()-lastInput>12000){lastInput=Date.now();playHint();if(!RM&&!tiltLock)floatEl.classList.add('idle')}},3000);
+  setTimeout(function(){if(!touched&&!S.revealed)tapOpen.hidden=false},4000);
+}
+initCard();
+/* lifecycle: cancel the rAF loop when hidden, recompute geometry on real resizes only */
+D.addEventListener('visibilitychange',function(){
+  if(D.hidden){if(running){W.cancelAnimationFrame(raf);running=false}}else kick();
+});
+var lastW=W.innerWidth,lastH=W.innerHeight,rsT=0;
+function relayout(){
+  clearTimeout(rsT);
+  rsT=setTimeout(function(){
+    sceneRect=null;
+    if(cutStarted)placeCut('geom');
+    if(foilOn&&!S.revealed&&!scratching&&card.offsetWidth!==cw)paintFoil();
+  },120);
+}
+W.addEventListener('resize',function(){
+  var w=W.innerWidth,h=W.innerHeight;
+  if(w===lastW&&Math.abs(h-lastH)<120)return;
+  lastW=w;lastH=h;relayout();
+});
+W.addEventListener('orientationchange',function(){lastW=-1;relayout()});
+W.addEventListener('load',function(){if(cutStarted)placeCut('geom')});
+/* scroll observers: one IO for section reveals (once), threshold .5 with a tall-section escape hatch */
+var IO=W.IntersectionObserver;
+if(IO){
+  var secIO=new IO(function(en){en.forEach(function(x){
+    if(x.isIntersecting&&(x.intersectionRatio>=.5||x.boundingClientRect.height>W.innerHeight*.8)){x.target.classList.add('in');secIO.unobserve(x.target)}
+  })},{threshold:[.15,.5]});
+  $$('.io').forEach(function(el){secIO.observe(el)});
+}else{$$('.io').forEach(function(el){el.classList.add('in')})}
+/* 08 bottom bar: hidden on first screen, slides up after the card leaves, slides down around the form/privacy/keyboard */
+var bbar=$('#bbar'),blk={card:true,focus:false,kb:false,zone:0};
+function bbarUpdate(){bbar.classList.toggle('show',!(blk.card||blk.focus||blk.kb||blk.zone>0))}
+if(IO){
+  new IO(function(en){blk.card=en[0].isIntersecting;bbarUpdate()},{threshold:0}).observe(scene);
+  var zoneIO=new IO(function(en){en.forEach(function(x){var k=x.target.id;var was=!!zoneSet[k];zoneSet[k]=x.isIntersecting;if(was!==x.isIntersecting)blk.zone+=x.isIntersecting?1:-1});bbarUpdate()},{threshold:0});
+  var zoneSet={};
+  ['reserve','privacy','okPanel'].forEach(function(id){zoneIO.observe($('#'+id))});
+}else{blk.card=false;bbarUpdate()}
+var form=$('#form');
+form.addEventListener('focusin',function(){blk.focus=true;bbarUpdate()});
+form.addEventListener('focusout',function(){setTimeout(function(){blk.focus=form.contains(D.activeElement);bbarUpdate()},50)});
+if(W.visualViewport){
+  var vh0=W.visualViewport.height;
+  W.visualViewport.addEventListener('resize',function(){var h=W.visualViewport.height;if(h>vh0)vh0=h;blk.kb=h<vh0-150;bbarUpdate()});
+  W.addEventListener('orientationchange',function(){setTimeout(function(){vh0=W.visualViewport.height},400)});
+}
+/* 06-B reservation form: validation, auto-hyphen, storage adapter */
+var MODE=C.RESERVATION_MODE==='auto'?(C.RESERVATION_ENDPOINT?'webhook':'local'):C.RESERVATION_MODE;
+if(MODE==='local')$('#testPill').hidden=false;
+var fName=$('#f-name'),fTel=$('#f-tel'),fRev=$('#f-rev'),fBiz=$('#f-biz'),fBizEtc=$('#f-bizEtc'),bizWrap=$('#bizEtcWrap'),fDate=$('#f-date'),fNoReg=$('#f-noReg'),fTime=$('#f-time'),fMemo=$('#f-memo'),fAgree=$('#f-agree'),sbtn=$('#sbtn'),okPanel=$('#okPanel'),failPanel=$('#failPanel');
+$('#h-src').value=safe(function(){var m=/[?&]utm_source=([^&#]*)/.exec(W.location.search);if(m)return decodeURIComponent(m[1]).slice(0,80);var ref=D.referrer;if(ref)return ref.replace(/^https?:\/\//,'').split('/')[0];return 'direct'},'direct');
+function fmtTel(v){var d=v.replace(/\D/g,'').slice(0,11);if(d.length<4)return d;if(d.length<8)return d.slice(0,3)+'-'+d.slice(3);if(d.length<11)return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);return d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7)}
+function telOk(v){return /^010\d{7,8}$/.test(v.replace(/\D/g,''))}
+fTel.addEventListener('input',function(){var f=fmtTel(fTel.value);if(f!==fTel.value)fTel.value=f});
+function mark(el,bad){var f=el.closest('.f');if(f)f.classList.toggle('bad',!!bad);el.setAttribute('aria-invalid',bad?'true':'false');return !bad}
+fTel.addEventListener('blur',function(){if(fTel.value)mark(fTel,!telOk(fTel.value))});
+fBiz.addEventListener('change',function(){var etc=fBiz.value==='기타';bizWrap.hidden=!etc;if(etc)safe(function(){fBizEtc.focus({preventScroll:true})})});
+fNoReg.addEventListener('change',function(){fDate.disabled=fNoReg.checked;fDate.required=!fNoReg.checked;if(fNoReg.checked){fDate.value='';mark(fDate,false)}});
+function validate(){
+  var ok=true,first=null,chk=function(el,bad){if(!mark(el,bad)){ok=false;if(!first)first=el}};
+  chk(fName,!fName.value.trim());
+  chk(fTel,!telOk(fTel.value));
+  chk(fRev,!fRev.value);
+  chk(fBiz,!fBiz.value);
+  chk(fDate,!fNoReg.checked&&!fDate.value);
+  chk(fTime,!fTime.value);
+  chk(fAgree,!fAgree.checked);
+  if(first)safe(function(){first.focus()});
+  return ok;
+}
+function save(data){
+  return new Promise(function(res,rej){
+    try{
+      if(MODE==='local'){
+        var arr=safe(function(){return JSON.parse(store.get('taxcut_reservations')||'[]')},[]);
+        if(!Array.isArray(arr))arr=[];
+        arr.push(data);store.set('taxcut_reservations',JSON.stringify(arr));res(true);return;
+      }
+      if(!C.RESERVATION_ENDPOINT||typeof W.fetch!=='function')throw new Error('no endpoint');
+      var opt=C.WEBHOOK_JSON
+        ?{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}
+        :{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)};
+      W.fetch(C.RESERVATION_ENDPOINT,opt).then(function(r){if(C.WEBHOOK_JSON&&!r.ok)throw new Error('status '+r.status);res(true)}).catch(rej);
+    }catch(err){rej(err)}
+  });
+}
+var sending=false;
+form.addEventListener('submit',function(e){
+  e.preventDefault();
+  if(sending||!validate())return;
+  var sec=remaining();
+  hSec.value=String(S.ended?0:sec);
+  hCoupon.value=(S.revealed&&S.code&&!S.ended)?S.code:'';
+  $('#h-at').value=new Date().toISOString();
+  var data={name:fName.value.trim(),tel:fTel.value,revenue:fRev.value,industry:fBiz.value==='기타'&&fBizEtc.value.trim()?'기타: '+fBizEtc.value.trim():fBiz.value,
+    regDate:fNoReg.checked?'':fDate.value,notRegistered:fNoReg.checked,time:fTime.value,memo:fMemo.value.trim(),agree:true,
+    coupon:hCoupon.value,secondsLeft:+hSec.value,source:$('#h-src').value,submittedAt:$('#h-at').value,page:safe(function(){return W.location.href.split('#')[0]},''),mode:MODE};
+  sending=true;sbtn.disabled=true;sbtn.textContent='보내는 중…';failPanel.hidden=true;
+  save(data).then(function(){
+    sending=false;form.hidden=true;okPanel.hidden=false;
+    safe(function(){okPanel.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})});
+    setTimeout(function(){safe(function(){$('#okH').focus({preventScroll:true})})},RM?50:400);
+  },function(){
+    sending=false;sbtn.disabled=false;sbtn.textContent='예약 신청하기';failPanel.hidden=false;
+    safe(function(){failPanel.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})});
+  });
+});
+})();
+</script>

@@ -1,0 +1,161 @@
+{
+ "name": "CUT LINE — 한 줄로 자르는 에디토리얼",
+ "thesis": "The green strike from the logo is the page's only ornament: one line at the wordmark's own angle that draws itself edge-to-edge across the hero on load, cuts 55,000원 down to 0원, underlines every CTA and rules every section — set in the logo's own faces (Black Han Sans for Hangul, Montserrat 900 for digits) blown up to headline size, so the whole page reads as the 택스컷 wordmark itself, and the scratch card is the single object allowed to float in 3D above it.",
+ "palette": [
+  {
+   "token": "--navy-950",
+   "hex": "#070D18",
+   "role": "deepest navy: footer, badge gradient end, card drop shadow color"
+  },
+  {
+   "token": "--navy-900",
+   "hex": "#0B1526",
+   "role": "body background (explicit on body), hero, 왜 택스컷, 최종 CTA-A; also text color on paper surfaces"
+  },
+  {
+   "token": "--navy-800",
+   "hex": "#16243A",
+   "role": "raised bands: timer bar, bottom CTA bar, 진행 절차 band, scratch-card base plate"
+  },
+  {
+   "token": "--navy-700",
+   "hex": "#1F2F49",
+   "role": "hairlines, dividers, input borders on paper, badge ring (from logo-badge.svg)"
+  },
+  {
+   "token": "--navy-500",
+   "hex": "#3A4B66",
+   "role": "disabled controls, stripe-texture lines (used at 3% alpha over navy)"
+  },
+  {
+   "token": "--ink",
+   "hex": "#FFFFFF",
+   "role": "display/headline text on navy, wordmark fill"
+  },
+  {
+   "token": "--ink-soft",
+   "hex": "#C9D2E3",
+   "role": "body copy on navy (≈13:1)"
+  },
+  {
+   "token": "--ink-mute",
+   "hex": "#8F9DB5",
+   "role": "captions, timer label, footer small print on navy (≈6.8:1)"
+  },
+  {
+   "token": "--green",
+   "hex": "#3DDC84",
+   "role": "THE cut line on navy surfaces, accent text/links on navy, timer progress line, focus ring on navy, confetti"
+  },
+  {
+   "token": "--green-deep",
+   "hex": "#1FB86A",
+   "role": "pressed/hover state of green elements on navy; wordmark-caption alt; never body text on paper"
+  },
+  {
+   "token": "--green-ink",
+   "hex": "#0E8F4F",
+   "role": "cut line, underline, eyebrow and focus ring on PAPER surfaces (≥3.8:1 on --paper); never used as text on navy"
+  },
+  {
+   "token": "--paper",
+   "hex": "#F4F6FA",
+   "role": "light 'receipt' surfaces: 가격, FAQ, 예약 폼 sections"
+  },
+  {
+   "token": "--paper-2",
+   "hex": "#E6EAF2",
+   "role": "input fills, alternating table rows, FAQ open-state background on paper"
+  },
+  {
+   "token": "--paper-line",
+   "hex": "#CBD3E1",
+   "role": "hairlines and dividers on paper"
+  },
+  {
+   "token": "--paper-mute",
+   "hex": "#4E5D78",
+   "role": "captions, footnote, helper text on paper (≈6.1:1)"
+  },
+  {
+   "token": "--kakao",
+   "hex": "#FEE500",
+   "role": "Kakao button fill (Kakao brand; no green applied to it)"
+  },
+  {
+   "token": "--kakao-ink",
+   "hex": "#191919",
+   "role": "Kakao button text and inline bubble icon"
+  },
+  {
+   "token": "--alert",
+   "hex": "#FFB020",
+   "role": "timer line + digits when under 5:00 (honest urgency, not error red; ≈10:1 on navy)"
+  },
+  {
+   "token": "--error",
+   "hex": "#B42318",
+   "role": "form validation text on paper (≈6:1)"
+  },
+  {
+   "token": "--foil-hi",
+   "hex": "#E9EDF3",
+   "role": "scratch foil highlight stop"
+  },
+  {
+   "token": "--foil-mid",
+   "hex": "#C7CDD8",
+   "role": "scratch foil mid stop"
+  },
+  {
+   "token": "--foil-lo",
+   "hex": "#AEB6C4",
+   "role": "scratch foil shadow stop; foil security-print text at 6% navy"
+  }
+ ],
+ "typography": {
+  "display": "Black Han Sans 400 for Hangul headlines (34–40px mobile, 56–72px desktop, line-height 1.1, letter-spacing -0.01em). Headline elements use the stack `Montserrat, 'Black Han Sans', 'Do Hyeon', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif` with `font-synthesis: none` so Latin digits/commas inside a Korean headline automatically render in Montserrat while Hangul falls to Black Han Sans, and no fake-bold is synthesized. Eyebrows: Montserrat 700 11px uppercase, letter-spacing 0.3em (mirrors the wordmark's 'TAXCUT' caption).",
+  "body": "Noto Sans KR 400/500/700 — 15px/1.55 on mobile, 16px/1.6 on desktop, max-width 34ch on navy; labels 13px/700; footnotes 12–13px. Stack `'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif`.",
+  "numeric": "Montserrat 800/900 with `font-variant-numeric: tabular-nums` and letter-spacing -0.02em: timer digits 20px/800, hero price 54px/900 → 84px/900 for 0원, 가격 section 96px (mobile) / 160px (desktop), step numbers 36px, coupon code 18px/800. Stack `Montserrat, 'Arial Black', Arial, sans-serif`. Load: https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Montserrat:wght@700;800;900&family=Noto+Sans+KR:wght@400;500;700&display=swap",
+  "rationale": "Black Han Sans is literally the wordmark face and Montserrat 900 is the badge face, so the page's type is the logo enlarged — brand recognition without any extra graphics. Black Han Sans is single-weight and ugly in digits, so Montserrat owns every number (prices, timer, codes) and the stack-order trick makes that automatic. Noto Sans KR is deliberately neutral so the two display faces stay loud; it also renders reliably in Instagram/당근 WebViews. No Inter, no Space Grotesk, no Pretendard dependency."
+ },
+ "first_frame_400px": "Viewport 400×~660 (Instagram/당근 in-app WebView), everything left-aligned with 16px gutters, nothing centered: (0–48px) fixed timer bar, solid --navy-800: 24px inline badge SVG at x=16; beside it two stacked lines — '첫 달 기장료 무료까지 남은 시간' 11px --ink-mute over '29:59' Montserrat 800 20px white tabular; right edge '카톡 상담 →' 13px --green with a 2px green underline (the always-present escape link); pinned to the bar's bottom edge a 3px --green progress line, full width, visibly draining leftward. (64–96px) logo row: 32px badge + 110px-wide wordmark inline SVG (white 택스컷 with the green strike), nothing else on the row. (112–300px) headline stack, ragged right: line 1 '첫 달 기장료,' Black Han Sans 34px white; line 2 '55,000원' Montserrat 900 54px white — a 5px --green line enters from the viewport's left edge just under the digits' vertical center, rises at ≈5° (wordmark ratio 32:376), passes straight through the digits and exits the right edge into empty space (already drawn under reduced-motion; otherwise draws 150→800ms after load, after which 55,000원 dims to 55% opacity); line 3 '0원' Montserrat 900 84px --green followed on the same baseline by '으로 잘라드려요.' Black Han Sans 30px white. (312–372px) subheadline Noto Sans KR 15px/1.55 --ink-soft, 3 lines: '이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료. 세무를 몰라도 괜찮아요, 사장님. 카톡 한 번이면 시작됩니다.' (388–604px) the scratch card, 368×216, radius 14px (the only rounded object on the page), resting pose rotateY 3° with a soft --navy-950 shadow; the silver foil shows a faint diagonal 'TAXCUT' security print, top-left 'TC · COUPON' 10px Montserrat tracking in --navy-700, centered '여기를 긁어보세요' Black Han Sans 24px --navy-900, under it a 48px --green-ink line at the badge angle, then '손가락으로 문질러 첫 달 기장료를 잘라내세요' 12px --navy-700. The card's bottom edge is inside the frame on ≥640px-tall viewports; on a 560px viewport the lower 44px is cut but the prompt is fully visible. The hero's top 360px carries the YouTube-banner stripe texture (45° hairlines, 1px white at 3% alpha, 9px pitch, masked to transparent). Below the fold: '긁지 않아도 상담은 바로 가능해요 → 카톡 상담' 13px link, then the collapsed post-reveal CTA slot.",
+ "scratch_card": "MECHANIC: 3-layer card inside a perspective wrapper. Layer 0 base plate (--navy-800 with the 45° stripe texture, 14px radius). Layer 1 coupon face: --paper 'receipt' — top-left eyebrow 'TAXCUT COUPON' Montserrat 700 10px --green-ink tracking 0.3em, top-right the 24px badge SVG; '첫 달 기장료' Black Han Sans 22px --navy-900; '0원' Montserrat 900 56px --navy-900 with a 5px --green-ink UNDERLINE (0 is never struck); a dashed perforation box holding '코드 TC-4821' Montserrat 800 18px tabular; bottom line '쿠폰코드를 상담 때 말씀해 주세요' Noto 12px --paper-mute. Code = 'TC-' + 4 digits generated once per session (crypto.getRandomValues, fallback Math.random) and stored under 'taxcut_coupon' in localStorage (try/catch; in-memory fallback), reused on refresh. Layer 2 foil: a canvas sized CSS×min(devicePixelRatio,1.5), painted with a 135° gradient --foil-hi→--foil-mid→--foil-lo, a fine 1px diagonal grain, a tiled 'TAXCUT' security print at 6% navy, and the prompt text ('여기를 긁어보세요' 24px Black Han Sans navy, a 48px --green-ink line at −12°, caption 12px). Pointer Events with `touch-action: none` on the canvas; pointerdown freezes the 3D tilt (so the brush maps to the canvas exactly), captures the pointer, and draws round-cap lines between samples with globalCompositeOperation 'destination-out', radius 22px touch / 16px mouse, batched per requestAnimationFrame. On pointerup, sample alpha every 12th pixel (~1,200 samples); at ≥45% cleared the reveal fires. Keyboard/canvas-unsupported fallback: a visually-hidden-until-focused button '탭해서 쿠폰 열기' performs the same reveal. REVEAL MOMENT (≈900ms total): remaining foil fades out 350ms; a 4px --green line draws corner-to-corner (lower-left → upper-right) on a floating SVG layer above the card in 350ms; the 0원 underline draws; 8 four-point SVG sparkles scale in around the code; a full-hero-width canvas throws 60 confetti rectangles in --green, #9BF0C3, --paper and white for 1.2s with simple gravity, then the canvas is removed. A 40ms haptic (navigator.vibrate, guarded) on Android. Under prefers-reduced-motion: foil disappears instantly, line pre-drawn, no confetti, sparkles static. AFTER: the CTA slot under the card expands (300ms max-height, content already opaque): Kakao button 56px full-width (#FEE500/#191919, inline SVG speech bubble, '카톡으로 상담 시작'), then '전화 예약하기 (30초)' white outline with a 3px --green underline that sweeps left→right on press and scrolls to #reserve; under both, 12px --ink-mute '쿠폰코드 TC-4821을 상담 때 말씀해 주세요'. The coupon code is also copied into the form's hidden field and shown as a small pill beside the form heading. State 'revealed' persists in localStorage so a refresh shows the opened coupon.",
+ "three_d": "CSS 3D only, no Three.js: the audience is on mid-range Android in-app WebViews where WebGL context creation is flaky and r128 adds ~600KB; the angle calls for one precise 3D object, and one floating card does not need a GPU scene. OBJECTS: the scratch card group under `perspective: 900px` (perspective-origin 50% 40%), `transform-style: preserve-3d`, `will-change: transform` — (a) `.card-shadow` translateZ(−30px): a --navy-950 rectangle blurred 18px, rasterized once and moved with the group; (b) `.card-base` translateZ(0): stripes + paper coupon face; (c) `.card-foil` canvas translateZ(14px) so the foil visibly floats above the coupon and parallaxes against it when tilted; (d) `.card-cut` SVG line translateZ(28px), hidden until reveal; (e) `.card-glare` a soft white linear-gradient at 12% whose background-position moves opposite to the tilt via the same CSS variables. CAMERA/INPUT: tilt = rotateX(clamp(−8°..8°)) rotateY(clamp(−10°..10°)) driven by CSS vars --tx/--ty; on mouse, from pointer position over the card (lerp 0.12 per frame, spring back on leave); on Android phones, from `deviceorientation` beta/gamma (deadzone 2°, clamp ±20° → ±10°, smoothed); on iOS (DeviceOrientationEvent.requestPermission exists) do NOT prompt — use touch position while touching instead. Tilt freezes on pointerdown over the foil and resumes on pointerup. Idle pose when untouched: a 6s ease-in-out loop translateY ±4px + rotateY 0→3°→0 (transform only). Desktop hero: the edge-to-edge cut line runs BEHIND the card (z-index under the perspective wrapper) so the card reads as floating above the cut. FALLBACK: `@supports not (transform-style: preserve-3d)` → flat card, no tilt; canvas unavailable → tap-to-open button; `prefers-reduced-motion` → no idle float, no tilt, instant reveal; `visibilitychange` hidden → cancel the rAF loop. PERF BUDGET: only transform/opacity animate; no box-shadow animation, no backdrop-filter, no filters on moving layers except the pre-rasterized shadow; canvas DPR ≤1.5; one rAF loop for tilt + scratch batching; confetti canvas exists ≤1.5s; total JS < 12KB; target 60fps on a Galaxy A-class WebView, zero WebGL.",
+ "timer_bar": "48px fixed top bar (z 50), solid --navy-800 with a 1px --navy-700 hairline beneath; the 3px --green progress line sits on the bar's bottom edge, `transform: scaleX(remaining/total)` from the left with a 1s linear transition so it drains smoothly every tick — this line is the same cut line as the hero, so the bar is on-brand without any icon. Contents (max-width 1120 centered on desktop, 16px gutters on mobile): 24px badge SVG; label '첫 달 기장료 무료까지 남은 시간' Noto 11px --ink-mute stacked over digits '29:59' Montserrat 800 20px white tabular-nums (digits live OUTSIDE aria-live; a visually-hidden `aria-live=\\\"polite\\\"` span announces '남은 시간 약 N분' only when the minute changes); right-aligned '카톡 상담 →' 13px --green with a 2px green underline, opening the Kakao URL in a new tab (rel noopener) — the pre-scratch escape link that is always visible. Timing: `TAXCUT_CONFIG.EVENT_MINUTES` (30); on first load store Date.now() under 'taxcut_event_start' (try/catch, in-memory fallback), so refresh continues the same countdown; recompute from the timestamp each second (never decrement) so background tabs stay honest. Under 5:00: line and digits switch to --alert and the digits pulse opacity 1↔0.55 at 1Hz (no pulse under reduced-motion, color change only). At 0:00: line scaleX(0), digits hidden, label becomes the one-line 13px '이벤트 시간이 종료되었어요. 그래도 상담은 가능해요', the right link stays, all CTAs stay, the form's hidden remaining_seconds records 0. Body gets `padding-top: 48px`; scroll-margin-top 64px on anchors.",
+ "sections": [
+  "00 · 상단 고정 타이머 바 — as specified in timer_bar: 48px, --navy-800, green progress line on the bottom edge, badge + label/digits left, '카톡 상담 →' escape link right, --alert under 5 min, ended-state copy at 0:00, localStorage-persisted start.",
+  "01 · 히어로 (--navy-900; top 360px carries the YouTube-banner stripe texture: repeating-linear-gradient 45°, 1px white @3%, 9px pitch, masked to transparent) — padding 64px 16px 32px, everything left-aligned and ragged right. Logo row: 32px badge + 110px wordmark inline SVGs (both inherit the page webfonts so they match the headline exactly). Headline: '첫 달 기장료,' / '55,000원' / '0원으로 잘라드려요.' as sized in first_frame. THE HERO CUT: one absolutely positioned SVG <line> from −5vw to 105vw rising ≈5° (--cut-angle-wide: -4.9deg), 5px --green, round caps, vertically centered on the '55,000원' line; stroke-dashoffset draw 150→800ms cubic-bezier(.2,.8,.2,1); on landing, '55,000원' → opacity .55 and '0원' pops scale .96→1 (200ms). Sub-copy 15px/1.55 --ink-soft max-width 34ch containing the verbatim 30분 sentence. Scratch card 16px below (see scratch_card). Under the card: '긁지 않아도 상담은 바로 가능해요 → 카톡 상담' 13px --green link with 2px underline. Post-reveal CTA slot collapsed until reveal (height 0, aria-hidden), then Kakao button + '전화 예약하기 (30초)' + coupon reminder. Desktop ≥1024: 12-col grid, text 7 cols, card 420×248 in cols 8–12 vertically centered, the hero line continues behind the card.",
+  "02 · 가격 (--paper, text --navy-900; the 'receipt') — square corners, no card, 1px --paper-line top rule, padding 56px 16px. Eyebrow 'PRICE' Montserrat 700 11px --green-ink tracking .3em with a 24px --green-ink rule at −12°. First the verbatim line '1개월 기장료 55,000원 (부가세 포함)' Noto 700 18px. Then the number: '55,000' Montserrat 900 96px (160px desktop) --navy-900 + '원' Black Han Sans 40px; an 8px --green-ink line strikes it when scrolled into view (IntersectionObserver once, 500ms draw, pre-drawn under reduced-motion). Directly beneath: '첫 달' Black Han Sans 24px + '0원' Montserrat 900 120px --navy-900 with a 6px --green-ink underline that draws right after the strike. A 3-row hairline table (Noto 15px, --paper-line rules, --paper-2 alternating): 첫 달 기장료 — 0원 / 둘째 달부터 — 55,000원 (부가세 포함) / 매출액 구간 — 상담 시 안내. Footnote 13px --paper-mute led by a 16px --green-ink dash: '※ 매출액에 따라 달라질 수 있습니다.' Condition line 13px: '이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료'. Nothing rounded, nothing centered; desktop puts the number left and the table right.",
+  "03 · 왜 택스컷 (--navy-900) — eyebrow 'WHY TAXCUT', heading '세무 몰라도 괜찮아요, 사장님.' Black Han Sans 30px (44px desktop). Four points, no cards, no icons: 1 column on mobile with 32px gaps, 2×2 on desktop with a 1px --navy-700 hairline grid; each point opens with a 28px --green rule at −12° (--cut-angle-tight, badge ratio), title Black Han Sans 22px white, body Noto 15px --ink-soft. (1) 카톡으로 편하게 — '영수증 사진 한 장, 질문 한 줄. 카톡으로 보내시면 됩니다.' (2) 세무사가 직접 — '상담부터 신고까지 세무사가 직접 봅니다.' (3) 첫 창업 사장님 맞춤 — '사업자등록 전이어도, 매출이 아직 없어도 상담부터 시작하세요.' (4) 유튜브 택스컷 — '세금 이야기는 유튜브 @taxcut_min에서 계속 드려요.' (title is an external link with the 2px green underline). No customer counts, no savings figures anywhere.",
+  "04 · 진행 절차 (--navy-800 band) — eyebrow 'HOW IT WORKS', heading '30분이면 됩니다.' Black Han Sans 30px. Three steps: mobile vertical with a 3px --green line running down the left edge through the numbers (draws top→bottom on intersection); desktop horizontal rail with the line running left→right. Numbers '01 / 02 / 03' Montserrat 900 36px --green; titles Black Han Sans 22px white; bodies Noto 15px --ink-soft. ① 카톡 또는 전화 상담 — '궁금한 것부터 편하게 물어보세요.' ② 온라인 계약 — '서류 없이 온라인으로 계약해요.' ③ 기장 시작, 첫 달 0원 — '자료만 보내주시면 장부는 저희가 만듭니다.' A single Kakao text link closes the band: '지금 1단계 시작하기 → 카톡 상담'.",
+  "05 · FAQ (--paper) — eyebrow 'FAQ', heading '자주 묻는 질문' Black Han Sans 30px --navy-900. Five native <details>, separated by 1px --paper-line, summary Noto 700 16px --navy-900 at 56px tall, indicator is a 16px --green-ink line that rotates 45°→90° on open (a cut mark, not a chevron), answers Noto 15px/1.6 --paper-mute on --paper-2. Q 기장이 뭔가요? — '매달 매출·매입 자료를 정리해 장부를 만들고, 부가세·종합소득세 신고까지 이어지는 세무 관리예요. 사장님은 자료만 보내주시면 됩니다.' Q 매출이 아직 없어도 되나요? — '네. 사업자등록 전이거나 매출이 0원이어도 상담부터 시작하실 수 있어요. 시작 시점은 상담 때 같이 정해요.' Q 30분 조건은 어떻게 확인하나요? — '이 페이지의 타이머와 스크래치 쿠폰코드로 확인해요. 카톡 상담 때 쿠폰코드를 말씀해 주시면 됩니다.' Q 첫 달 이후 비용은? — '1개월 기장료 55,000원 (부가세 포함)이 기본이고, 매출액에 따라 달라질 수 있습니다. 정확한 금액은 상담 때 안내드려요.' Q 계약 기간은? — '계약 기간과 해지 조건은 상담 시 안내드려요.'",
+  "06 · 최종 CTA — two branches, stacked on mobile, 5:7 side by side on desktop. A) --navy-900 block: heading '카톡이 제일 빨라요' Black Han Sans 30px, sub '영업시간 내 순서대로 답장드려요.' Noto 15px --ink-soft, Kakao button full-width 56px (#FEE500, #191919 text, inline SVG speech bubble 20px, '카톡으로 상담 시작', target _blank rel noopener). B) #reserve on --paper: heading '전화로 예약할게요' Black Han Sans 30px --navy-900 with the coupon-code pill beside it once revealed; labels above inputs Noto 700 13px, inputs 48px, 6px radius, 1.5px --navy-700 border on --paper-2 fill, focus 2px --green-ink ring with 2px offset; fields in brief order — 이름 또는 상호 / 연락처 (inputmode tel, 010 pattern validated on blur, auto-hyphen) / 매출액 select (아직 매출 없음 · 연 3천만원 미만 · 3천만~8천만 · 8천만~2억 · 2억~5억 · 5억 이상) / 업종 select (온라인쇼핑몰·스마트스토어 · 카페·음식점 · 프리랜서·콘텐츠 · 배달·서비스 · 도소매 · 제조 · 기타) with '기타' revealing a text input / 사업자등록일 date + '아직 등록 전' checkbox that disables the date / 상담 가능 시간 select (평일 오전 9~12시 · 오후 12~3시 · 오후 3~6시 · 저녁 6시 이후 · 주말·공휴일) + 메모 textarea / 개인정보 수집·이용 동의 required checkbox with 12px spec text (수집 항목: 이름·상호, 연락처, 매출액, 업종, 등록일, 상담 가능 시간 / 목적: 전화상담 예약 및 안내 / 보유기간: 상담 완료 후 1년 또는 동의 철회 시 파기 — client to confirm) linking #privacy; hidden: coupon_code, remaining_seconds, utm_source (from URL), submitted_at (ISO). Errors 13px --error under the field with aria-describedby and aria-invalid. Submit: --navy-900 56px full-width '예약 신청하기' white text with a 3px --green-ink underline sweep; disabled+spinner-less '보내는 중…' while pending. Success replaces the form (focus moved to the heading): '예약 완료! 영업시간 내 순서대로 전화드릴게요' + Kakao button. Failure: '예약이 잘 안 됐어요. 카톡으로 바로 상담해 주세요' + Kakao button, form data kept. Local mode shows a --paper-2 pill '테스트 모드: 이 기기에만 저장됨'. Adapter per brief: TAXCUT_CONFIG.RESERVATION_MODE auto/webhook/local, text/plain + no-cors for Apps Script.",
+  "07 · 푸터 (--navy-950) — 90px wordmark SVG; '세무회계 민 · 택스컷' Noto 13px --ink-soft; link row (13px --green, 2px underline): taxmin.kr · 유튜브 @taxcut_min · 개인정보처리방침 (#privacy, an in-page block repeating the 3-line spec plus 담당자 안내 '상담 시 안내'); '이벤트 유의사항' 12px --ink-mute: ① 이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료 ② 기장료는 매출액에 따라 달라질 수 있습니다 ③ 타이머는 이 기기에서 페이지를 처음 연 시각 기준입니다. Bottom padding 96px on mobile to clear the fixed bar.",
+  "08 · 하단 고정 CTA 바 (mobile <768px only) — 64px + env(safe-area-inset-bottom), --navy-800, 1px --navy-700 top hairline, 12px gutters: Kakao button (yellow, bubble icon + '카톡 상담', 58% width) and '예약하기' (white 1.5px outline, 3px --green underline, 40%), both 44px tall. Slides down (translateY 100%, 200ms) while #reserve, the success panel or the footer's privacy block is in view (IntersectionObserver) so it never covers the submit button; hero bottom padding is increased 24px so the scratch card is never under it. Hidden ≥768px where the hero CTAs are inline."
+ ],
+ "motion": "PAGE LOAD (all text painted at full opacity on first frame; no opacity:0 waiting): 0ms everything visible, hero line at dashoffset 100%; 150→800ms the edge-to-edge hero cut line draws left→right (cubic-bezier .2,.8,.2,1); ~800ms '55,000원' dims to opacity .55 and '0원' pops scale .96→1 over 200ms (transform only); 1000ms the scratch card begins its 6s idle float (translateY ±4px, rotateY 0→3°→0) and the timer's progress line starts its per-second 1s-linear scaleX transitions. Nothing else moves on load. SCROLL-TRIGGERED (IntersectionObserver, threshold .5, once each): 가격 strike draws 500ms then the 0원 underline 300ms; the 진행 절차 connector line draws 600ms; section eyebrow rules draw 300ms. No parallax, no scroll-jacking, no background particles. MICRO: every text link and the reserve button have a 2–3px green underline that sweeps left→right 200ms on hover/press; Kakao button scales .98 on :active with a 1px darker edge; form inputs animate only the focus ring; FAQ cut-mark indicator rotates 150ms, panels open without height animation; timer digits flip value only (no tween); under 5:00 the digits pulse opacity at 1Hz. SCRATCH: tilt follows pointer/orientation via lerp .12 per rAF; tilt freezes during scratching; reveal sequence per scratch_card (~900ms incl. 1.2s confetti tail). REDUCED MOTION: all lines pre-drawn, no float/tilt/pulse/confetti/underline sweep; scratch still functions, reveal is instant. STAYS STILL: all body copy, the timer bar itself, the form, the footer, section backgrounds; the only 3D object is the card and the only animated ornament is the line.",
+ "copy": {
+  "headline": "첫 달 기장료, / 55,000원 / 0원으로 잘라드려요. (line 2 is struck by the hero cut line; '0원' is green Montserrat 900, the rest Black Han Sans)",
+  "subheadline": "이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료. 세무를 몰라도 괜찮아요, 사장님. 카톡 한 번이면 시작됩니다.",
+  "cta_kakao": "카톡으로 상담 시작",
+  "cta_reserve": "전화 예약하기 (30초)",
+  "scratch_prompt": "여기를 긁어보세요 — 손가락으로 문질러 첫 달 기장료를 잘라내세요",
+  "reveal_text": "첫 달 기장료 0원 쿠폰 · 코드 TC-4821 · 쿠폰코드를 상담 때 말씀해 주세요",
+  "timer_label": "첫 달 기장료 무료까지 남은 시간"
+ },
+ "aesthetic_risk": "The hero cut line overshoots: it is drawn edge-to-edge across the whole viewport at the wordmark's angle, strikes only the price and keeps going into empty space — and it is the ONLY animated ornament on load (no gradient wash, no particles, no Three.js scene, a left-aligned ragged headline). By AI-landing standards the hero looks 'unfinished'; that is the point. It serves conversion because the entire offer (55,000 → 0) is understood pre-attentively in under a second before a 당근/인스타 visitor decides to bounce, the eye rides the line straight to the one interactive object (the card) and from there to the CTAs, and the restraint keeps the page light enough to hold 60fps and load fast inside an in-app WebView — the two things that actually decide whether a 30-minute window turns into a Kakao chat.",
+ "risks": [
+  "Black Han Sans arrives as multiple Korean unicode-range slices; expect a brief FOUT in in-app WebViews. Use display=swap, fixed line-heights and a weight-matched fallback (Do Hyeon → Apple SD Gothic Neo/Malgun Gothic) so the headline does not reflow when the font lands.",
+  "The stack-order trick (Montserrat first, Black Han Sans second) requires `font-synthesis: none` on headline elements, otherwise browsers fake-bold Black Han Sans (400) when Montserrat 900 is requested, smearing the Hangul.",
+  "Scratching inside a 3D-transformed element: pointer→canvas mapping must be taken from getBoundingClientRect while tilt is frozen (pointerdown), and the canvas needs `touch-action: none` plus `overscroll-behavior: none` on body so Instagram/당근 WebViews do not pull-to-refresh or scroll mid-scratch.",
+  "Do not call DeviceOrientationEvent.requestPermission on iOS (it would pop a permission dialog and kill trust); detect its presence and fall back to touch-position tilt. Android may fire deviceorientation at 60Hz — throttle via the single rAF loop.",
+  "Green as text fails contrast on paper (#3DDC84 ≈1.65:1, #1FB86A ≈2.4:1); on light sections green is only ever the line (--green-ink #0E8F4F, ≈3.8:1) and text stays navy. The builder must not 'match' the hero by putting green text on paper.",
+  "Kakao's pf.kakao.com/_Mxojqs/chat opened with target=_blank inside Instagram's in-app browser may stay in the WebView rather than deep-linking to the Kakao app; keep the href exactly as given, add rel=noopener, and expose the link in three places (timer bar, under the card, bottom bar) so a failed hop is one tap from a retry.",
+  "Timer honesty: persisting the start in localStorage means a visitor returning the next day sees the ended state immediately; that is the real condition per brief, and the ended state must keep every CTA and the coupon visible. Also compute remaining time from the stored timestamp, never by decrementing, so backgrounded tabs stay accurate.",
+  "Privacy spec text (보유기간, 개인정보처리방침 body) and the '계약 기간' FAQ answer are placeholders the client must confirm before launch; the builder should mark them with a code comment.",
+  "Small-phone fold (≈360×560 visible after WebView chrome): the card's lower ~44px falls below the fold; keep the foil prompt in the card's upper 45% and the timer-bar Kakao link always visible so the first frame still has an offer, a promise and a way to act.",
+  "Confetti and sparkles are extra canvases/DOM created only on reveal and removed after 1.5s; cap particles at 60 and skip entirely under prefers-reduced-motion to protect low-end devices.",
+  "The hero line's angle is set in viewport units at mobile; on desktop widths the same 4.9° rise spans ~100px, so the line must be re-measured on resize to stay centered on the '55,000원' line and run behind (not across) the card column."
+ ]
+}

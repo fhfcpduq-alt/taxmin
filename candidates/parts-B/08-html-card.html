@@ -1,0 +1,50 @@
+    <div class="hero-cardcol">
+      <div class="card-scene" id="cardScene">
+        <div class="card-float" id="cardFloat">
+          <div class="card" id="card">
+            <div class="card-shadow" aria-hidden="true"></div>
+            <div class="card-thick" aria-hidden="true"></div>
+            <div class="card-thick mid" aria-hidden="true"></div>
+            <div class="card-face" id="cardFace">
+              <div class="card-stub" aria-hidden="true"><span>TAXCUT · 1ST MONTH FREE</span></div>
+              <div class="card-main">
+                <div class="card-top"><span class="eyebrow">TAXCUT COUPON</span><svg class="badge" aria-hidden="true" focusable="false"><use href="#tc-badge"/></svg></div>
+                <div class="face-title">첫 달 기장료</div>
+                <div class="face-live">
+                  <div class="face-zero num">0<span class="won">원</span></div>
+                  <div class="face-code"><span>코드</span><span class="num" data-code>TC-0000</span><button type="button" id="faceCopy" aria-label="쿠폰코드 복사">복사</button></div>
+                  <p class="face-foot">상담 때 이 코드를 말씀해 주세요</p>
+                </div>
+                <p class="face-ended">이벤트 종료 · 상담은 계속 가능해요</p>
+                <span class="face-mark">시간 종료</span>
+              </div>
+              <div class="card-stamp" id="cardStamp" aria-hidden="true">첫 달 0원</div>
+            </div>
+            <canvas class="card-foil" id="foil" role="img" aria-label="스크래치 영역. 손가락이나 마우스로 문질러서 쿠폰을 열어요"></canvas>
+            <div class="card-prompt" id="cardPrompt" aria-hidden="true"><strong>여기를 긁어보세요</strong><i></i><small>손가락으로 문지르면 첫 달 기장료가 잘려요</small></div>
+            <div class="card-glare" aria-hidden="true"></div>
+            <svg class="card-hint" id="cardHint" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+              <circle cx="14" cy="14" r="11" style="fill:var(--green);stroke:var(--navy-900);stroke-width:2"/>
+              <circle cx="14" cy="14" r="7" style="fill:none;stroke:var(--navy-900);stroke-width:1.5;opacity:.5"/>
+              <path d="M9 11.5h10M9 15h10" style="stroke:var(--navy-900);stroke-width:2;stroke-linecap:round"/>
+            </svg>
+            <svg class="card-cut" id="cardCut" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><line x1="-5" y1="58" x2="105" y2="42" vector-effect="non-scaling-stroke"/></svg>
+            <button type="button" class="card-fallback" id="cardFallback">탭해서 쿠폰 열기</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="sr-only" id="kbdReveal">키보드로 쿠폰 열기</button>
+      <div class="skip-row"><a href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao>긁지 않아도 돼요 · 바로 카톡 상담 →</a></div>
+      <button type="button" class="tap-open" id="tapOpen">긁기 어려우세요? 탭해서 열기</button>
+      <div class="cta-slot" id="ctaSlot" aria-hidden="true">
+        <div class="cta-slot-in">
+          <a class="btn btn-kakao" id="ctaKakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+          <p class="cta-cap">질문 한 줄부터 괜찮아요</p>
+          <a class="btn btn-outline" href="#reserve" data-reserve>전화 상담 예약하기</a>
+          <p class="cta-code">쿠폰코드 <span class="num" data-code>TC-0000</span>을 상담 때 말씀해 주세요</p>
+          <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

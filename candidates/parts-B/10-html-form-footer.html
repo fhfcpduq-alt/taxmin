@@ -1,0 +1,92 @@
+<!-- 06 최종 CTA -->
+<div class="final">
+<section class="cta-a" id="kakao" aria-labelledby="kakaoTitle">
+  <div class="wrap">
+    <p class="eyebrow" data-seen>Kakao</p>
+    <h2 class="h2" id="kakaoTitle">카톡이 제일 빨라요</h2>
+    <p class="sub2">영업시간 내 순서대로 답장드려요.</p>
+    <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+    <p class="cta-cap">질문 한 줄부터 괜찮아요</p>
+    <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+  </div>
+</section>
+<section class="cta-b on-paper" id="reserve" aria-labelledby="reserveTitle">
+  <div class="wrap">
+    <p class="eyebrow" data-seen>Reserve</p>
+    <h2 class="h2" id="reserveTitle">전화로 예약할게요 <span class="pill num" data-code>TC-0000</span></h2>
+    <p class="mode-badge">테스트 모드: 이 기기에만 저장됨</p>
+    <form class="form" id="resForm" novalidate>
+      <div class="f" id="g_name"><label for="f_name">이름 또는 상호</label><input id="f_name" name="name" type="text" required autocomplete="name" aria-describedby="e_name" placeholder="예: 김민지 / 민지커피"><p class="err" id="e_name">이름 또는 상호를 입력해 주세요</p></div>
+      <div class="f" id="g_phone"><label for="f_phone">연락처</label><input id="f_phone" name="phone" type="tel" inputmode="tel" required autocomplete="tel" aria-describedby="e_phone" placeholder="010-0000-0000" maxlength="13"><p class="err" id="e_phone">010으로 시작하는 휴대폰 번호를 입력해 주세요</p></div>
+      <div class="f" id="g_sales"><label for="f_sales">매출액</label><select id="f_sales" name="sales" required aria-describedby="e_sales"><option value="">선택해 주세요</option><option>아직 매출 없음</option><option>연 3천만원 미만</option><option>3천만~8천만원</option><option>8천만~2억원</option><option>2억~5억원</option><option>5억원 이상</option></select><p class="err" id="e_sales">매출액을 선택해 주세요</p></div>
+      <div class="f" id="g_biz"><label for="f_biz">업종</label><select id="f_biz" name="biz" required aria-describedby="e_biz"><option value="">선택해 주세요</option><option>온라인쇼핑몰·스마트스토어</option><option>카페·음식점</option><option>프리랜서·콘텐츠</option><option>배달·서비스</option><option>도소매</option><option>제조</option><option>기타</option></select><p class="err" id="e_biz">업종을 선택해 주세요</p></div>
+      <div class="f f-other" id="g_bizOther"><label for="f_bizOther">업종 직접 입력</label><input id="f_bizOther" name="bizOther" type="text" aria-describedby="e_bizOther" placeholder="예: 반려동물 용품"><p class="err" id="e_bizOther">업종을 입력해 주세요</p></div>
+      <div class="f" id="g_reg"><label for="f_reg">사업자등록일</label><input id="f_reg" name="regDate" type="date" required aria-describedby="e_reg"><label class="chk"><input id="f_noReg" name="noReg" type="checkbox"><span>아직 등록 전</span></label><p class="err" id="e_reg">사업자등록일을 선택하거나 「아직 등록 전」에 체크해 주세요</p></div>
+      <div class="f" id="g_slot"><label for="f_slot">상담 가능 시간</label><select id="f_slot" name="slot" required aria-describedby="e_slot"><option value="">선택해 주세요</option><option>평일 오전 9~12시</option><option>평일 오후 12~3시</option><option>평일 오후 3~6시</option><option>저녁 6시 이후</option><option>주말·공휴일</option></select><p class="err" id="e_slot">상담 가능 시간을 선택해 주세요</p></div>
+      <div class="f"><label for="f_memo">메모(선택)</label><textarea id="f_memo" name="memo" rows="2" placeholder="궁금한 점이나 통화 시 참고할 내용"></textarea></div>
+      <div class="f" id="g_agree">
+        <label class="chk"><input id="f_agree" name="agree" type="checkbox" required aria-describedby="e_agree privacyNote"><span>개인정보 수집·이용 동의(필수)</span></label>
+        <!-- 고객사 확인 필요: 개인정보 수집 항목·목적·보유기간 -->
+        <p class="privacy-note" id="privacyNote">수집 항목: 이름·상호, 연락처, 매출액, 업종, 사업자등록일, 상담 가능 시간 / 목적: 전화상담 예약 및 안내 / 보유기간: 상담 완료 후 1년 또는 동의 철회 시 파기 · <a href="#privacy">개인정보처리방침</a></p>
+        <p class="err" id="e_agree">동의해 주셔야 예약할 수 있어요</p>
+      </div>
+      <input type="hidden" id="f_coupon" name="coupon" value=""><input type="hidden" id="f_seconds" name="secondsLeft" value=""><input type="hidden" id="f_source" name="source" value=""><input type="hidden" id="f_submitted" name="submittedAt" value="">
+      <button type="submit" class="btn btn-solid" id="submitBtn">예약 신청하기</button>
+    </form>
+    <div class="form-fail" id="formFail" role="alert">
+      <p>예약이 잘 안 됐어요. 카톡으로 바로 상담해 주세요</p>
+      <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+      <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+    </div>
+    <div class="panel" id="successPanel">
+      <h3 id="successTitle" tabindex="-1">예약 완료! 영업시간 내 순서대로 전화드릴게요</h3>
+      <p>급하시면 카톡으로도 바로 상담할 수 있어요.</p>
+      <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+      <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<!-- 07 푸터 -->
+<footer class="foot" id="footer">
+  <div class="wrap">
+    <svg class="wordmark" viewBox="0 0 420 150" role="img" aria-label="택스컷" focusable="false"><use href="#tc-wordmark"/></svg>
+    <p class="firm">세무회계 민 · 택스컷</p>
+    <!-- 고객사 확인 필요: 아래 신뢰 블록은 플레이스홀더 -->
+    <div class="trust">
+      <span>세무사 [성명]</span>
+      <span>주소 [사무소 주소]</span>
+      <span>사업자등록번호 [000-00-00000]</span>
+      <span>대표전화 [000-0000-0000]</span>
+    </div>
+    <p class="foot-links">
+      <a href="https://taxmin.kr" target="_blank" rel="noopener" data-site>taxmin.kr</a>
+      <a href="https://www.youtube.com/@taxcut_min" target="_blank" rel="noopener" data-youtube>유튜브 @taxcut_min</a>
+      <a href="#privacy">개인정보처리방침</a>
+    </p>
+    <div class="privacy" id="privacy">
+      <h3>개인정보처리방침</h3>
+      <!-- 고객사 확인 필요: 개인정보처리방침 본문 -->
+      <span>수집 항목: 이름·상호, 연락처, 매출액, 업종, 사업자등록일, 상담 가능 시간</span>
+      <span>목적: 전화상담 예약 및 안내</span>
+      <span>보유기간: 상담 완료 후 1년 또는 동의 철회 시 파기</span>
+      <span>문의: 상담 시 안내</span>
+    </div>
+    <ul class="notes">
+      <li><h3>이벤트 유의사항</h3></li>
+      <li><span class="num">1</span><span>이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</span></li>
+      <li><span class="num">2</span><span>기장료는 매출액에 따라 달라질 수 있습니다</span></li>
+      <li><span class="num">3</span><span>타이머는 이 기기에서 페이지를 처음 연 시각 기준입니다</span></li>
+    </ul>
+  </div>
+</footer>
+
+<!-- 08 하단 고정 CTA 바 (모바일) -->
+<div class="bbar" id="bbar">
+  <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡 상담</a>
+  <a class="btn btn-outline" href="#reserve" data-reserve>예약하기</a>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>

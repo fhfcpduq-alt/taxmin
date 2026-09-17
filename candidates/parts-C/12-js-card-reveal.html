@@ -1,0 +1,106 @@
+/* hint glyph: drag once at t+900ms, again at t+2.5s, replay after 12s of no input */
+var hintOn=true;
+function playHint(){if(!hintOn||touched||S.revealed||RM||D.hidden)return;hint.classList.add('go')}
+hint.addEventListener('animationend',function(){hint.classList.remove('go')});
+function stopHint(){hintOn=false;hint.hidden=true}
+/* reveal sequence (~900ms), everything that moves is at or below the card */
+function openSlot(instant){
+  ctaSlot.setAttribute('aria-hidden','false');ctaSlot.classList.add('open');
+  if(instant||RM){ctaSlot.style.maxHeight='none';return}
+  ctaSlot.style.maxHeight=ctaSlot.scrollHeight+'px';
+  setTimeout(function(){ctaSlot.style.maxHeight='none';safe(function(){$('#ctaSlot .kbtn').scrollIntoView({block:'nearest',behavior:'smooth'})})},330);
+}
+function reveal(instant){
+  if(S.revealed)return;
+  S.revealed=true;scratching=false;tiltLock=false;ttx=tty=0;
+  var ended=S.ended||remaining()<=0;
+  if(!ended){if(!S.code)S.code=genCode();store.set('taxcut_coupon',S.code)}
+  store.set('taxcut_revealed','1');
+  stopHint();tapOpen.hidden=true;prompt.classList.add('off');floatEl.classList.remove('idle');
+  if(ended){S.ended=true;face.classList.add('ended')}
+  applyCode();
+  if(instant||RM){foil.classList.add('gone');face.classList.add('revealed');if(!ended)stamp.hidden=false;openSlot(true);return}
+  cardCut.hidden=false;
+  W.requestAnimationFrame(function(){cardCut.classList.add('draw')});
+  setTimeout(function(){foil.classList.add('gone');cardCut.classList.add('gone')},300);
+  setTimeout(function(){face.classList.add('revealed')},450);
+  setTimeout(function(){if(!ended){stamp.hidden=false;stamp.classList.add('pop')}},650);
+  setTimeout(function(){if(!ended)confetti();vibrate(40)},700);
+  setTimeout(function(){openSlot(false)},750);
+}
+/* hand-rolled confetti: 60 rects, token colors only, 1.2s, canvas removed within 1.5s */
+function confetti(){
+  var cv=$('#confetti'),c=safe(function(){return cv.getContext('2d')},null);if(!c)return;
+  var w=hero.clientWidth,h=hero.clientHeight;
+  cv.width=Math.round(w*DPR);cv.height=Math.round(h*DPR);cv.hidden=false;
+  var r=card.getBoundingClientRect(),hr=hero.getBoundingClientRect(),ox=r.left-hr.left+r.width/2,oy=r.top-hr.top+r.height/2;
+  var cols=[tok('--green','#3DDC84'),tok('--green-deep','#1FB86A'),tok('--paper','#F4F6FA'),tok('--ink','#FFFFFF')],P=[],i;
+  for(i=0;i<60;i++){var a=-Math.PI/2+(Math.random()-.5)*1.7,v=240+Math.random()*300;
+    P.push({x:ox,y:oy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,w:5+Math.random()*5,h:3+Math.random()*4,r:Math.random()*6.28,vr:(Math.random()-.5)*14,col:cols[i&3]})}
+  var t0=0,prev=0,done=false;
+  function frame(t){
+    if(done)return;
+    if(!t0){t0=t;prev=t}
+    var el=(t-t0)/1000,dt=Math.min(.05,(t-prev)/1000);prev=t;
+    if(el>1.2){done=true;cv.hidden=true;return}
+    c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);c.globalAlpha=el>.9?Math.max(0,1-(el-.9)/.3):1;
+    for(var j=0;j<P.length;j++){var p=P[j];p.vy+=900*dt;p.vx*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
+      var cs=Math.cos(p.r)*DPR,sn=Math.sin(p.r)*DPR;c.setTransform(cs,sn,-sn,cs,p.x*DPR,p.y*DPR);c.fillStyle=p.col;c.fillRect(-p.w/2,-p.h/2,p.w,p.h)}
+    W.requestAnimationFrame(frame);
+  }
+  W.requestAnimationFrame(frame);
+  setTimeout(function(){done=true;cv.hidden=true;cv.width=1;cv.height=1},1500);
+}
+/* init card state */
+function initCard(){
+  if(foilOn){
+    paintFoil();
+    foil.addEventListener('pointerdown',onDown);
+    foil.addEventListener('pointermove',onMove);
+    foil.addEventListener('pointerup',onUp);
+    foil.addEventListener('pointercancel',onUp);
+    foil.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+    foil.addEventListener('touchstart',function(e){if(e.touches.length>1)e.preventDefault()},{passive:false});
+    foil.addEventListener('contextmenu',function(e){e.preventDefault()});
+  }else{
+    foil.hidden=true;prompt.hidden=true;hint.hidden=true;
+    var nc=$('#noCanvas');nc.hidden=false;nc.addEventListener('click',function(){reveal(false)});
+  }
+  $('#kbReveal').addEventListener('click',function(){reveal(false)});
+  tapOpen.addEventListener('click',function(){reveal(false)});
+  if(S.revealed){
+    card.classList.add('still');
+    stopHint();prompt.classList.add('off');foil.hidden=true;face.classList.add('revealed');
+    if(S.ended&&!S.code)face.classList.add('ended');
+    if(S.code){stamp.hidden=false;if(S.ended)endMark.hidden=false}
+    applyCode();openSlot(true);
+    setTimeout(function(){card.classList.remove('still')},100);
+    return;
+  }
+  if(S.ended)face.classList.add('ended');
+  setTimeout(function(){if(!touched&&!S.revealed&&!RM)floatEl.classList.add('idle')},1000);
+  setTimeout(playHint,900);setTimeout(playHint,2500);
+  setInterval(function(){if(!S.revealed&&!touched&&Date.now()-lastInput>12000){lastInput=Date.now();playHint();if(!RM&&!tiltLock)floatEl.classList.add('idle')}},3000);
+  setTimeout(function(){if(!touched&&!S.revealed)tapOpen.hidden=false},4000);
+}
+initCard();
+/* lifecycle: cancel the rAF loop when hidden, recompute geometry on real resizes only */
+D.addEventListener('visibilitychange',function(){
+  if(D.hidden){if(running){W.cancelAnimationFrame(raf);running=false}}else kick();
+});
+var lastW=W.innerWidth,lastH=W.innerHeight,rsT=0;
+function relayout(){
+  clearTimeout(rsT);
+  rsT=setTimeout(function(){
+    sceneRect=null;
+    if(cutStarted)placeCut('geom');
+    if(foilOn&&!S.revealed&&!scratching&&card.offsetWidth!==cw)paintFoil();
+  },120);
+}
+W.addEventListener('resize',function(){
+  var w=W.innerWidth,h=W.innerHeight;
+  if(w===lastW&&Math.abs(h-lastH)<120)return;
+  lastW=w;lastH=h;relayout();
+});
+W.addEventListener('orientationchange',function(){lastW=-1;relayout()});
+W.addEventListener('load',function(){if(cutStarted)placeCut('geom')});

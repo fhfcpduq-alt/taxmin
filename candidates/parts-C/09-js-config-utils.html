@@ -1,0 +1,71 @@
+<script>
+window.TAXCUT_CONFIG = { KAKAO_URL:'https://pf.kakao.com/_Mxojqs/chat', EVENT_MINUTES:30, RESERVATION_MODE:'auto', RESERVATION_ENDPOINT:'', WEBHOOK_JSON:false, YOUTUBE_URL:'https://www.youtube.com/@taxcut_min', SITE_URL:'https://taxmin.kr' };
+(function(){
+'use strict';
+var C=window.TAXCUT_CONFIG,D=document,W=window;
+var $=function(s,r){return (r||D).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||D).querySelectorAll(s))};
+function safe(fn,fb){try{return fn()}catch(e){return fb}}
+var RM=safe(function(){return W.matchMedia('(prefers-reduced-motion: reduce)').matches},false);
+var cs=safe(function(){return W.getComputedStyle(D.documentElement)},null);
+function tok(n,fb){var v=cs?cs.getPropertyValue(n):'';v=v&&v.trim();return v||fb}
+/* guarded storage: localStorage with in-memory fallback (sandboxed iframes / private mode may throw) */
+var mem={};
+var store={
+  get:function(k){var v=null;try{v=W.localStorage.getItem(k)}catch(e){}if(v==null)v=Object.prototype.hasOwnProperty.call(mem,k)?mem[k]:null;return v},
+  set:function(k,v){v=String(v);mem[k]=v;try{W.localStorage.setItem(k,v)}catch(e){}},
+  del:function(k){delete mem[k];try{W.localStorage.removeItem(k)}catch(e){}}
+};
+function vibrate(ms){safe(function(){if(navigator.vibrate)navigator.vibrate(ms)})}
+function copyText(t,cb){
+  var done=function(ok){if(cb)cb(!!ok)};
+  var fallback=function(){done(safe(function(){var ta=D.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:-9999px;font-size:16px';D.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);var r=D.execCommand('copy');D.body.removeChild(ta);return r},false))};
+  var ok=safe(function(){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){done(true)},fallback);return true}return false},false);
+  if(!ok)fallback();
+}
+var toastEl=$('#toast'),toastT=0;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('on')},2000)}
+/* event state — remaining time is always derived from the stored start timestamp, never decremented */
+var TOTAL=Math.max(60,(+C.EVENT_MINUTES||30)*60);
+var start=parseInt(store.get('taxcut_event_start'),10);
+if(!start||isNaN(start)||start>Date.now()){start=Date.now();store.set('taxcut_event_start',start)}
+function remaining(){return Math.max(0,TOTAL-Math.floor((Date.now()-start)/1000))}
+var S={code:store.get('taxcut_coupon')||'',revealed:store.get('taxcut_revealed')==='1',ended:remaining()<=0};
+if(!/^TC-\d{4}$/.test(S.code))S.code='';
+function genCode(){
+  var n=safe(function(){var a=new Uint32Array(1);W.crypto.getRandomValues(a);return a[0]%10000},null);
+  if(n==null)n=Math.floor(Math.random()*10000);
+  return 'TC-'+('000'+n).slice(-4);
+}
+/* shared DOM refs */
+var chip=$('#chip'),resPill=$('#resPill'),hCoupon=$('#h-coupon'),hSec=$('#h-sec'),rcptLink=$('#rcptLink'),rcptCode=$('#rcptCode'),couponSay=$('#couponSay'),face=$('#face'),endMark=$('#endMark');
+function applyCode(){
+  var has=!!S.code;
+  $$('[data-code]').forEach(function(el){el.textContent=S.code||'TC-0000'});
+  chip.hidden=!(has&&!S.ended);
+  resPill.hidden=!(has&&!S.ended);
+  hCoupon.value=(has&&!S.ended)?S.code:'';
+  couponSay.hidden=!has;
+  rcptLink.hidden=has||S.ended;
+  rcptCode.hidden=!(has&&!S.ended);
+}
+/* kakao links: same-window inside in-app browsers, new tab elsewhere; copy coupon on tap */
+var INAPP=/Instagram|FBAN|FBAV|KAKAOTALK|DaangnMarket|TowneersApp|Daangn/i.test(navigator.userAgent||'');
+$$('a[data-kakao]').forEach(function(a){
+  a.href=C.KAKAO_URL;
+  if(INAPP){a.removeAttribute('target');a.removeAttribute('rel')}else{a.target='_blank';a.rel='noopener'}
+  a.addEventListener('click',function(){if(S.revealed&&S.code)copyText(S.code,function(ok){if(ok)toast('쿠폰코드 복사됨')})});
+});
+$$('a[data-yt]').forEach(function(a){a.href=C.YOUTUBE_URL});
+$$('a[data-site]').forEach(function(a){a.href=C.SITE_URL});
+function goReserve(e){
+  if(e)e.preventDefault();
+  var sec=$('#reserve'),name=$('#f-name');
+  safe(function(){sec.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})},null);
+  setTimeout(function(){safe(function(){name.focus({preventScroll:true})})},RM?50:450);
+}
+$$('a[data-reserve]').forEach(function(a){a.addEventListener('click',goReserve)});
+/* coupon chip + copy button */
+function copyUI(btn,label){copyText(S.code,function(ok){if(!ok)return;var old=label;btn.textContent='복사됨';setTimeout(function(){btn.textContent=old},1500)})}
+chip.addEventListener('click',function(){copyUI(chip,S.code)});
+$('#copyBtn').addEventListener('click',function(){copyUI(this,'복사')});

@@ -1,0 +1,95 @@
+<svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="tc-badge" viewBox="0 0 200 200">
+    <defs><linearGradient id="tcBadgeBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16243A"/><stop offset="1" stop-color="#070D18"/></linearGradient></defs>
+    <circle cx="100" cy="100" r="98" fill="url(#tcBadgeBg)"/>
+    <circle cx="100" cy="100" r="98" fill="none" stroke="#1F2F49" stroke-width="2"/>
+    <text x="100" y="88" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">TAX</text>
+    <text x="100" y="150" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">CUT</text>
+    <line x1="34" y1="122" x2="166" y2="94" stroke="#3DDC84" stroke-width="6" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="tc-wordmark" viewBox="0 0 420 150">
+    <text x="210" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="700" font-size="18" fill="#3DDC84" letter-spacing="7">TAXCUT</text>
+    <text x="210" y="118" text-anchor="middle" font-family="'Black Han Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif" font-weight="900" font-size="104" fill="#FFFFFF">택스컷</text>
+    <line x1="22" y1="102" x2="398" y2="70" stroke="#3DDC84" stroke-width="7" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="tc-kakao" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.8 5.2 4.6 6.6L5.5 21l4.4-2.6c.7.1 1.4.2 2.1.2 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></symbol>
+  <symbol id="tc-coin" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="#3DDC84" stroke="currentColor" stroke-width="2"/><path d="M8 17l12-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+</svg>
+
+<header class="tbar" id="tbar">
+  <div class="tbar-in">
+    <svg width="24" height="24" aria-hidden="true"><use href="#tc-badge"/></svg>
+    <div class="tbar-txt">
+      <span class="tbar-lbl" id="tLbl">첫 달 기장료 무료까지<span class="w600"> 남은 시간</span></span>
+      <span class="tbar-num num" id="tNum" aria-hidden="true"><span class="d">2</span><span class="d">9</span>:<span class="d">5</span><span class="d">9</span></span>
+    </div>
+    <span class="sr" aria-live="polite" id="tLive">남은 시간 약 30분</span>
+    <button class="chip" id="chip" type="button" hidden aria-label="쿠폰코드 복사">TC-0000</button>
+    <a class="kbtn kbtn-sq" data-kakao href="https://pf.kakao.com/_Mxojqs/chat" aria-label="카카오톡 상담"><svg aria-hidden="true"><use href="#tc-kakao"/></svg></a>
+  </div>
+  <div class="tline" aria-hidden="true"><i id="tBar"></i><b id="tTip"></b></div>
+</header>
+
+<main>
+<section class="hero" id="hero" aria-labelledby="h1">
+  <svg class="hero-cut" id="heroCut" aria-hidden="true"><line id="cutLine" x1="0" y1="0" x2="0" y2="0"/></svg>
+  <canvas class="confetti" id="confetti" hidden aria-hidden="true"></canvas>
+  <div class="wrap hero-grid">
+    <div class="hero-txt">
+      <div class="logo-row">
+        <svg width="32" height="32" role="img" aria-label="택스컷 로고"><use href="#tc-badge"/></svg>
+        <svg class="wm" role="img" aria-label="택스컷"><use href="#tc-wordmark"/></svg>
+        <span class="firm">세무회계 민</span>
+      </div>
+      <p class="eb-ko">첫 창업 사장님을 위한 세무 기장 서비스</p>
+      <h1 class="h1" id="h1">
+        <span class="l1">첫 달 기장료,</span>
+        <span class="l2" id="l2"><span class="num">55,000</span><span class="won">원</span></span>
+        <span class="l3"><span class="z"><span class="num">0</span><span class="won">원</span></span><span class="rest">으로</span></span>
+        <span class="l4">잘라드릴게요.</span>
+      </h1>
+      <p class="cond">이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</p>
+      <p class="sub">세무를 몰라도 괜찮아요, 사장님. 카톡 한 줄로 세무사와 상담하고, 계약은 온라인으로 끝나요. 아래 카드를 긁으면 첫 달 0원 쿠폰이 나와요.</p>
+    </div>
+    <div class="hero-card">
+      <div class="card-scene" id="scene">
+        <div class="card-float" id="cardFloat">
+          <div class="card" id="card">
+            <div class="card-shadow" aria-hidden="true"></div>
+            <div class="card-face" id="face">
+              <div class="stub" aria-hidden="true"><span>TAXCUT · 1ST MONTH FREE</span></div>
+              <div class="face-in">
+                <div class="face-top"><span class="face-eb">TAXCUT COUPON</span><svg width="24" height="24" aria-hidden="true"><use href="#tc-badge"/></svg></div>
+                <p class="face-title">첫 달 기장료</p>
+                <p class="face-zero"><span class="num">0</span><span class="won">원</span><i class="face-ul" aria-hidden="true"></i></p>
+                <p class="face-end">이벤트 종료 · 상담은 계속 가능해요</p>
+                <div class="face-code"><span>코드 <b class="num" data-code>TC-0000</b></span><button type="button" class="copy" id="copyBtn">복사</button></div>
+                <p class="face-foot">상담 때 이 코드를 말씀해 주세요</p>
+                <span class="stamp" id="stamp" hidden aria-hidden="true">첫 달 0원</span>
+                <span class="end-mark" id="endMark" hidden>시간 종료</span>
+              </div>
+            </div>
+            <canvas class="card-foil" id="foil" aria-hidden="true"></canvas>
+            <div class="card-prompt" id="prompt" aria-hidden="true"><strong>여기를 긁어보세요</strong><i class="rule"></i><small>손가락으로 문지르면 첫 달 기장료가 잘려요</small></div>
+            <svg class="card-hint" id="hint" aria-hidden="true"><use href="#tc-coin"/></svg>
+            <svg class="card-cut" id="cardCut" viewBox="0 0 160 100" preserveAspectRatio="none" hidden aria-hidden="true"><line x1="-6" y1="90" x2="166" y2="10"/></svg>
+            <div class="card-glare" aria-hidden="true"></div>
+          </div>
+        </div>
+        <button type="button" class="sr-btn" id="kbReveal">키보드로 쿠폰 열기</button>
+      </div>
+      <button type="button" class="obtn ncv" id="noCanvas" hidden>탭해서 쿠폰 열기</button>
+      <a class="ul-link skip" data-kakao href="https://pf.kakao.com/_Mxojqs/chat">긁지 않아도 돼요 · 바로 카톡 상담 →</a>
+      <button type="button" class="tap-open" id="tapOpen" hidden>긁기 어려우세요? 탭해서 열기</button>
+      <div class="cta-slot" id="ctaSlot" aria-hidden="true">
+        <div class="cta-slot-in">
+          <a class="kbtn kbtn-lg" data-kakao href="https://pf.kakao.com/_Mxojqs/chat"><svg aria-hidden="true"><use href="#tc-kakao"/></svg>카톡으로 바로 상담하기</a>
+          <p class="kcap">질문 한 줄부터 괜찮아요</p>
+          <a class="obtn" data-reserve href="#reserve">전화 상담 예약하기</a>
+          <p class="coupon-say" id="couponSay">쿠폰코드 <b class="num" data-code>TC-0000</b>을 상담 때 말씀해 주세요</p>
+          <p class="knote">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="택스컷 로고">
+  <defs>
+    <linearGradient id="tcBadgeBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16243A"/>
+      <stop offset="1" stop-color="#070D18"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="98" fill="url(#tcBadgeBg)"/>
+  <circle cx="100" cy="100" r="98" fill="none" stroke="#1F2F49" stroke-width="2"/>
+  <text x="100" y="88" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">TAX</text>
+  <text x="100" y="150" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">CUT</text>
+  <line x1="34" y1="122" x2="166" y2="94" stroke="#3DDC84" stroke-width="6" stroke-linecap="round"/>
+</svg>

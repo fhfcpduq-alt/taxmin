@@ -1,0 +1,134 @@
+/* ===== 스크래치 카드 ===== */
+.card-scene{
+  perspective:900px;perspective-origin:50% 40%;width:min(368px,100%);margin:0 0 4px;position:relative;
+  --tx:0deg;--ty:0deg;--gx:50%;--gy:50%;
+}
+.card{
+  position:relative;aspect-ratio:8/5;max-width:100%;border-radius:14px;
+  transform-style:preserve-3d;will-change:transform;
+  transform:rotateX(var(--tx)) rotateY(var(--ty));
+  transition:transform .35s var(--ease-cut);
+}
+.card.is-snap{transition:transform .08s ease}
+.card.is-idle{animation:float 6s ease-in-out infinite}
+@keyframes float{
+  0%,100%{transform:translateY(0) rotateX(0deg) rotateY(0deg)}
+  50%{transform:translateY(-4px) rotateX(0deg) rotateY(3deg)}
+}
+.card > *{position:absolute;inset:0;border-radius:14px}
+.card-thick{transform:translateZ(-6px);background:var(--navy-950);border:1px solid var(--navy-700)}
+.card-shadow{transform:translateZ(-30px) scale(.96);background:var(--navy-950);filter:blur(18px);opacity:.75;border-radius:20px}
+.card-face{
+  background:var(--paper);color:var(--navy-900);overflow:hidden;display:grid;grid-template-columns:40px 1fr;
+  transform:translateZ(0);
+}
+.card-stub{
+  border-right:2px dashed var(--paper-line);display:flex;align-items:center;justify-content:center;
+}
+.card-stub span{
+  writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--font-num);font-weight:700;font-size:8px;
+  letter-spacing:.3em;color:var(--paper-mute);white-space:nowrap;
+}
+.card-body{padding:14px 14px 12px 16px;display:flex;flex-direction:column;position:relative}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.card-top .eb{font-family:var(--font-num);font-weight:700;font-size:10px;letter-spacing:.3em;color:var(--green-ink)}
+.card-top .badge{width:24px;height:24px}
+.card-face .t{font-size:22px;color:var(--navy-900);line-height:1}
+.card-face .z{position:relative;display:inline-block;font-size:56px;color:var(--navy-900);line-height:1;padding-bottom:5px;margin:2px 0 8px}
+.card-face .z::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--green-ink);
+  transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease-cut);
+}
+.card.is-revealed .card-face .z::after{transform:scaleX(1)}
+.card-face .over{display:none;font-size:20px;color:var(--navy-900);line-height:1.15;margin:6px 0 10px;max-width:14em}
+.card.is-over .card-face .z,.card.is-over .card-face .code-box{display:none}
+.card.is-over .card-face .over{display:block}
+.code-box{
+  display:flex;align-items:center;gap:8px;border:1.5px dashed var(--navy-700);padding:6px 8px 6px 10px;width:max-content;max-width:100%;
+}
+.code-box .code{font-size:18px;color:var(--navy-900);line-height:1}
+.code-box .lab{font-size:12px;color:var(--paper-mute)}
+.copy-btn{
+  border:0;background:var(--navy-900);color:var(--ink);font-size:12px;font-weight:700;padding:5px 10px;cursor:pointer;min-height:28px;
+}
+.copy-btn.is-copied{background:var(--green-ink)}
+.card-foot{margin-top:auto;font-size:12px;color:var(--paper-mute)}
+.card-mark{
+  display:none;position:absolute;right:12px;bottom:10px;font-size:11px;font-weight:700;color:var(--paper-mute);
+  border:1.5px solid var(--paper-line);padding:2px 6px;
+}
+.card.is-over.has-coupon .card-mark{display:block}
+.stamp{
+  position:absolute;right:14px;top:36%;padding:6px 12px;background:var(--green);color:var(--navy-900);
+  font-family:var(--font-display);font-size:22px;line-height:1;transform:rotate(-8deg) scale(2);opacity:0;
+  transition:transform .25s var(--ease-cut),opacity .2s ease;pointer-events:none;
+}
+.card.is-revealed .stamp{opacity:1;transform:rotate(-8deg) scale(1)}
+.card.is-over .stamp{display:none}
+.card-foil{transform:translateZ(14px);touch-action:none;cursor:crosshair;transition:opacity .35s ease}
+.card.is-revealed .card-foil{opacity:0;pointer-events:none}
+.card-prompt{
+  transform:translateZ(15px);pointer-events:none;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;transition:opacity .15s ease;
+}
+.card-prompt .p1{font-size:24px;color:var(--navy-900);line-height:1.1}
+.card-prompt .rule{width:48px;height:2px;background:var(--green-ink);transform:skewY(var(--cut-angle));margin:8px 0}
+.card-prompt .p2{font-size:12px;color:var(--navy-700)}
+.card-prompt.is-hidden{opacity:0}
+.card-hint{
+  transform:translateZ(16px);pointer-events:none;inset:auto;left:18%;bottom:18%;width:28px;height:28px;border-radius:0;
+  opacity:0;
+}
+.card-hint.is-play{animation:swipe 1.2s var(--ease-cut) 1}
+@keyframes swipe{
+  0%{opacity:0;transform:translateZ(16px) translate(0,0)}
+  15%{opacity:1}
+  85%{opacity:1}
+  100%{opacity:0;transform:translateZ(16px) translate(190px,-95px)}
+}
+.card-cut{transform:translateZ(28px);pointer-events:none;opacity:0;transition:opacity .35s ease .35s}
+.card-cut line{stroke:var(--green);stroke-width:4;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .35s var(--ease-cut)}
+.card.is-revealed .card-cut{opacity:1}
+.card.is-revealed .card-cut line{stroke-dashoffset:0}
+.card.is-revealed.is-settled .card-cut{opacity:0;transition:opacity .3s ease}
+.card-glare{
+  transform:translateZ(16px);pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.12) 50%,rgba(255,255,255,0) 70%);
+  background-size:200% 200%;background-position:var(--gx) var(--gy);
+}
+.card.is-revealed .card-glare{opacity:.5}
+.card-open{
+  display:none;position:absolute;left:50%;bottom:10px;transform:translate(-50%,0) translateZ(30px);z-index:5;
+  background:var(--navy-900);color:var(--ink);border:0;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer;
+}
+.card.no-canvas .card-open{display:block}
+.card.no-canvas .card-foil{background:linear-gradient(135deg,var(--foil-hi),var(--foil-mid),var(--foil-lo))}
+.card.is-revealed .card-open{display:none}
+.card-open.sr-only:focus{position:absolute;width:auto;height:auto;margin:0;clip:auto;white-space:normal;display:block;left:50%;bottom:10px;transform:translate(-50%,0)}
+.card-scene.is-static .card{transition:none;animation:none}
+
+/* 카드 아래 링크/CTA 슬롯 */
+.skip-row{display:flex;align-items:center;min-height:44px;margin-top:6px}
+.skip-row .cut-link{font-size:14px}
+.tap-row{display:none;min-height:36px;align-items:center}
+.tap-row.is-on{display:flex}
+.tap-row button{background:none;border:0;padding:0;font-size:13px;color:var(--green);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.cta-slot{height:0;overflow:hidden;transition:height .3s var(--ease-cut)}
+.cta-slot.is-open{height:auto}
+.cta-inner{padding:12px 0 4px;display:grid;gap:12px;max-width:420px}
+.cta-inner .btn-outline{min-height:56px}
+.cta-inner .coupon-note{font-size:12px;color:var(--ink-mute);text-align:center}
+.cta-inner .btn-caption{margin-top:-4px}
+
+/* 컨페티 */
+.confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4}
+
+/* 3D 미지원 폴백 */
+@supports not (transform-style:preserve-3d){
+  .card{transform:none !important;animation:none !important}
+  .card > *{transform:none !important}
+  .card-thick,.card-shadow{display:none}
+}
+</style>
+</head>
+<body>

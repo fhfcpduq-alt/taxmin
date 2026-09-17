@@ -1,0 +1,1202 @@
+<!doctype html>
+<!--
+  택스컷 랜딩페이지 · 후보 B (히어로 임팩트 + 카드 물성)
+  폰트: Google Fonts — Black Han Sans(한글 디스플레이) / Montserrat 700·900(숫자·코드·타이머) / Noto Sans KR 400·700(본문), 시스템 폴백 스택 포함
+  3D: CSS 3D만 사용(perspective + preserve-3d 스크래치 카드: 두께층·그림자층·글레어·틸트·스탬프). WebGL/Three.js 없음. 애니메이션은 transform/opacity.
+  설정: 스크립트 첫 줄 window.TAXCUT_CONFIG — RESERVATION_MODE 'auto'|'webhook'|'local', RESERVATION_ENDPOINT(Apps Script 웹앱 URL), WEBHOOK_JSON, EVENT_MINUTES, KAKAO_URL
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>택스컷 첫달 0원</title>
+<meta name="description" content="첫 창업 사장님을 위한 세무 기장 서비스 택스컷. 이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료. 카톡 한 줄로 세무사와 상담하세요.">
+<meta name="theme-color" content="#16243A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Montserrat:wght@700;900&family=Noto+Sans+KR:wght@400;700&display=swap">
+<style>
+/* ===== 1. 토큰 ===== */
+:root{
+  --navy-950:#070D18;--navy-900:#0B1526;--navy-800:#16243A;--navy-700:#1F2F49;--navy-500:#3A4B66;
+  --ink:#FFFFFF;--ink-soft:#C9D2E3;--ink-mute:#8F9DB5;
+  --green:#3DDC84;--green-deep:#1FB86A;--green-ink:#0E8F4F;
+  --paper:#F4F6FA;--paper-2:#E6EAF2;--paper-line:#CBD3E1;--paper-mute:#4E5D78;
+  --kakao:#FEE500;--kakao-ink:#191919;
+  --alert:#FFB020;--error:#B42318;
+  --foil-hi:#E9EDF3;--foil-mid:#C7CDD8;--foil-lo:#AEB6C4;
+  --cut-angle:-5deg;
+  --font-display:'Black Han Sans','Do Hyeon','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --font-num:Montserrat,'Arial Black',Arial,sans-serif;
+  --font-body:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --gutter:16px;--timer-h:48px;
+}
+/* ===== 베이스 ===== */
+*,*::before,*::after{box-sizing:border-box}
+html,body{overflow-x:clip}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--navy-900);color:var(--ink-soft);font-family:var(--font-body);font-size:15px;line-height:1.55;padding-top:var(--timer-h);overscroll-behavior-y:none;-webkit-font-smoothing:antialiased}
+@media (min-width:768px){body{font-size:16px;line-height:1.6}}
+h1,h2,h3,p,ul,dl,dd,figure{margin:0}
+ul{padding:0;list-style:none}
+a{color:var(--green);text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+svg{display:block}
+section,footer,[id]{scroll-margin-top:64px}
+.num{font-family:var(--font-num);font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.h2{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:30px;line-height:1.1;letter-spacing:-.01em;color:var(--ink)}
+.on-paper .h2{color:var(--navy-900)}
+@media (min-width:1024px){.h2-lg{font-size:44px}}
+.eyebrow{font-family:var(--font-num);font-weight:700;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.eyebrow::before{content:"";width:24px;height:2px;background:currentColor;transform:rotate(var(--cut-angle)) scaleX(0);transform-origin:left center;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.eyebrow.is-seen::before{transform:rotate(var(--cut-angle)) scaleX(1)}
+.on-paper .eyebrow{color:var(--green-ink)}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.on-paper :focus-visible{outline-color:var(--green-ink)}
+.wrap{max-width:1160px;margin:0 auto}
+.no-anim *,.no-anim *::before,.no-anim *::after{transition:none!important;animation:none!important}
+/* ===== 버튼 / 링크 ===== */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:0 20px;font-weight:700;font-size:16px;text-align:center;line-height:1.2;transition:transform .12s ease;-webkit-tap-highlight-color:transparent}
+.btn:active{transform:scale(.98)}
+.btn-kakao{background:var(--kakao);color:var(--kakao-ink)}
+.btn-kakao svg{width:22px;height:22px;flex:none}
+.btn-outline{position:relative;color:var(--ink);border:1.5px solid var(--ink);background:transparent}
+.btn-solid{position:relative;background:var(--navy-900);color:var(--ink)}
+.btn-outline::after,.btn-solid::after{content:"";position:absolute;left:-1.5px;right:-1.5px;bottom:-1.5px;height:3px;background:var(--green);transform:scaleX(0);transform-origin:left center;transition:transform .2s ease}
+.btn-solid::after{left:0;right:0;bottom:0;background:var(--green-ink)}
+.btn-outline:hover::after,.btn-outline:focus-visible::after,.btn-outline:active::after,.btn-solid:hover::after,.btn-solid:focus-visible::after,.btn-solid:active::after{transform:scaleX(1)}
+.btn:disabled{opacity:.6;cursor:default}
+.link-cut{position:relative;display:inline-block;color:var(--green);font-weight:700;padding-bottom:2px}
+.link-cut::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;transform-origin:left center}
+.link-cut:hover::after,.link-cut:focus-visible::after{animation:sweep .2s ease}
+@keyframes sweep{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.on-paper .link-cut{color:var(--green-ink)}
+.kakao-note{font-size:11px;color:var(--ink-mute);text-align:center;line-height:1.4;margin-top:8px}
+.cta-cap{font-size:12px;color:var(--ink-mute);text-align:center;margin-top:-4px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);opacity:0;background:var(--ink);color:var(--navy-900);font-weight:700;font-size:13px;padding:10px 14px;z-index:60;pointer-events:none;transition:transform .2s ease,opacity .2s ease}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* ===== 00 상단 고정 타이머 바 ===== */
+.tbar{position:fixed;top:0;left:0;right:0;height:var(--timer-h);z-index:50;background:var(--navy-800);border-bottom:1px solid var(--navy-700);display:flex;align-items:center;gap:10px;padding:0 var(--gutter)}
+.tbar .badge{width:24px;height:24px;flex:none}
+.tbar-text{flex:1;min-width:0;line-height:1.1}
+.tbar-label{display:block;font-size:11px;color:var(--ink-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbar-label .long{display:none}
+@media (min-width:600px){.tbar-label .long{display:inline}.tbar-label .short{display:none}}
+.tbar-time{display:block;font-size:20px;color:var(--ink);line-height:1;margin-top:2px}
+.tbar-time .d{display:inline-block;min-width:.62em;text-align:center}
+.tbar-time .c{display:inline-block;width:.35em;text-align:center}
+.is-alert .tbar-time{color:var(--alert);animation:pulse 1s steps(1,end) infinite}
+@keyframes pulse{50%{opacity:.35}}
+.is-alert .tbar-label{color:var(--ink-soft)}
+.is-ended .tbar-time{display:none}
+.is-ended .tbar-label{font-size:12px;color:var(--ink);white-space:normal;line-height:1.25}
+.tbar-line{position:absolute;left:0;bottom:-1px;height:3px;width:100%;background:var(--green);transform-origin:left center;transform:scaleX(1);transition:transform 1s linear}
+.tbar-line::after{content:"";position:absolute;right:-3px;top:0;width:6px;height:3px;background:inherit;transform:skewX(var(--cut-angle))}
+.is-alert .tbar-line{background:var(--alert)}
+.chip{display:none;align-items:center;font-family:var(--font-num);font-weight:900;font-size:13px;letter-spacing:-.02em;color:var(--ink);border:1.5px dashed var(--green);padding:6px 8px;line-height:1;white-space:nowrap}
+.is-revealed:not(.is-ended) .chip{display:inline-flex}
+.tbar-kakao{width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--kakao);color:var(--kakao-ink)}
+.tbar-kakao svg{width:20px;height:20px}
+/* ===== 01 히어로 ===== */
+.hero{position:relative;overflow:clip;background:var(--navy-900);padding:56px var(--gutter) 40px}
+.hero::before{content:"";position:absolute;left:0;right:0;top:0;height:360px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 1px,transparent 1px 9px);-webkit-mask-image:linear-gradient(#000 35%,transparent);mask-image:linear-gradient(#000 35%,transparent);pointer-events:none}
+.hero-inner{position:relative;max-width:1160px;margin:0 auto}
+.hero-copy{position:relative;z-index:0}
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.logo-row .badge{width:32px;height:32px;flex:none}
+.logo-row .wordmark{width:110px;height:auto;flex:none}
+.logo-row .firm{margin-left:auto;font-size:11px;color:var(--ink-mute);letter-spacing:.05em;white-space:nowrap}
+.hero-eyebrow{font-weight:700;font-size:11px;letter-spacing:.1em;color:var(--green);margin-bottom:10px}
+.hl{font-family:var(--font-display);font-weight:400;line-height:1.1;letter-spacing:-.01em;font-synthesis:none;color:var(--ink)}
+.hl>span{display:block}
+.hl .l1{font-size:clamp(30px,8.5vw,44px)}
+.hl .l2{position:relative;font-size:clamp(48px,14vw,72px);line-height:1.05;width:max-content;max-width:100%;--rise:12px;transition:opacity .4s ease .1s}
+.hl .l2 .won{font-family:var(--font-display);font-size:.6em}
+.hl .l2 .base{display:block;white-space:nowrap;color:transparent}
+.hl .l2 .piece{position:absolute;inset:0;display:block;white-space:nowrap;transition:transform .5s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.hl .l2 .piece-top{clip-path:polygon(0 0,100% 0,100% calc(50% - var(--rise)),0 calc(50% + var(--rise)))}
+.hl .l2 .piece-bot{clip-path:polygon(0 calc(50% + var(--rise)),100% calc(50% - var(--rise)),100% 100%,0 100%)}
+.is-cut .hl .l2{opacity:.55}
+.is-cut .hl .l2 .piece-top{transform:translate(-3px,-5px) rotate(-.7deg)}
+.is-cut .hl .l2 .piece-bot{transform:translate(3px,5px) rotate(.7deg)}
+.hl .l3{white-space:nowrap;font-size:clamp(26px,7.5vw,34px);display:flex;align-items:baseline;gap:.06em;margin-top:.04em}
+.hl .l3 .zero{font-size:clamp(56px,17vw,88px);color:var(--green);line-height:1;display:inline-block;transform:scale(.96);transform-origin:left bottom;transition:transform .2s ease}
+.is-cut .hl .l3 .zero{transform:scale(1)}
+.hl .l3 .won{color:var(--green);font-size:clamp(39px,11.9vw,62px)}
+@media (max-width:379px){.hl .l3 .zero{font-size:60px}.hl .l3 .won{font-size:42px}}
+.hl .l4{font-size:clamp(26px,7.5vw,34px)}
+.hero-cut{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:1}
+.hero-cut line{stroke:var(--green);stroke-width:5;stroke-linecap:round;stroke-dasharray:var(--cut-len,4000);stroke-dashoffset:var(--cut-len,4000);transition:stroke-dashoffset .65s cubic-bezier(.2,.8,.2,1)}
+.is-drawn .hero-cut line{stroke-dashoffset:0}
+.hero-cut .tip{fill:var(--ink);opacity:0}
+.is-drawn .hero-cut .tip{animation:tipfade .65s linear both}
+@keyframes tipfade{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.cond{margin-top:22px;padding-left:12px;border-left:2px solid var(--green);font-weight:700;font-size:14px;line-height:1.5;color:var(--ink);max-width:34ch}
+.sub{margin-top:14px;font-size:15px;line-height:1.55;color:var(--ink-soft);max-width:34ch}
+.hero-cardcol{position:relative;z-index:2;margin-top:16px}
+.skip-row{display:flex;align-items:center;min-height:44px;margin-top:8px;font-size:14px}
+.skip-row a{color:var(--green);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.tap-open{display:none;font-size:13px;color:var(--ink-mute);text-decoration:underline;text-underline-offset:3px;min-height:36px;align-items:center}
+.show-tap .tap-open{display:inline-flex}
+.is-revealed .tap-open{display:none}
+.cta-slot{max-height:0;overflow:hidden;visibility:hidden;transition:max-height .3s ease-out}
+.is-revealed .cta-slot{max-height:600px;visibility:visible}
+.cta-slot-in{padding-top:16px;display:grid;gap:12px}
+.cta-code{display:none;font-size:12px;color:var(--ink-mute);text-align:center}
+.has-coupon .cta-code{display:block}
+@media (min-width:1024px){
+  .hero{padding:72px var(--gutter) 64px}
+  .hero-inner{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;align-items:center}
+  .hero-copy{grid-column:1/8}
+  .hero-cardcol{grid-column:8/13;margin-top:0}
+  .hl .l1{font-size:44px}.hl .l2{font-size:72px}.hl .l3{font-size:34px}.hl .l3 .zero{font-size:88px}.hl .l3 .won{font-size:62px}.hl .l4{font-size:34px}
+}
+/* ===== 스크래치 카드 (3D 물체) ===== */
+.card-scene{perspective:900px;perspective-origin:50% 40%;width:min(368px,100%);position:relative}
+.card-float{transform-style:preserve-3d;will-change:transform}
+.is-idle .card-float{animation:floaty 6s ease-in-out infinite}
+.card-float.is-held{animation:none}
+@keyframes floaty{0%,100%{transform:translateY(0) rotateY(0)}50%{transform:translateY(-4px) rotateY(3deg)}}
+.card{position:relative;aspect-ratio:8/5;width:100%;border-radius:14px;transform-style:preserve-3d;will-change:transform;transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg));--gx:0;--gy:0}
+.card.press{animation:press .28s ease-out}
+@keyframes press{0%{transform:translateZ(0)}40%{transform:translateZ(-12px) rotateX(1.5deg)}100%{transform:translateZ(0)}}
+.card-thick{position:absolute;inset:0;border-radius:14px;background:var(--navy-950);border:1px solid var(--navy-700);transform:translateZ(-6px)}
+.card-thick.mid{background:var(--navy-800);border-color:var(--navy-500);transform:translateZ(-3px)}
+.card-shadow{position:absolute;inset:8% 5% 2%;border-radius:14px;background:var(--navy-950);filter:blur(18px);opacity:.8;transform:translateZ(-30px)}
+.card-face{position:absolute;inset:0;border-radius:14px;overflow:hidden;background:var(--paper);color:var(--navy-900);display:grid;grid-template-columns:40px 1fr;transform:translateZ(0)}
+.card-stub{border-right:2px dashed var(--paper-line);position:relative;background:var(--paper-2)}
+.card-stub span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;font-family:var(--font-num);font-weight:700;font-size:8px;letter-spacing:.3em;color:var(--paper-mute)}
+.card-main{position:relative;padding:12px 14px 12px 16px;display:flex;flex-direction:column;min-width:0}
+.card-top{display:flex;align-items:center;justify-content:space-between}
+.card-top .eyebrow{margin:0;font-size:10px;color:var(--green-ink)}
+.card-top .eyebrow::before{display:none}
+.card-top .badge{width:24px;height:24px}
+.face-title{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:22px;line-height:1.1;margin-top:6px}
+.face-live{display:flex;flex-direction:column;flex:1;min-height:0}
+.face-zero{font-size:56px;line-height:1;display:inline-block;position:relative;margin-top:2px;align-self:flex-start}
+.face-zero .won{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:.5em}
+.face-zero::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:5px;background:var(--green-ink);transform:scaleX(0);transform-origin:left center;transition:transform .3s cubic-bezier(.2,.8,.2,1) .35s}
+.is-revealed .face-zero::after{transform:scaleX(1)}
+.face-code{margin-top:auto;display:flex;align-items:center;gap:8px;border:1.5px dashed var(--navy-700);padding:6px 8px 6px 10px;font-size:13px;color:var(--paper-mute)}
+.face-code .num{font-size:18px;color:var(--navy-900)}
+.face-code button{margin-left:auto;font-size:12px;font-weight:700;color:var(--navy-900);border:1.5px solid var(--navy-700);padding:5px 8px;line-height:1;background:var(--paper)}
+.face-code button:active{background:var(--paper-2)}
+.face-foot{font-size:12px;color:var(--paper-mute);margin-top:6px;line-height:1.3}
+.face-ended{display:none;font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:20px;line-height:1.2;margin-top:10px;color:var(--navy-900)}
+.is-ended:not(.has-coupon) .face-live{display:none}
+.is-ended:not(.has-coupon) .face-ended{display:block}
+.face-mark{display:none;position:absolute;right:14px;top:42px;font-size:11px;font-weight:700;color:var(--paper-mute);border:1.5px solid var(--paper-line);padding:3px 6px;line-height:1;background:var(--paper)}
+.is-ended.has-coupon .face-mark{display:block}
+.card-stamp{position:absolute;right:8%;bottom:12%;transform:rotate(-8deg) scale(2);opacity:0;font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:22px;line-height:1;color:var(--navy-900);background:var(--green);padding:9px 14px 10px;border:3px solid var(--navy-900);box-shadow:inset 0 0 0 2px var(--green);letter-spacing:.02em;pointer-events:none;white-space:nowrap;will-change:transform,opacity}
+.card-stamp.hit{opacity:1;transform:rotate(-8deg) scale(1);transition:transform .25s cubic-bezier(.2,1.6,.4,1),opacity .08s ease}
+.card-stamp.set{opacity:1;transform:rotate(-8deg) scale(1)}
+.card-foil{position:absolute;inset:0;width:100%;height:100%;border-radius:14px;transform:translateZ(14px);touch-action:none;cursor:crosshair;transition:opacity .35s ease .1s;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.is-revealed .card-foil{opacity:0;pointer-events:none}
+.card-prompt{position:absolute;inset:0;transform:translateZ(15px);pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--navy-900);transition:opacity .15s ease;padding:0 16px}
+.card-prompt strong{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:24px;line-height:1.1}
+.card-prompt i{display:block;width:48px;height:3px;background:var(--green-ink);transform:rotate(var(--cut-angle));margin:10px 0}
+.card-prompt small{font-size:12px;color:var(--navy-700);font-weight:700}
+.is-scratched .card-prompt,.is-revealed .card-prompt{opacity:0}
+.card-glare{position:absolute;inset:0;border-radius:14px;overflow:hidden;pointer-events:none;transform:translateZ(15.5px)}
+.card-glare::before{content:"";position:absolute;left:-50%;top:-50%;width:200%;height:200%;background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.06) 44%,rgba(255,255,255,.12) 49%,rgba(255,255,255,.12) 51%,rgba(255,255,255,.06) 56%,transparent 64%);transform:translate(calc(var(--gx) * -22%),calc(var(--gy) * -22%));will-change:transform}
+.is-revealed .card-glare::before{opacity:.6}
+.card-hint{position:absolute;left:18%;top:62%;width:28px;height:28px;transform:translateZ(16px);pointer-events:none;opacity:0;will-change:transform,opacity}
+.card-hint.play{animation:hintDrag 1.2s cubic-bezier(.4,0,.2,1) both}
+@keyframes hintDrag{0%{opacity:0;transform:translateZ(16px) translate(0,0)}15%{opacity:1;transform:translateZ(16px) translate(6px,-4px)}85%{opacity:1;transform:translateZ(16px) translate(170px,-100px)}100%{opacity:0;transform:translateZ(16px) translate(180px,-106px)}}
+.card-cut{position:absolute;inset:0;width:100%;height:100%;transform:translateZ(28px);pointer-events:none;overflow:visible;opacity:0}
+.card-cut line{stroke:var(--green);stroke-width:4;stroke-linecap:round;stroke-dasharray:700;stroke-dashoffset:700}
+.card-cut.draw{opacity:1}
+.card-cut.draw line{stroke-dashoffset:0;transition:stroke-dashoffset .35s cubic-bezier(.2,.8,.2,1)}
+.card-cut.fade{opacity:0;transition:opacity .25s ease}
+.card-fallback{display:none;position:absolute;inset:0;transform:translateZ(16px);align-items:center;justify-content:center;background:var(--foil-mid);color:var(--navy-900);font-weight:700;font-size:16px;border-radius:14px}
+.no-canvas .card-fallback{display:flex}
+.no-canvas .card-foil,.no-canvas .card-prompt,.no-canvas .card-hint{display:none}
+.is-revealed .card-fallback{display:none}
+.confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3}
+@supports not (transform-style:preserve-3d){
+  .card,.card-float{transform:none!important;animation:none!important}
+  .card-thick,.card-shadow{display:none}
+  .card-foil,.card-prompt,.card-cut,.card-glare,.card-hint,.card-fallback{transform:none}
+}
+@media (max-width:359px){.face-title{font-size:19px}.face-zero{font-size:46px}.card-prompt strong{font-size:21px}.card-stamp{font-size:18px}}
+@media (min-width:1024px){.card-scene{width:420px}.card{aspect-ratio:420/248}}
+/* ===== 02 가격 — 영수증 ===== */
+.receipt{position:relative;background:var(--paper);color:var(--navy-900);padding:40px var(--gutter) 40px;margin-top:8px}
+.receipt::before{content:"";position:absolute;left:0;right:0;top:-8px;height:8px;background:conic-gradient(from 135deg at 50% 0,var(--paper) 0 90deg,transparent 90deg) 0 0/16px 8px repeat-x}
+.price-raw{font-weight:700;font-size:18px;margin-top:16px;line-height:1.4}
+.price-big{display:flex;align-items:baseline;gap:6px;margin-top:8px;position:relative;width:max-content;max-width:100%}
+.price-big .num{font-size:clamp(72px,24vw,160px);line-height:1;color:var(--navy-900);transition:opacity .3s ease .4s}
+.price-big .won{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:40px;transition:opacity .3s ease .4s}
+.price-big::after{content:"";position:absolute;left:-4%;right:-4%;top:50%;height:8px;margin-top:-4px;background:var(--green-ink);transform:rotate(var(--cut-angle)) scaleX(0);transform-origin:left center;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.price-big.is-seen::after{transform:rotate(var(--cut-angle)) scaleX(1)}
+.price-big.is-seen .num,.price-big.is-seen .won{opacity:.5}
+.price-first{display:flex;align-items:baseline;gap:10px;margin-top:8px}
+.price-first .lbl{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:24px}
+.price-first .zero{position:relative;font-size:clamp(80px,30vw,120px);line-height:1;color:var(--navy-900)}
+.price-first .zero .won{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:.4em}
+.price-first .zero::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:6px;background:var(--green-ink);transform:scaleX(0);transform-origin:left center;transition:transform .3s cubic-bezier(.2,.8,.2,1) .5s}
+.price-big.is-seen+.price-first .zero::after{transform:scaleX(1)}
+.price-table{margin-top:20px;border-top:1px solid var(--paper-line);font-size:15px}
+.price-table>div{display:flex;justify-content:space-between;gap:12px;padding:12px 8px;border-bottom:1px solid var(--paper-line)}
+.price-table>div:nth-child(even){background:var(--paper-2)}
+.price-table dd{font-weight:700;text-align:right}
+.fn{margin-top:16px;font-size:13px;color:var(--paper-mute);display:grid;gap:4px}
+.fn li{display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.fn li::before{content:"";flex:none;width:16px;height:2px;background:var(--green-ink);margin-top:.6em}
+.cond-paper{margin-top:14px;font-size:13px;font-weight:700;padding-left:10px;border-left:2px solid var(--green-ink);line-height:1.5}
+.receipt-foot{margin-top:20px;padding-top:14px;border-top:1px dashed var(--paper-line);font-size:14px;font-weight:700}
+.receipt-foot a{color:var(--green-ink);text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+.receipt-foot .after{display:none}
+.is-revealed:not(.is-ended) .receipt-foot .before{display:none}
+.is-revealed:not(.is-ended) .receipt-foot .after{display:inline}
+@media (min-width:1024px){.receipt{padding:64px var(--gutter)}.receipt-grid{display:grid;grid-template-columns:7fr 5fr;gap:48px;align-items:start}.price-table{margin-top:0}}
+/* ===== 03 왜 택스컷 ===== */
+.why{background:var(--navy-900);padding:56px var(--gutter)}
+.why .lead{margin-top:10px;color:var(--ink-soft);font-size:15px}
+.points{display:grid;gap:32px;margin-top:32px}
+.point{position:relative;padding-top:14px}
+.point::before{content:"";position:absolute;left:0;top:0;width:28px;height:2px;background:var(--green);transform:rotate(var(--cut-angle));transform-origin:left center}
+.point .idx{position:absolute;right:0;top:4px;font-size:36px;color:var(--green);opacity:.4;line-height:1;pointer-events:none}
+.point h3{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:22px;line-height:1.15;color:var(--ink);padding-right:64px}
+.point h3 a{color:inherit;text-decoration:underline;text-decoration-color:var(--green);text-decoration-thickness:2px;text-underline-offset:5px}
+.point p{margin-top:8px;color:var(--ink-soft);font-size:15px;max-width:34ch}
+@media (min-width:1024px){
+  .why{padding:80px var(--gutter)}
+  .points{grid-template-columns:1fr 1fr;gap:1px;background:var(--navy-700);margin-top:40px}
+  .point{background:var(--navy-900);padding:36px 28px 36px 0}
+  .point:nth-child(even){padding-left:28px}
+  .point::before{top:20px}
+  .point:nth-child(even)::before{left:28px}
+  .point .idx{top:24px;right:28px}
+}
+/* ===== 04 진행 절차 ===== */
+.how{background:var(--navy-800);padding:56px var(--gutter)}
+.steps{position:relative;margin-top:28px;display:grid;gap:28px;padding-left:44px}
+.steps::before{content:"";position:absolute;left:14px;top:0;bottom:0;width:3px;background:var(--green);transform:scaleY(0);transform-origin:top center;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.steps.is-seen::before{transform:scaleY(1)}
+.step{position:relative}
+.step .n{position:absolute;left:-44px;top:-6px;width:32px;text-align:center;font-size:36px;line-height:1;color:var(--green);background:var(--navy-800);padding:4px 0}
+.step h3{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:22px;line-height:1.15;color:var(--ink)}
+.step p{margin-top:6px;color:var(--ink-soft);font-size:15px}
+.how-note{margin-top:24px;font-size:13px;color:var(--ink-mute)}
+.how-link{margin-top:14px;font-size:15px}
+@media (min-width:1024px){
+  .how{padding:80px var(--gutter)}
+  .steps{grid-template-columns:repeat(3,1fr);gap:32px;padding-left:0;padding-top:64px;margin-top:40px}
+  .steps::before{left:0;right:0;top:20px;bottom:auto;height:3px;width:auto;transform:scaleX(0);transform-origin:left center}
+  .steps.is-seen::before{transform:scaleX(1)}
+  .step .n{left:0;top:-64px;width:auto;text-align:left;padding:2px 12px 2px 0}
+}
+/* ===== 05 FAQ ===== */
+.faq{background:var(--paper);color:var(--navy-900);padding:56px var(--gutter)}
+.faq-list{margin-top:20px;border-top:1px solid var(--paper-line)}
+.faq details{border-bottom:1px solid var(--paper-line)}
+.faq summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:12px 0;font-weight:700;font-size:16px;cursor:pointer;line-height:1.35}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary i{flex:none;width:16px;height:2px;background:var(--green-ink);transform:rotate(45deg);transition:transform .15s ease}
+.faq details[open]{background:var(--paper-2);margin:0 -8px;padding:0 8px}
+.faq details[open] summary i{transform:rotate(90deg)}
+.faq .a{padding:0 0 16px;font-size:15px;line-height:1.6;color:var(--paper-mute);max-width:60ch}
+@media (min-width:1024px){.faq{padding:80px var(--gutter)}.faq-list{margin-top:32px}}
+/* ===== 06 최종 CTA ===== */
+.cta-a{background:var(--navy-900);padding:56px var(--gutter)}
+.cta-a .sub2{margin-top:8px;color:var(--ink-soft)}
+.cta-a .btn{margin-top:20px}
+.cta-a .cta-cap{margin-top:10px}
+.cta-b{background:var(--paper);color:var(--navy-900);padding:56px var(--gutter)}
+.cta-b .h2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{display:none;font-family:var(--font-num);font-weight:900;font-size:13px;letter-spacing:-.02em;border:1.5px dashed var(--green-ink);padding:6px 8px;line-height:1;color:var(--navy-900)}
+.is-revealed:not(.is-ended) .pill{display:inline-block}
+.mode-badge{display:none;margin-top:10px;font-size:12px;font-weight:700;color:var(--paper-mute);background:var(--paper-2);padding:5px 8px;width:max-content;max-width:100%}
+.is-local .mode-badge{display:block}
+.form{margin-top:20px;display:grid;gap:16px;max-width:520px}
+.form[hidden]{display:none}
+.f{display:grid;gap:6px}
+.f label{font-size:13px;font-weight:700}
+.f input,.f select,.f textarea{width:100%;min-height:48px;padding:10px 12px;border:1.5px solid var(--navy-700);border-radius:6px;background:var(--paper-2);font:inherit;font-size:16px;color:var(--navy-900);-webkit-appearance:none;appearance:none;margin:0}
+.f select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' fill='none' stroke='%231F2F49' stroke-width='2'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.f textarea{min-height:64px;resize:vertical;line-height:1.5}
+.f input:focus-visible,.f select:focus-visible,.f textarea:focus-visible{outline:2px solid var(--green-ink);outline-offset:2px}
+.f input:disabled{opacity:.5}
+.f .err{display:none;font-size:13px;color:var(--error);font-weight:700}
+.f.is-invalid .err{display:block}
+.f.is-invalid input,.f.is-invalid select{border-color:var(--error)}
+.f-row{display:grid;gap:8px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:400;line-height:1.4}
+.chk input{width:20px;height:20px;min-height:0;padding:0;margin:1px 0 0;flex:none;-webkit-appearance:checkbox;appearance:checkbox;accent-color:var(--green-ink);border-radius:3px}
+.chk.is-invalid input{outline:2px solid var(--error);outline-offset:1px}
+.privacy-note{font-size:12px;color:var(--paper-mute);line-height:1.5;margin-left:30px}
+.privacy-note a{color:var(--green-ink);text-decoration:underline;text-underline-offset:3px;font-weight:700}
+.f-other{display:none}
+.f-other.show{display:grid}
+.panel{display:none;margin-top:20px;padding:24px;border:2px solid var(--navy-900);max-width:520px}
+.panel.show{display:block}
+.panel h3{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:24px;line-height:1.25;outline:none}
+.panel p{margin-top:8px;font-size:14px}
+.panel .btn{margin-top:16px}
+.form-fail{display:none;margin-top:16px;padding:14px;border:2px solid var(--error);font-weight:700;max-width:520px;line-height:1.5}
+.form-fail.show{display:block}
+.form-fail .btn{margin-top:12px}
+.cta-b .kakao-note,.cta-b .cta-cap{color:var(--paper-mute)}
+@media (min-width:1024px){.final{display:grid;grid-template-columns:5fr 7fr}.cta-a,.cta-b{padding:80px 48px}.cta-a .btn{max-width:420px}}
+/* ===== 07 푸터 ===== */
+.foot{background:var(--navy-950);padding:48px var(--gutter) 96px;font-size:13px;color:var(--ink-soft)}
+.foot .wordmark{width:90px;height:auto}
+.foot .firm{margin-top:10px;font-weight:700}
+.trust{margin-top:16px;display:grid;gap:4px;color:var(--ink-mute);font-size:12px}
+.foot-links{margin-top:16px;display:flex;flex-wrap:wrap;gap:16px}
+.foot-links a{color:var(--green);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.privacy,.notes{margin-top:24px;padding-top:16px;border-top:1px solid var(--navy-700);font-size:12px;color:var(--ink-mute);display:grid;gap:4px}
+.privacy h3,.notes h3{font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:4px}
+.notes li{display:flex;gap:6px;line-height:1.5}
+.notes li .num{font-weight:700;color:var(--green)}
+@media (min-width:768px){.foot{padding-bottom:48px}}
+/* ===== 08 하단 고정 CTA 바 (모바일) ===== */
+.bbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--navy-800);border-top:1px solid var(--navy-700);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;transform:translateY(110%);transition:transform .2s ease}
+.bbar.show{transform:translateY(0)}
+.bbar .btn{min-height:44px;font-size:15px;padding:0 12px}
+.bbar .btn-kakao{flex:0 0 58%}
+.bbar .btn-outline{flex:1}
+@media (min-width:768px){.bbar{display:none}}
+/* ===== 모션 축소 ===== */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .is-alert .tbar-time{animation:none}
+  .is-idle .card-float{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="page" id="page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="tcBadgeBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16243A"/><stop offset="1" stop-color="#070D18"/></linearGradient>
+    <symbol id="tc-badge" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="98" fill="url(#tcBadgeBg)"/>
+      <circle cx="100" cy="100" r="98" fill="none" stroke="#1F2F49" stroke-width="2"/>
+      <text x="100" y="88" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">TAX</text>
+      <text x="100" y="150" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="900" font-size="52" fill="#FFFFFF" letter-spacing="1">CUT</text>
+      <line x1="34" y1="122" x2="166" y2="94" stroke="#3DDC84" stroke-width="6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="tc-wordmark" viewBox="0 0 420 150">
+      <text x="210" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="700" font-size="18" fill="#3DDC84" letter-spacing="7">TAXCUT</text>
+      <text x="210" y="118" text-anchor="middle" font-family="'Black Han Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif" font-weight="400" font-size="104" fill="#FFFFFF">택스컷</text>
+      <line x1="22" y1="102" x2="398" y2="70" stroke="#3DDC84" stroke-width="7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="ic-kakao" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3C6.48 3 2 6.53 2 10.9c0 2.8 1.86 5.26 4.66 6.66l-1.03 3.83c-.08.3.26.55.52.38l4.56-3.04c.42.05.85.07 1.29.07 5.52 0 10-3.53 10-7.9S17.52 3 12 3z"/></symbol>
+  </defs>
+</svg>
+
+<!-- 00 상단 고정 타이머 바 -->
+<div class="tbar" id="tbar">
+  <svg class="badge" aria-hidden="true" focusable="false"><use href="#tc-badge"/></svg>
+  <div class="tbar-text">
+    <span class="tbar-label" id="tbarLabel"><span class="short">첫 달 기장료 무료까지</span><span class="long">첫 달 기장료 무료까지 남은 시간</span></span>
+    <span class="tbar-time num" id="tbarTime" aria-hidden="true"><span class="d">2</span><span class="d">9</span><span class="c">:</span><span class="d">5</span><span class="d">9</span></span>
+    <span class="sr-only" aria-live="polite" id="tbarLive">남은 시간 약 30분</span>
+  </div>
+  <button type="button" class="chip" id="tbarChip" aria-label="쿠폰코드 복사"><span data-code>TC-0000</span></button>
+  <a class="tbar-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao aria-label="카카오톡 상담"><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg></a>
+  <div class="tbar-line" id="tbarLine" aria-hidden="true"></div>
+</div>
+
+<!-- 01 히어로 -->
+<header class="hero" id="top">
+  <svg class="hero-cut" id="heroCut" aria-hidden="true" focusable="false">
+    <line id="heroCutLine" x1="0" y1="0" x2="0" y2="0"/>
+    <circle class="tip" r="5"><animateMotion id="heroTipMotion" dur="0.65s" begin="indefinite" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1" path="M0 0 L0 0"/></circle>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="logo-row">
+        <svg class="badge" role="img" aria-label="택스컷 로고" focusable="false"><use href="#tc-badge"/></svg>
+        <svg class="wordmark" viewBox="0 0 420 150" role="img" aria-label="택스컷" focusable="false"><use href="#tc-wordmark"/></svg>
+        <span class="firm">세무회계 민</span>
+      </div>
+      <p class="hero-eyebrow">첫 창업 사장님을 위한 세무 기장 서비스</p>
+      <h1 class="hl">
+        <span class="l1">첫 달 기장료,</span>
+        <span class="l2 num" id="l2"><span class="base" aria-hidden="true">55,000<span class="won">원</span></span><span class="piece piece-top">55,000<span class="won">원</span></span><span class="piece piece-bot" aria-hidden="true">55,000<span class="won">원</span></span></span>
+        <span class="l3"><span class="zero num">0</span><span class="won">원</span><span class="rest">으로</span></span>
+        <span class="l4">잘라드릴게요.</span>
+      </h1>
+      <p class="cond">이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</p>
+      <p class="sub">세무를 몰라도 괜찮아요, 사장님. 카톡 한 줄로 세무사와 상담하고, 계약은 온라인으로 끝나요. 아래 카드를 긁으면 첫 달 0원 쿠폰이 나와요.</p>
+    </div>
+    <div class="hero-cardcol">
+      <div class="card-scene" id="cardScene">
+        <div class="card-float" id="cardFloat">
+          <div class="card" id="card">
+            <div class="card-shadow" aria-hidden="true"></div>
+            <div class="card-thick" aria-hidden="true"></div>
+            <div class="card-thick mid" aria-hidden="true"></div>
+            <div class="card-face" id="cardFace">
+              <div class="card-stub" aria-hidden="true"><span>TAXCUT · 1ST MONTH FREE</span></div>
+              <div class="card-main">
+                <div class="card-top"><span class="eyebrow">TAXCUT COUPON</span><svg class="badge" aria-hidden="true" focusable="false"><use href="#tc-badge"/></svg></div>
+                <div class="face-title">첫 달 기장료</div>
+                <div class="face-live">
+                  <div class="face-zero num">0<span class="won">원</span></div>
+                  <div class="face-code"><span>코드</span><span class="num" data-code>TC-0000</span><button type="button" id="faceCopy" aria-label="쿠폰코드 복사">복사</button></div>
+                  <p class="face-foot">상담 때 이 코드를 말씀해 주세요</p>
+                </div>
+                <p class="face-ended">이벤트 종료 · 상담은 계속 가능해요</p>
+                <span class="face-mark">시간 종료</span>
+              </div>
+              <div class="card-stamp" id="cardStamp" aria-hidden="true">첫 달 0원</div>
+            </div>
+            <canvas class="card-foil" id="foil" role="img" aria-label="스크래치 영역. 손가락이나 마우스로 문질러서 쿠폰을 열어요"></canvas>
+            <div class="card-prompt" id="cardPrompt" aria-hidden="true"><strong>여기를 긁어보세요</strong><i></i><small>손가락으로 문지르면 첫 달 기장료가 잘려요</small></div>
+            <div class="card-glare" aria-hidden="true"></div>
+            <svg class="card-hint" id="cardHint" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+              <circle cx="14" cy="14" r="11" style="fill:var(--green);stroke:var(--navy-900);stroke-width:2"/>
+              <circle cx="14" cy="14" r="7" style="fill:none;stroke:var(--navy-900);stroke-width:1.5;opacity:.5"/>
+              <path d="M9 11.5h10M9 15h10" style="stroke:var(--navy-900);stroke-width:2;stroke-linecap:round"/>
+            </svg>
+            <svg class="card-cut" id="cardCut" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><line x1="-5" y1="58" x2="105" y2="42" vector-effect="non-scaling-stroke"/></svg>
+            <button type="button" class="card-fallback" id="cardFallback">탭해서 쿠폰 열기</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="sr-only" id="kbdReveal">키보드로 쿠폰 열기</button>
+      <div class="skip-row"><a href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao>긁지 않아도 돼요 · 바로 카톡 상담 →</a></div>
+      <button type="button" class="tap-open" id="tapOpen">긁기 어려우세요? 탭해서 열기</button>
+      <div class="cta-slot" id="ctaSlot" aria-hidden="true">
+        <div class="cta-slot-in">
+          <a class="btn btn-kakao" id="ctaKakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+          <p class="cta-cap">질문 한 줄부터 괜찮아요</p>
+          <a class="btn btn-outline" href="#reserve" data-reserve>전화 상담 예약하기</a>
+          <p class="cta-code">쿠폰코드 <span class="num" data-code>TC-0000</span>을 상담 때 말씀해 주세요</p>
+          <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main">
+<!-- 02 가격 — 영수증 -->
+<section class="receipt on-paper" id="price" aria-labelledby="priceTitle">
+  <div class="wrap receipt-grid">
+    <div>
+      <p class="eyebrow" data-seen>Price</p>
+      <h2 class="h2" id="priceTitle">요금, 솔직하게.</h2>
+      <p class="price-raw">1개월 기장료 55,000원 (부가세 포함)</p>
+      <div class="price-big" id="priceBig" data-seen aria-label="55,000원, 첫 달은 잘라서"><span class="num">55,000</span><span class="won">원</span></div>
+      <div class="price-first"><span class="lbl">첫 달</span><span class="zero num">0<span class="won">원</span></span></div>
+    </div>
+    <div>
+      <dl class="price-table">
+        <div><dt>첫 달 기장료</dt><dd>0원</dd></div>
+        <div><dt>둘째 달부터</dt><dd>55,000원 (부가세 포함)</dd></div>
+        <div><dt>매출액 구간</dt><dd>상담 시 안내</dd></div>
+      </dl>
+      <ul class="fn">
+        <li>※ 매출액에 따라 달라질 수 있습니다.</li>
+        <li>※ 2개월째부터는 기장료가 정상 청구돼요.</li>
+      </ul>
+      <p class="cond-paper">이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</p>
+      <p class="receipt-foot"><a class="before" href="#cardScene" data-tocard>쿠폰은 위의 카드를 긁으면 나와요 ↑</a><span class="after">쿠폰 <span class="num" data-code>TC-0000</span> 적용</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 왜 택스컷 -->
+<section class="why" id="why" aria-labelledby="whyTitle">
+  <div class="wrap">
+    <p class="eyebrow" data-seen>Why Taxcut</p>
+    <h2 class="h2 h2-lg" id="whyTitle">처음이라 모르는 게 당연해요.</h2>
+    <p class="lead">지어낸 숫자 대신, 실제로 하는 것만 적었어요.</p>
+    <ul class="points">
+      <li class="point"><span class="idx num" aria-hidden="true">01</span><h3>카톡으로 편하게</h3><p>영수증 사진 한 장, 질문 한 줄. 카톡으로 보내주시면 돼요. 전화 통화가 어색해도 괜찮아요.</p></li>
+      <li class="point"><span class="idx num" aria-hidden="true">02</span><h3>세무사가 직접</h3><p>상담부터 신고까지 세무사가 직접 봐요.</p></li>
+      <li class="point"><span class="idx num" aria-hidden="true">03</span><h3>첫 창업 사장님 맞춤</h3><p>사업자등록 전이어도, 매출이 아직 없어도 상담부터 시작하세요.</p></li>
+      <li class="point"><span class="idx num" aria-hidden="true">04</span><h3><a href="https://www.youtube.com/@taxcut_min" target="_blank" rel="noopener" data-youtube>유튜브 택스컷</a></h3><p>세금 이야기는 유튜브 @taxcut_min에서 계속 드려요.</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 04 진행 절차 -->
+<section class="how" id="how" aria-labelledby="howTitle">
+  <div class="wrap">
+    <p class="eyebrow" data-seen>How it works</p>
+    <h2 class="h2" id="howTitle">30분이면 돼요.</h2>
+    <ol class="steps" id="steps" data-seen>
+      <li class="step"><span class="n num" aria-hidden="true">01</span><h3>카톡 또는 전화 상담</h3><p>궁금한 것부터 편하게 물어보세요.</p></li>
+      <li class="step"><span class="n num" aria-hidden="true">02</span><h3>온라인 계약</h3><p>방문 없이 온라인으로 계약해요.</p></li>
+      <li class="step"><span class="n num" aria-hidden="true">03</span><h3>기장 시작, 첫 달 0원</h3><p>자료만 보내주시면 장부는 저희가 만들어요.</p></li>
+    </ol>
+    <p class="how-note">01~02가 이 페이지에서 30분 안에 끝나면 첫 달이 0원이에요.</p>
+    <p class="how-link"><a class="link-cut" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao>지금 1단계 시작하기 → 카톡 상담</a></p>
+  </div>
+</section>
+
+<!-- 05 FAQ -->
+<section class="faq on-paper" id="faq" aria-labelledby="faqTitle">
+  <div class="wrap">
+    <p class="eyebrow" data-seen>FAQ</p>
+    <h2 class="h2" id="faqTitle">자주 묻는 질문</h2>
+    <div class="faq-list">
+      <details><summary>기장이 뭔가요?<i aria-hidden="true"></i></summary><p class="a">매달 매출·매입 자료를 정리해 장부를 만들고, 부가세·종합소득세 신고까지 이어지는 세무 관리예요. 사장님은 자료만 보내주시면 돼요.</p></details>
+      <details><summary>매출이 아직 없어도 되나요?<i aria-hidden="true"></i></summary><p class="a">네. 사업자등록 전이거나 매출이 0원이어도 상담부터 시작하실 수 있어요. 시작 시점은 상담 때 같이 정해요.</p></details>
+      <details><summary>30분 조건은 어떻게 확인하나요?<i aria-hidden="true"></i></summary><p class="a">이 페이지 상단 타이머가 기준이에요. 타이머가 남아 있을 때 상담과 계약이 완료되면 첫 달 기장료가 무료예요. 카톡이나 예약 폼에 쿠폰코드를 남겨주시면 확인이 빨라요.</p></details>
+      <details><summary>첫 달 이후 비용은?<i aria-hidden="true"></i></summary><p class="a">1개월 기장료 55,000원 (부가세 포함)이 기본이고, 매출액에 따라 달라질 수 있습니다. 정확한 금액은 상담 때 안내드려요.</p></details>
+      <!-- 고객사 확인 필요: 계약 기간·해지 조건 -->
+      <details><summary>계약 기간은?<i aria-hidden="true"></i></summary><p class="a">계약 기간과 해지 조건은 상담 시 안내드려요.</p></details>
+    </div>
+  </div>
+</section>
+<!-- 06 최종 CTA -->
+<div class="final">
+<section class="cta-a" id="kakao" aria-labelledby="kakaoTitle">
+  <div class="wrap">
+    <p class="eyebrow" data-seen>Kakao</p>
+    <h2 class="h2" id="kakaoTitle">카톡이 제일 빨라요</h2>
+    <p class="sub2">영업시간 내 순서대로 답장드려요.</p>
+    <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+    <p class="cta-cap">질문 한 줄부터 괜찮아요</p>
+    <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+  </div>
+</section>
+<section class="cta-b on-paper" id="reserve" aria-labelledby="reserveTitle">
+  <div class="wrap">
+    <p class="eyebrow" data-seen>Reserve</p>
+    <h2 class="h2" id="reserveTitle">전화로 예약할게요 <span class="pill num" data-code>TC-0000</span></h2>
+    <p class="mode-badge">테스트 모드: 이 기기에만 저장됨</p>
+    <form class="form" id="resForm" novalidate>
+      <div class="f" id="g_name"><label for="f_name">이름 또는 상호</label><input id="f_name" name="name" type="text" required autocomplete="name" aria-describedby="e_name" placeholder="예: 김민지 / 민지커피"><p class="err" id="e_name">이름 또는 상호를 입력해 주세요</p></div>
+      <div class="f" id="g_phone"><label for="f_phone">연락처</label><input id="f_phone" name="phone" type="tel" inputmode="tel" required autocomplete="tel" aria-describedby="e_phone" placeholder="010-0000-0000" maxlength="13"><p class="err" id="e_phone">010으로 시작하는 휴대폰 번호를 입력해 주세요</p></div>
+      <div class="f" id="g_sales"><label for="f_sales">매출액</label><select id="f_sales" name="sales" required aria-describedby="e_sales"><option value="">선택해 주세요</option><option>아직 매출 없음</option><option>연 3천만원 미만</option><option>3천만~8천만원</option><option>8천만~2억원</option><option>2억~5억원</option><option>5억원 이상</option></select><p class="err" id="e_sales">매출액을 선택해 주세요</p></div>
+      <div class="f" id="g_biz"><label for="f_biz">업종</label><select id="f_biz" name="biz" required aria-describedby="e_biz"><option value="">선택해 주세요</option><option>온라인쇼핑몰·스마트스토어</option><option>카페·음식점</option><option>프리랜서·콘텐츠</option><option>배달·서비스</option><option>도소매</option><option>제조</option><option>기타</option></select><p class="err" id="e_biz">업종을 선택해 주세요</p></div>
+      <div class="f f-other" id="g_bizOther"><label for="f_bizOther">업종 직접 입력</label><input id="f_bizOther" name="bizOther" type="text" aria-describedby="e_bizOther" placeholder="예: 반려동물 용품"><p class="err" id="e_bizOther">업종을 입력해 주세요</p></div>
+      <div class="f" id="g_reg"><label for="f_reg">사업자등록일</label><input id="f_reg" name="regDate" type="date" required aria-describedby="e_reg"><label class="chk"><input id="f_noReg" name="noReg" type="checkbox"><span>아직 등록 전</span></label><p class="err" id="e_reg">사업자등록일을 선택하거나 「아직 등록 전」에 체크해 주세요</p></div>
+      <div class="f" id="g_slot"><label for="f_slot">상담 가능 시간</label><select id="f_slot" name="slot" required aria-describedby="e_slot"><option value="">선택해 주세요</option><option>평일 오전 9~12시</option><option>평일 오후 12~3시</option><option>평일 오후 3~6시</option><option>저녁 6시 이후</option><option>주말·공휴일</option></select><p class="err" id="e_slot">상담 가능 시간을 선택해 주세요</p></div>
+      <div class="f"><label for="f_memo">메모(선택)</label><textarea id="f_memo" name="memo" rows="2" placeholder="궁금한 점이나 통화 시 참고할 내용"></textarea></div>
+      <div class="f" id="g_agree">
+        <label class="chk"><input id="f_agree" name="agree" type="checkbox" required aria-describedby="e_agree privacyNote"><span>개인정보 수집·이용 동의(필수)</span></label>
+        <!-- 고객사 확인 필요: 개인정보 수집 항목·목적·보유기간 -->
+        <p class="privacy-note" id="privacyNote">수집 항목: 이름·상호, 연락처, 매출액, 업종, 사업자등록일, 상담 가능 시간 / 목적: 전화상담 예약 및 안내 / 보유기간: 상담 완료 후 1년 또는 동의 철회 시 파기 · <a href="#privacy">개인정보처리방침</a></p>
+        <p class="err" id="e_agree">동의해 주셔야 예약할 수 있어요</p>
+      </div>
+      <input type="hidden" id="f_coupon" name="coupon" value=""><input type="hidden" id="f_seconds" name="secondsLeft" value=""><input type="hidden" id="f_source" name="source" value=""><input type="hidden" id="f_submitted" name="submittedAt" value="">
+      <button type="submit" class="btn btn-solid" id="submitBtn">예약 신청하기</button>
+    </form>
+    <div class="form-fail" id="formFail" role="alert">
+      <p>예약이 잘 안 됐어요. 카톡으로 바로 상담해 주세요</p>
+      <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+      <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+    </div>
+    <div class="panel" id="successPanel">
+      <h3 id="successTitle" tabindex="-1">예약 완료! 영업시간 내 순서대로 전화드릴게요</h3>
+      <p>급하시면 카톡으로도 바로 상담할 수 있어요.</p>
+      <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+      <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<!-- 07 푸터 -->
+<footer class="foot" id="footer">
+  <div class="wrap">
+    <svg class="wordmark" viewBox="0 0 420 150" role="img" aria-label="택스컷" focusable="false"><use href="#tc-wordmark"/></svg>
+    <p class="firm">세무회계 민 · 택스컷</p>
+    <!-- 고객사 확인 필요: 아래 신뢰 블록은 플레이스홀더 -->
+    <div class="trust">
+      <span>세무사 [성명]</span>
+      <span>주소 [사무소 주소]</span>
+      <span>사업자등록번호 [000-00-00000]</span>
+      <span>대표전화 [000-0000-0000]</span>
+    </div>
+    <p class="foot-links">
+      <a href="https://taxmin.kr" target="_blank" rel="noopener" data-site>taxmin.kr</a>
+      <a href="https://www.youtube.com/@taxcut_min" target="_blank" rel="noopener" data-youtube>유튜브 @taxcut_min</a>
+      <a href="#privacy">개인정보처리방침</a>
+    </p>
+    <div class="privacy" id="privacy">
+      <h3>개인정보처리방침</h3>
+      <!-- 고객사 확인 필요: 개인정보처리방침 본문 -->
+      <span>수집 항목: 이름·상호, 연락처, 매출액, 업종, 사업자등록일, 상담 가능 시간</span>
+      <span>목적: 전화상담 예약 및 안내</span>
+      <span>보유기간: 상담 완료 후 1년 또는 동의 철회 시 파기</span>
+      <span>문의: 상담 시 안내</span>
+    </div>
+    <ul class="notes">
+      <li><h3>이벤트 유의사항</h3></li>
+      <li><span class="num">1</span><span>이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료</span></li>
+      <li><span class="num">2</span><span>기장료는 매출액에 따라 달라질 수 있습니다</span></li>
+      <li><span class="num">3</span><span>타이머는 이 기기에서 페이지를 처음 연 시각 기준입니다</span></li>
+    </ul>
+  </div>
+</footer>
+
+<!-- 08 하단 고정 CTA 바 (모바일) -->
+<div class="bbar" id="bbar">
+  <a class="btn btn-kakao" href="https://pf.kakao.com/_Mxojqs/chat" target="_blank" rel="noopener" data-kakao><svg aria-hidden="true" focusable="false"><use href="#ic-kakao"/></svg>카톡 상담</a>
+  <a class="btn btn-outline" href="#reserve" data-reserve>예약하기</a>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script>
+window.TAXCUT_CONFIG = { KAKAO_URL:'https://pf.kakao.com/_Mxojqs/chat', EVENT_MINUTES:30, RESERVATION_MODE:'auto', RESERVATION_ENDPOINT:'', WEBHOOK_JSON:false, YOUTUBE_URL:'https://www.youtube.com/@taxcut_min', SITE_URL:'https://taxmin.kr' };
+(function(){
+'use strict';
+var CFG = window.TAXCUT_CONFIG;
+var doc = document, win = window;
+var page = doc.getElementById('page');
+function $(id){ return doc.getElementById(id); }
+function $$(sel, root){ return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
+function safe(fn, fallback){ try { return fn(); } catch (e) { return fallback; } }
+var reduced = safe(function(){ return win.matchMedia('(prefers-reduced-motion: reduce)').matches; }, false);
+var inApp = /Instagram|FBAN|FBAV|KAKAOTALK|DaangnMarket|TowneersApp|Daangn/i.test(navigator.userAgent || '');
+
+/* ---- guarded helpers: storage / clipboard / vibrate ---- */
+var mem = {};
+var store = {
+  get: function(k){ return safe(function(){ var v = win.localStorage.getItem(k); return v === null ? (k in mem ? mem[k] : null) : v; }, (k in mem ? mem[k] : null)); },
+  set: function(k, v){ mem[k] = v; safe(function(){ win.localStorage.setItem(k, v); }); },
+  getJSON: function(k, fb){ var v = store.get(k); if (v === null) return fb; return safe(function(){ return JSON.parse(v); }, fb); }
+};
+function copyText(text){
+  function legacy(){
+    return safe(function(){
+      var ta = doc.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+      doc.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, 99999);
+      var ok = doc.execCommand('copy'); doc.body.removeChild(ta); return !!ok;
+    }, false);
+  }
+  return new Promise(function(resolve){
+    var used = safe(function(){
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ resolve(true); }, function(){ resolve(legacy()); });
+        return true;
+      }
+      return false;
+    }, false);
+    if (!used) resolve(legacy());
+  });
+}
+function vibrate(ms){ safe(function(){ if (navigator.vibrate) navigator.vibrate(ms); }); }
+function genCode(){
+  var n = safe(function(){ var a = new Uint16Array(1); win.crypto.getRandomValues(a); return a[0] % 9000 + 1000; }, null);
+  if (n === null) n = Math.floor(Math.random() * 9000) + 1000;
+  return 'TC-' + n;
+}
+var toastEl = $('toast'), toastTimer = 0;
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2000);
+}
+function flashLabel(btn, text, ms){
+  var prev = btn.getAttribute('data-label') || btn.textContent;
+  btn.setAttribute('data-label', prev); btn.textContent = text;
+  setTimeout(function(){ btn.textContent = prev; }, ms || 1500);
+}
+
+/* ---- 공유 상태 ---- */
+var state = {
+  total: (CFG.EVENT_MINUTES || 30) * 60,
+  start: 0, secondsLeft: 0,
+  ended: false, revealed: false, coupon: ''
+};
+var startRaw = parseInt(store.get('taxcut_event_start'), 10);
+if (!startRaw || isNaN(startRaw) || startRaw > Date.now()) { startRaw = Date.now(); store.set('taxcut_event_start', String(startRaw)); }
+state.start = startRaw;
+state.coupon = store.get('taxcut_coupon') || '';
+state.revealed = store.get('taxcut_revealed') === '1';
+
+function fillCodes(code){
+  $$('[data-code]').forEach(function(el){ el.textContent = code; });
+  $('f_coupon').value = state.ended ? '' : code;
+}
+function ensureCoupon(){
+  if (state.ended) return '';
+  if (!state.coupon) { state.coupon = genCode(); store.set('taxcut_coupon', state.coupon); }
+  page.classList.add('has-coupon');
+  fillCodes(state.coupon);
+  return state.coupon;
+}
+if (state.coupon) { page.classList.add('has-coupon'); fillCodes(state.coupon); }
+
+/* ---- 카카오 링크 규칙 + 예약 스크롤 ---- */
+$$('[data-kakao]').forEach(function(a){
+  a.setAttribute('href', CFG.KAKAO_URL);
+  if (inApp) { a.removeAttribute('target'); a.removeAttribute('rel'); }
+  else { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); }
+  a.addEventListener('click', function(){
+    if (state.revealed && state.coupon) { copyText(state.coupon).then(function(ok){ if (ok) toast('쿠폰코드 복사됨'); }); }
+  });
+});
+$$('[data-youtube]').forEach(function(a){ a.setAttribute('href', CFG.YOUTUBE_URL); });
+$$('[data-site]').forEach(function(a){ a.setAttribute('href', CFG.SITE_URL); });
+function goReserve(e){
+  if (e) e.preventDefault();
+  var sec = $('reserve');
+  sec.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  setTimeout(function(){ safe(function(){ $('f_name').focus({ preventScroll: true }); }); }, reduced ? 50 : 450);
+}
+$$('[data-reserve]').forEach(function(a){ a.addEventListener('click', goReserve); });
+$$('[data-tocard]').forEach(function(a){
+  a.addEventListener('click', function(e){ e.preventDefault(); $('cardScene').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' }); });
+});
+
+/* ================= 00 타이머 ================= */
+var tbarLabel = $('tbarLabel'), tbarLive = $('tbarLive'), tbarLine = $('tbarLine');
+var digits = $$('.d', $('tbarTime'));
+var lastStr = '', lastMinAnnounced = -1, timerId = 0, endHooks = [];
+function remaining(){ return Math.max(0, state.total - Math.floor((Date.now() - state.start) / 1000)); }
+function endEvent(){
+  if (state.ended) return;
+  state.ended = true;
+  page.classList.add('is-ended'); page.classList.remove('is-alert');
+  tbarLabel.textContent = '이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  tbarLive.textContent = '이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  tbarLine.style.transform = 'scaleX(0)';
+  $('f_coupon').value = ''; $('f_seconds').value = '0';
+  if (timerId) { clearInterval(timerId); timerId = 0; }
+  endHooks.forEach(function(fn){ safe(fn); });
+}
+function renderTimer(){
+  var r = remaining();
+  state.secondsLeft = r;
+  if (r <= 0) { endEvent(); return; }
+  var m = Math.floor(r / 60), s = r % 60;
+  var str = (m < 10 ? '0' : '') + m + (s < 10 ? '0' : '') + s;
+  if (str !== lastStr) {
+    for (var i = 0; i < 4; i++) { if (digits[i].textContent !== str.charAt(i)) digits[i].textContent = str.charAt(i); }
+    lastStr = str;
+  }
+  var approx = Math.ceil(r / 60);
+  if (approx !== lastMinAnnounced) { lastMinAnnounced = approx; tbarLive.textContent = '남은 시간 약 ' + approx + '분'; }
+  tbarLine.style.transform = 'scaleX(' + (r / state.total).toFixed(4) + ')';
+  if (r < 300 && !page.classList.contains('is-alert')) {
+    page.classList.add('is-alert');
+    tbarLabel.textContent = '5분 남았어요 — 카톡 한 줄이면 돼요';
+  }
+}
+if (remaining() <= 0) { page.classList.add('no-anim'); endEvent(); }
+else {
+  renderTimer();
+  timerId = setInterval(renderTimer, 1000);
+}
+doc.addEventListener('visibilitychange', function(){ if (!doc.hidden) renderTimer(); });
+win.addEventListener('pageshow', function(){ renderTimer(); });
+
+/* 타이머 바 쿠폰 칩 */
+$('tbarChip').addEventListener('click', function(){
+  var btn = this;
+  if (!state.coupon) return;
+  copyText(state.coupon).then(function(ok){ if (ok) flashLabel(btn, '복사됨', 1500); });
+});
+
+/* ================= 01 히어로 컷 선 ================= */
+var hero = doc.querySelector('.hero'), l2 = $('l2'), heroCut = $('heroCut'), cutLine = $('heroCutLine'), tipMotion = $('heroTipMotion');
+var TAN = Math.tan(5 * Math.PI / 180);
+var lastW = 0, lastH = 0, heroStarted = false;
+function layoutCut(){
+  var hr = hero.getBoundingClientRect(), lr = l2.getBoundingClientRect();
+  var vw = doc.documentElement.clientWidth || win.innerWidth;
+  var cx = lr.left - hr.left + lr.width / 2, cy = lr.top - hr.top + lr.height / 2;
+  var x1 = -0.05 * vw - hr.left, x2 = 1.05 * vw - hr.left;
+  var y1 = cy + (cx - x1) * TAN, y2 = cy - (x2 - cx) * TAN;
+  cutLine.setAttribute('x1', x1.toFixed(1)); cutLine.setAttribute('y1', y1.toFixed(1));
+  cutLine.setAttribute('x2', x2.toFixed(1)); cutLine.setAttribute('y2', y2.toFixed(1));
+  var len = Math.ceil(Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)));
+  heroCut.style.setProperty('--cut-len', String(len));
+  tipMotion.setAttribute('path', 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' L' + x2.toFixed(1) + ' ' + y2.toFixed(1));
+  l2.style.setProperty('--rise', (lr.width / 2 * TAN).toFixed(1) + 'px');
+  lastW = win.innerWidth; lastH = win.innerHeight;
+}
+function startHero(){
+  if (heroStarted) return;
+  heroStarted = true;
+  layoutCut();
+  if (reduced) {
+    page.classList.add('no-anim');
+    page.classList.add('is-drawn', 'is-cut', 'is-idle');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ page.classList.remove('no-anim'); }); });
+    return;
+  }
+  page.classList.add('is-drawn');
+  safe(function(){ tipMotion.beginElement(); });
+  setTimeout(function(){ page.classList.add('is-cut'); }, 650);
+  setTimeout(function(){ page.classList.add('is-idle'); }, 850);
+}
+(function scheduleHero(){
+  var t0 = Date.now();
+  function go(){ var wait = Math.max(0, 150 - (Date.now() - t0)); setTimeout(startHero, wait); }
+  var p = safe(function(){
+    return Promise.all([doc.fonts.load('400 40px "Black Han Sans"'), doc.fonts.load('900 40px Montserrat')]);
+  }, null);
+  if (p && p.then) p.then(go, go); else go();
+  setTimeout(startHero, 1500);
+})();
+safe(function(){ doc.fonts.ready.then(function(){ if (heroStarted) layoutCut(); }); });
+win.addEventListener('resize', function(){
+  var w = win.innerWidth, h = win.innerHeight;
+  if (w === lastW && Math.abs(h - lastH) < 120) { lastH = h; return; }
+  layoutCut();
+});
+win.addEventListener('orientationchange', function(){ setTimeout(layoutCut, 250); });
+
+/* ================= 스크래치 카드: 포일 / 틸트 / 긁기 ================= */
+var scene = $('cardScene'), cardFloat = $('cardFloat'), card = $('card'), foil = $('foil');
+var cardPrompt = $('cardPrompt'), cardHint = $('cardHint'), cardCut = $('cardCut'), cardStamp = $('cardStamp');
+var ctx = safe(function(){ return foil.getContext('2d', { willReadFrequently: true }); }, null);
+var off = doc.createElement('canvas');
+var octx = safe(function(){ return off.getContext('2d', { willReadFrequently: true }); }, null);
+if (!ctx || !octx) { ctx = null; page.classList.add('no-canvas'); }
+var dpr = Math.min(win.devicePixelRatio || 1, 1.5);
+var tokens = safe(function(){ return getComputedStyle(doc.documentElement); }, null);
+function tok(name, fb){ var v = tokens ? tokens.getPropertyValue(name).trim() : ''; return v || fb; }
+var scratched = false, foilW = 0, foilH = 0;
+
+function paintFoil(){
+  if (!ctx) return;
+  var w = foil.clientWidth, h = foil.clientHeight;
+  if (!w || !h) return;
+  foilW = w; foilH = h;
+  foil.width = Math.round(w * dpr); foil.height = Math.round(h * dpr);
+  off.width = Math.max(1, Math.round(foil.width / 4)); off.height = Math.max(1, Math.round(foil.height / 4));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  var g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, tok('--foil-hi', '#E9EDF3')); g.addColorStop(.5, tok('--foil-mid', '#C7CDD8')); g.addColorStop(1, tok('--foil-lo', '#AEB6C4'));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(11,21,38,.07)'; ctx.lineWidth = 1; ctx.beginPath();
+  for (var x = -h; x < w; x += 4) { ctx.moveTo(x, 0); ctx.lineTo(x + h, h); }
+  ctx.stroke();
+  ctx.save();
+  ctx.fillStyle = 'rgba(11,21,38,.06)'; ctx.font = '700 9px Montserrat, "Arial Black", Arial, sans-serif';
+  ctx.translate(w / 2, h / 2); ctx.rotate(-5 * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+  for (var ty = -10; ty < h + 20; ty += 22) { for (var tx = -30 + (Math.floor(ty / 22) % 2) * 27; tx < w + 30; tx += 54) { ctx.fillText('TAXCUT', tx, ty); } }
+  ctx.restore();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+}
+
+/* ---- 틸트 (단일 rAF 루프에서 스크래치와 배칭) ---- */
+var tx = 0, ty = 0, ttx = 0, tty = 0, held = false, rafId = 0, strokes = [], brush = 22;
+function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+function applyTilt(){
+  card.style.setProperty('--tx', tx.toFixed(2) + 'deg');
+  card.style.setProperty('--ty', ty.toFixed(2) + 'deg');
+  card.style.setProperty('--gx', (ty / 10).toFixed(3));
+  card.style.setProperty('--gy', (-tx / 8).toFixed(3));
+}
+function wake(){ if (!rafId && !doc.hidden) rafId = requestAnimationFrame(tick); }
+function tick(){
+  rafId = 0;
+  if (strokes.length && ctx) {
+    ctx.lineWidth = brush * 2; ctx.beginPath();
+    for (var i = 0; i < strokes.length; i++) { var s = strokes[i]; ctx.moveTo(s[0], s[1]); ctx.lineTo(s[2], s[3]); }
+    ctx.stroke(); strokes.length = 0;
+  }
+  var dx = ttx - tx, dy = tty - ty;
+  if (Math.abs(dx) > .03 || Math.abs(dy) > .03) { tx += dx * .12; ty += dy * .12; applyTilt(); wake(); }
+  else if (dx || dy) { tx = ttx; ty = tty; applyTilt(); }
+}
+function holdCard(on){
+  held = on;
+  if (on) { ttx = tty = tx = ty = 0; applyTilt(); cardFloat.classList.add('is-held'); }
+  else { cardFloat.classList.remove('is-held'); }
+}
+scene.addEventListener('pointermove', function(e){
+  if (held || e.pointerType !== 'mouse') return;
+  var r = scene.getBoundingClientRect();
+  var nx = clamp((e.clientX - r.left) / r.width * 2 - 1, -1, 1), ny = clamp((e.clientY - r.top) / r.height * 2 - 1, -1, 1);
+  ttx = clamp(-ny * 8, -8, 8); tty = clamp(nx * 10, -10, 10); wake();
+});
+scene.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse' && !held) { ttx = tty = 0; wake(); } });
+var iosPerm = safe(function(){ return typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'; }, false);
+if (!iosPerm && !reduced && win.DeviceOrientationEvent) {
+  var base = null;
+  win.addEventListener('deviceorientation', function(e){
+    if (held || doc.hidden || e.beta === null || e.gamma === null) return;
+    if (!base) { base = { b: e.beta, g: e.gamma }; return; }
+    var rb = e.beta - base.b, rg = e.gamma - base.g;
+    if (Math.abs(rb) < 2) rb = 0; if (Math.abs(rg) < 2) rg = 0;
+    ttx = clamp(-rb, -20, 20) * .4; tty = clamp(rg, -20, 20) * .5; wake();
+  }, true);
+}
+doc.addEventListener('visibilitychange', function(){
+  if (doc.hidden) { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } } else { wake(); }
+});
+
+/* ---- 긁기 ---- */
+var scratching = false, sx = 1, sy = 1, rx = 0, ry = 0, lastX = 0, lastY = 0, moves = 0, lastProg = 0, lastInput = Date.now();
+function checkProgress(){
+  if (!ctx || state.revealed) return 0;
+  octx.clearRect(0, 0, off.width, off.height);
+  octx.drawImage(foil, 0, 0, off.width, off.height);
+  var d = octx.getImageData(0, 0, off.width, off.height).data, clear = 0, n = d.length / 4;
+  for (var i = 3; i < d.length; i += 4) { if (d[i] < 128) clear++; }
+  var p = clear / n;
+  if (p >= .10) page.classList.add('is-scratched');
+  if (p >= .45) reveal(false);
+  return p;
+}
+foil.addEventListener('pointerdown', function(e){
+  if (state.revealed || !ctx) return;
+  e.preventDefault();
+  scratching = true; scratched = true; moves = 0; lastInput = Date.now();
+  holdCard(true); stopHint();
+  var r = foil.getBoundingClientRect();
+  rx = r.left; ry = r.top; sx = foilW / r.width; sy = foilH / r.height;
+  brush = e.pointerType === 'mouse' ? 16 : 22;
+  safe(function(){ foil.setPointerCapture(e.pointerId); });
+  lastX = (e.clientX - rx) * sx; lastY = (e.clientY - ry) * sy;
+  strokes.push([lastX, lastY, lastX + .01, lastY]); wake();
+});
+foil.addEventListener('pointermove', function(e){
+  if (!scratching) return;
+  var x = (e.clientX - rx) * sx, y = (e.clientY - ry) * sy;
+  strokes.push([lastX, lastY, x, y]); lastX = x; lastY = y; moves++; wake();
+  var now = Date.now();
+  if (moves >= 3 && now - lastProg > 120) { lastProg = now; checkProgress(); }
+});
+function endScratch(){
+  if (!scratching) return;
+  scratching = false; holdCard(false); lastInput = Date.now();
+  if (moves >= 3) { tick(); checkProgress(); }
+}
+foil.addEventListener('pointerup', endScratch);
+foil.addEventListener('pointercancel', endScratch);
+foil.addEventListener('touchmove', function(e){ e.preventDefault(); }, { passive: false });
+foil.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+/* ================= 리빌 / 컨페티 / 힌트 ================= */
+var ctaSlot = $('ctaSlot'), ctaKakao = $('ctaKakao');
+var hintTimers = [], hintLoop = 0, tapTimer = 0;
+function stopHint(){
+  hintTimers.forEach(clearTimeout); hintTimers = [];
+  if (hintLoop) { clearInterval(hintLoop); hintLoop = 0; }
+  cardHint.classList.remove('play');
+}
+function playHint(){
+  if (scratched || state.revealed || doc.hidden) return;
+  cardHint.classList.remove('play'); void cardHint.offsetWidth; cardHint.classList.add('play');
+}
+function confetti(){
+  if (reduced) return;
+  var c = doc.createElement('canvas'); c.className = 'confetti'; c.setAttribute('aria-hidden', 'true');
+  var hr = hero.getBoundingClientRect(), cr = card.getBoundingClientRect();
+  var W = hr.width, H = hr.height, k = Math.min(dpr, 1.5);
+  c.width = Math.round(W * k); c.height = Math.round(H * k); hero.appendChild(c);
+  var cc = safe(function(){ return c.getContext('2d'); }, null);
+  if (!cc) { hero.removeChild(c); return; }
+  cc.setTransform(k, 0, 0, k, 0, 0);
+  var cols = [tok('--green', '#3DDC84'), tok('--green-deep', '#1FB86A'), tok('--paper', '#F4F6FA'), tok('--ink', '#FFFFFF')];
+  var ox = cr.left - hr.left + cr.width / 2, oy = cr.top - hr.top + cr.height * .45, parts = [];
+  for (var i = 0; i < 60; i++) {
+    var a = -Math.PI / 2 + (Math.random() - .5) * 2.2, v = 7 + Math.random() * 7;
+    parts.push({ x: ox + (Math.random() - .5) * cr.width * .6, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, w: 3 + Math.random() * 5, h: 8 + Math.random() * 10, r: Math.random() * Math.PI, vr: (Math.random() - .5) * .35, c: cols[i % 4], dot: i % 7 === 0 });
+  }
+  var t0 = 0, dur = 1200;
+  function frame(t){
+    if (!t0) t0 = t;
+    var el = t - t0, p = el / dur;
+    cc.clearRect(0, 0, W, H);
+    cc.globalAlpha = p > .75 ? Math.max(0, 1 - (p - .75) / .25) : 1;
+    for (var j = 0; j < parts.length; j++) {
+      var q = parts[j];
+      q.vy += .28; q.vx *= .985; q.vy *= .985; q.x += q.vx; q.y += q.vy; q.r += q.vr;
+      cc.save(); cc.translate(q.x, q.y); cc.rotate(q.r); cc.fillStyle = q.c;
+      if (q.dot) { cc.beginPath(); cc.arc(0, 0, q.w * .6, 0, Math.PI * 2); cc.fill(); }
+      else { cc.fillRect(-q.w / 2, -q.h / 2, q.w, q.h * Math.abs(Math.cos(q.r * 1.5))); }
+      cc.restore();
+    }
+    if (el < dur && !doc.hidden) requestAnimationFrame(frame); else safe(function(){ hero.removeChild(c); });
+  }
+  requestAnimationFrame(frame);
+  setTimeout(function(){ safe(function(){ if (c.parentNode) hero.removeChild(c); }); }, 1500);
+}
+function reveal(instant){
+  if (state.revealed) return;
+  state.revealed = true; store.set('taxcut_revealed', '1');
+  stopHint(); clearTimeout(tapTimer);
+  scratching = false; holdCard(false);
+  ensureCoupon();
+  page.classList.add('is-revealed'); page.classList.remove('show-tap');
+  ctaSlot.setAttribute('aria-hidden', 'false');
+  var celebrate = !state.ended;
+  if (instant || reduced) {
+    page.classList.add('no-anim');
+    if (celebrate) cardStamp.classList.add('set');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ page.classList.remove('no-anim'); }); });
+    if (!instant) setTimeout(function(){ ctaKakao.scrollIntoView({ block: 'nearest' }); }, 60);
+    return;
+  }
+  cardCut.classList.add('draw');
+  setTimeout(function(){ cardCut.classList.add('fade'); }, 350);
+  if (celebrate) {
+    setTimeout(function(){ cardStamp.classList.add('hit'); card.classList.add('press'); vibrate(40); }, 600);
+    setTimeout(confetti, 660);
+  }
+  setTimeout(function(){ ctaKakao.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 950);
+}
+$('tapOpen').addEventListener('click', function(){ reveal(false); });
+$('kbdReveal').addEventListener('click', function(){ reveal(false); });
+$('cardFallback').addEventListener('click', function(){ reveal(false); });
+$('faceCopy').addEventListener('click', function(){
+  var btn = this; if (!state.coupon) return;
+  copyText(state.coupon).then(function(ok){ if (ok) flashLabel(btn, '복사됨', 1500); });
+});
+card.addEventListener('animationend', function(e){ if (e.animationName === 'press') card.classList.remove('press'); });
+
+/* ---- 초기 상태 ---- */
+paintFoil();
+if (state.revealed) {
+  page.classList.add('no-anim', 'is-revealed');
+  if (state.coupon) cardStamp.classList.add('set');
+  ctaSlot.setAttribute('aria-hidden', 'false');
+} else if (!reduced && ctx) {
+  hintTimers.push(setTimeout(playHint, 900), setTimeout(playHint, 2500));
+  hintLoop = setInterval(function(){ if (!scratched && !state.revealed && Date.now() - lastInput > 12000) playHint(); }, 12000);
+}
+if (!state.revealed) tapTimer = setTimeout(function(){ if (!scratched && !state.revealed) page.classList.add('show-tap'); }, 4000);
+endHooks.push(function(){ if (!state.coupon) fillCodes(''); });
+win.addEventListener('resize', function(){
+  if (!scratched && !state.revealed && foil.clientWidth !== foilW) paintFoil();
+});
+requestAnimationFrame(function(){ requestAnimationFrame(function(){ page.classList.remove('no-anim'); }); });
+
+/* ================= 06 예약 폼 + 저장 어댑터 ================= */
+var form = $('resForm'), submitBtn = $('submitBtn'), formFail = $('formFail'), successPanel = $('successPanel');
+var fName = $('f_name'), fPhone = $('f_phone'), fSales = $('f_sales'), fBiz = $('f_biz'), fBizOther = $('f_bizOther');
+var fReg = $('f_reg'), fNoReg = $('f_noReg'), fSlot = $('f_slot'), fMemo = $('f_memo'), fAgree = $('f_agree');
+function resolvedMode(){ var m = CFG.RESERVATION_MODE; if (m === 'auto') m = CFG.RESERVATION_ENDPOINT ? 'webhook' : 'local'; return m; }
+if (resolvedMode() === 'local') page.classList.add('is-local');
+function setInvalid(group, field, bad){
+  group.classList.toggle('is-invalid', bad);
+  if (field) { if (bad) field.setAttribute('aria-invalid', 'true'); else field.removeAttribute('aria-invalid'); }
+}
+function digitsOf(v){ return (v || '').replace(/\D/g, '').slice(0, 11); }
+function formatPhone(d){
+  if (d.length <= 3) return d;
+  if (d.length <= 7) return d.slice(0, 3) + '-' + d.slice(3);
+  if (d.length === 10) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6);
+  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+}
+function validPhone(){ return /^010\d{7,8}$/.test(digitsOf(fPhone.value)); }
+fPhone.addEventListener('input', function(){ fPhone.value = formatPhone(digitsOf(fPhone.value)); });
+fPhone.addEventListener('blur', function(){ if (fPhone.value) setInvalid($('g_phone'), fPhone, !validPhone()); });
+fBiz.addEventListener('change', function(){
+  var other = fBiz.value === '기타';
+  $('g_bizOther').classList.toggle('show', other); fBizOther.required = other;
+  if (!other) setInvalid($('g_bizOther'), fBizOther, false);
+});
+fNoReg.addEventListener('change', function(){
+  fReg.disabled = fNoReg.checked; fReg.required = !fNoReg.checked;
+  if (fNoReg.checked) { fReg.value = ''; setInvalid($('g_reg'), fReg, false); }
+});
+function validate(){
+  var firstBad = null;
+  function chk(group, field, ok){ setInvalid(group, field, !ok); if (!ok && !firstBad) firstBad = field; }
+  chk($('g_name'), fName, fName.value.trim().length > 0);
+  chk($('g_phone'), fPhone, validPhone());
+  chk($('g_sales'), fSales, !!fSales.value);
+  chk($('g_biz'), fBiz, !!fBiz.value);
+  if (fBiz.value === '기타') chk($('g_bizOther'), fBizOther, fBizOther.value.trim().length > 0);
+  chk($('g_reg'), fReg, fNoReg.checked || !!fReg.value);
+  chk($('g_slot'), fSlot, !!fSlot.value);
+  chk($('g_agree'), fAgree, fAgree.checked);
+  return firstBad;
+}
+function sourceOf(){
+  return safe(function(){
+    var u = new URLSearchParams(win.location.search).get('utm_source');
+    if (u) return u;
+    return doc.referrer ? new URL(doc.referrer).hostname : '';
+  }, '');
+}
+function sendReservation(data){
+  return new Promise(function(resolve, reject){
+    try {
+      var mode = resolvedMode();
+      if (mode === 'local') {
+        var arr = store.getJSON('taxcut_reservations', []); if (!Array.isArray(arr)) arr = [];
+        arr.push(data); store.set('taxcut_reservations', JSON.stringify(arr));
+        resolve({ ok: true, mode: 'local' }); return;
+      }
+      if (!CFG.RESERVATION_ENDPOINT) throw new Error('no endpoint');
+      if (CFG.WEBHOOK_JSON) {
+        fetch(CFG.RESERVATION_ENDPOINT, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+          .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json().catch(function(){ return { ok: true }; }); })
+          .then(function(j){ if (j && j.ok === false) throw new Error('server'); resolve({ ok: true, mode: 'webhook' }); })
+          .catch(reject);
+      } else {
+        fetch(CFG.RESERVATION_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data) })
+          .then(function(){ resolve({ ok: true, mode: 'webhook' }); }).catch(reject);
+      }
+    } catch (e) { reject(e); }
+  });
+}
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  var bad = validate();
+  if (bad) { safe(function(){ bad.focus(); }); return; }
+  formFail.classList.remove('show');
+  $('f_coupon').value = state.ended ? '' : state.coupon;
+  $('f_seconds').value = String(state.ended ? 0 : remaining());
+  $('f_source').value = sourceOf();
+  $('f_submitted').value = new Date().toISOString();
+  var data = {
+    name: fName.value.trim(), phone: fPhone.value, sales: fSales.value,
+    biz: fBiz.value === '기타' ? '기타: ' + fBizOther.value.trim() : fBiz.value,
+    regDate: fNoReg.checked ? '' : fReg.value, noReg: fNoReg.checked,
+    slot: fSlot.value, memo: fMemo.value.trim(), agree: true,
+    coupon: $('f_coupon').value, secondsLeft: Number($('f_seconds').value),
+    source: $('f_source').value, submittedAt: $('f_submitted').value,
+    page: safe(function(){ return win.location.href; }, '')
+  };
+  submitBtn.disabled = true; var prevLabel = submitBtn.textContent; submitBtn.textContent = '보내는 중…';
+  sendReservation(data).then(function(){
+    form.hidden = true; successPanel.classList.add('show');
+    safe(function(){ $('successTitle').focus(); });
+  }, function(){
+    submitBtn.disabled = false; submitBtn.textContent = prevLabel;
+    formFail.classList.add('show');
+  });
+});
+
+/* ================= 스크롤 옵저버 / 하단 바 ================= */
+var seenIO = safe(function(){
+  return new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if (en.isIntersecting) { en.target.classList.add('is-seen'); seenIO.unobserve(en.target); } });
+  }, { threshold: .5 });
+}, null);
+$$('[data-seen]').forEach(function(el){ if (seenIO) seenIO.observe(el); else el.classList.add('is-seen'); });
+
+var bbar = $('bbar'), pastCard = false, focusHide = false, kbHide = false, blockHide = false, blockSet = {};
+function syncBar(){ bbar.classList.toggle('show', pastCard && !focusHide && !kbHide && !blockHide); }
+var cardIO = safe(function(){
+  return new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ pastCard = !en.isIntersecting && en.boundingClientRect.top < 0; });
+    syncBar();
+  }, { threshold: 0 });
+}, null);
+if (cardIO) cardIO.observe(scene);
+var blockIO = safe(function(){
+  return new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ blockSet[en.target.id] = en.isIntersecting; });
+    blockHide = Object.keys(blockSet).some(function(k){ return blockSet[k]; });
+    syncBar();
+  }, { threshold: 0 });
+}, null);
+if (blockIO) { blockIO.observe($('reserve')); blockIO.observe($('privacy')); }
+form.addEventListener('focusin', function(){ focusHide = true; syncBar(); });
+form.addEventListener('focusout', function(){
+  setTimeout(function(){ if (!form.contains(doc.activeElement)) { focusHide = false; syncBar(); } }, 80);
+});
+var vv = win.visualViewport, baseH = win.innerHeight;
+if (vv) vv.addEventListener('resize', function(){
+  if (vv.height > baseH) baseH = vv.height;
+  kbHide = vv.height < baseH - 120; syncBar();
+});
+})();
+</script>
+</body>
+</html>

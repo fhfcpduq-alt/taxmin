@@ -1,0 +1,61 @@
+    <div class="hero-card">
+      <!-- 스크래치 카드 (CSS 3D 틸트 + 캔버스 포일) -->
+      <div class="card-scene" id="cardScene">
+        <div class="card" id="card">
+          <div class="card-shadow" aria-hidden="true"></div>
+          <div class="card-thick" aria-hidden="true"></div>
+          <div class="card-face" id="cardFace">
+            <div class="card-stub" aria-hidden="true"><span>TAXCUT · 1ST MONTH FREE</span></div>
+            <div class="card-body">
+              <div class="card-top">
+                <span class="eb">TAXCUT COUPON</span>
+                <svg class="badge" viewBox="0 0 200 200" aria-hidden="true"><use href="#tc-badge"/></svg>
+              </div>
+              <p class="t display">첫 달 기장료</p>
+              <p class="z"><span class="num">0</span><span class="won">원</span></p>
+              <p class="over display">이벤트 종료 · 상담은 계속 가능해요</p>
+              <div class="code-box">
+                <span class="lab">코드</span>
+                <span class="code num js-code" id="cardCode">TC-0000</span>
+                <button class="copy-btn" type="button" id="cardCopy" aria-label="쿠폰코드 복사">복사</button>
+              </div>
+              <p class="card-foot">상담 때 이 코드를 말씀해 주세요</p>
+              <span class="card-mark">시간 종료</span>
+              <span class="stamp" aria-hidden="true">첫 달 0원</span>
+            </div>
+          </div>
+          <canvas class="card-foil" id="foil" role="img" aria-label="스크래치 포일. 손가락으로 문질러 쿠폰을 열어요"></canvas>
+          <div class="card-prompt" id="cardPrompt" aria-hidden="true">
+            <p class="p1 display">여기를 긁어보세요</p>
+            <span class="rule"></span>
+            <p class="p2">손가락으로 문지르면 첫 달 기장료가 잘려요</p>
+          </div>
+          <svg class="card-hint" id="cardHint" viewBox="0 0 28 28" aria-hidden="true"><use href="#ic-coin"/></svg>
+          <svg class="card-cut" id="cardCut" aria-hidden="true"><line x1="-2%" y1="102%" x2="102%" y2="-2%" pathLength="1"/></svg>
+          <div class="card-glare" aria-hidden="true"></div>
+          <button class="card-open" type="button" id="cardOpen">탭해서 쿠폰 열기</button>
+        </div>
+      </div>
+
+      <div class="skip-row">
+        <a class="cut-link js-kakao" href="https://pf.kakao.com/_Mxojqs/chat">긁지 않아도 돼요 · 바로 카톡 상담 →</a>
+      </div>
+      <div class="tap-row" id="tapRow">
+        <button type="button" id="tapOpen">긁기 어려우세요? 탭해서 열기</button>
+      </div>
+
+      <!-- 리빌 후 CTA 슬롯 -->
+      <div class="cta-slot" id="ctaSlot" aria-hidden="true">
+        <div class="cta-inner">
+          <div>
+            <a class="btn btn-kakao js-kakao" href="https://pf.kakao.com/_Mxojqs/chat" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-kakao"/></svg>카톡으로 바로 상담하기</a>
+            <p class="btn-caption">질문 한 줄부터 괜찮아요</p>
+          </div>
+          <a class="btn btn-outline js-reserve" href="#reserve" tabindex="-1">전화 상담 예약하기</a>
+          <p class="coupon-note">쿠폰코드 <span class="num js-code">TC-0000</span>을 상담 때 말씀해 주세요</p>
+          <p class="kakao-note">카톡이 열리지 않으면 우측 상단 ⋯ 메뉴에서 「브라우저로 열기」를 눌러 주세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

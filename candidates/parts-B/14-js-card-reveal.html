@@ -1,0 +1,96 @@
+
+/* ================= 리빌 / 컨페티 / 힌트 ================= */
+var ctaSlot = $('ctaSlot'), ctaKakao = $('ctaKakao');
+var hintTimers = [], hintLoop = 0, tapTimer = 0;
+function stopHint(){
+  hintTimers.forEach(clearTimeout); hintTimers = [];
+  if (hintLoop) { clearInterval(hintLoop); hintLoop = 0; }
+  cardHint.classList.remove('play');
+}
+function playHint(){
+  if (scratched || state.revealed || doc.hidden) return;
+  cardHint.classList.remove('play'); void cardHint.offsetWidth; cardHint.classList.add('play');
+}
+function confetti(){
+  if (reduced) return;
+  var c = doc.createElement('canvas'); c.className = 'confetti'; c.setAttribute('aria-hidden', 'true');
+  var hr = hero.getBoundingClientRect(), cr = card.getBoundingClientRect();
+  var W = hr.width, H = hr.height, k = Math.min(dpr, 1.5);
+  c.width = Math.round(W * k); c.height = Math.round(H * k); hero.appendChild(c);
+  var cc = safe(function(){ return c.getContext('2d'); }, null);
+  if (!cc) { hero.removeChild(c); return; }
+  cc.setTransform(k, 0, 0, k, 0, 0);
+  var cols = [tok('--green', '#3DDC84'), tok('--green-deep', '#1FB86A'), tok('--paper', '#F4F6FA'), tok('--ink', '#FFFFFF')];
+  var ox = cr.left - hr.left + cr.width / 2, oy = cr.top - hr.top + cr.height * .45, parts = [];
+  for (var i = 0; i < 60; i++) {
+    var a = -Math.PI / 2 + (Math.random() - .5) * 2.2, v = 7 + Math.random() * 7;
+    parts.push({ x: ox + (Math.random() - .5) * cr.width * .6, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, w: 3 + Math.random() * 5, h: 8 + Math.random() * 10, r: Math.random() * Math.PI, vr: (Math.random() - .5) * .35, c: cols[i % 4], dot: i % 7 === 0 });
+  }
+  var t0 = 0, dur = 1200;
+  function frame(t){
+    if (!t0) t0 = t;
+    var el = t - t0, p = el / dur;
+    cc.clearRect(0, 0, W, H);
+    cc.globalAlpha = p > .75 ? Math.max(0, 1 - (p - .75) / .25) : 1;
+    for (var j = 0; j < parts.length; j++) {
+      var q = parts[j];
+      q.vy += .28; q.vx *= .985; q.vy *= .985; q.x += q.vx; q.y += q.vy; q.r += q.vr;
+      cc.save(); cc.translate(q.x, q.y); cc.rotate(q.r); cc.fillStyle = q.c;
+      if (q.dot) { cc.beginPath(); cc.arc(0, 0, q.w * .6, 0, Math.PI * 2); cc.fill(); }
+      else { cc.fillRect(-q.w / 2, -q.h / 2, q.w, q.h * Math.abs(Math.cos(q.r * 1.5))); }
+      cc.restore();
+    }
+    if (el < dur && !doc.hidden) requestAnimationFrame(frame); else safe(function(){ hero.removeChild(c); });
+  }
+  requestAnimationFrame(frame);
+  setTimeout(function(){ safe(function(){ if (c.parentNode) hero.removeChild(c); }); }, 1500);
+}
+function reveal(instant){
+  if (state.revealed) return;
+  state.revealed = true; store.set('taxcut_revealed', '1');
+  stopHint(); clearTimeout(tapTimer);
+  scratching = false; holdCard(false);
+  ensureCoupon();
+  page.classList.add('is-revealed'); page.classList.remove('show-tap');
+  ctaSlot.setAttribute('aria-hidden', 'false');
+  var celebrate = !state.ended;
+  if (instant || reduced) {
+    page.classList.add('no-anim');
+    if (celebrate) cardStamp.classList.add('set');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ page.classList.remove('no-anim'); }); });
+    if (!instant) setTimeout(function(){ ctaKakao.scrollIntoView({ block: 'nearest' }); }, 60);
+    return;
+  }
+  cardCut.classList.add('draw');
+  setTimeout(function(){ cardCut.classList.add('fade'); }, 350);
+  if (celebrate) {
+    setTimeout(function(){ cardStamp.classList.add('hit'); card.classList.add('press'); vibrate(40); }, 600);
+    setTimeout(confetti, 660);
+  }
+  setTimeout(function(){ ctaKakao.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 950);
+}
+$('tapOpen').addEventListener('click', function(){ reveal(false); });
+$('kbdReveal').addEventListener('click', function(){ reveal(false); });
+$('cardFallback').addEventListener('click', function(){ reveal(false); });
+$('faceCopy').addEventListener('click', function(){
+  var btn = this; if (!state.coupon) return;
+  copyText(state.coupon).then(function(ok){ if (ok) flashLabel(btn, '복사됨', 1500); });
+});
+card.addEventListener('animationend', function(e){ if (e.animationName === 'press') card.classList.remove('press'); });
+
+/* ---- 초기 상태 ---- */
+paintFoil();
+if (state.revealed) {
+  page.classList.add('no-anim', 'is-revealed');
+  if (state.coupon) cardStamp.classList.add('set');
+  ctaSlot.setAttribute('aria-hidden', 'false');
+} else if (!reduced && ctx) {
+  hintTimers.push(setTimeout(playHint, 900), setTimeout(playHint, 2500));
+  hintLoop = setInterval(function(){ if (!scratched && !state.revealed && Date.now() - lastInput > 12000) playHint(); }, 12000);
+}
+if (!state.revealed) tapTimer = setTimeout(function(){ if (!scratched && !state.revealed) page.classList.add('show-tap'); }, 4000);
+endHooks.push(function(){ if (!state.coupon) fillCodes(''); });
+win.addEventListener('resize', function(){
+  if (!scratched && !state.revealed && foil.clientWidth !== foilW) paintFoil();
+});
+requestAnimationFrame(function(){ requestAnimationFrame(function(){ page.classList.remove('no-anim'); }); });

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 150" width="420" height="150" role="img" aria-label="택스컷">
+  <text x="210" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-weight="700" font-size="18" fill="#3DDC84" letter-spacing="7">TAXCUT</text>
+  <text x="210" y="118" text-anchor="middle" font-family="'Black Han Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif" font-weight="900" font-size="104" fill="#FFFFFF">택스컷</text>
+  <line x1="22" y1="102" x2="398" y2="70" stroke="#3DDC84" stroke-width="7" stroke-linecap="round"/>
+</svg>

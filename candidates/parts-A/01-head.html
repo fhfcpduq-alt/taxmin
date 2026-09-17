@@ -1,0 +1,18 @@
+<!doctype html>
+<!--
+  택스컷 첫달 0원 랜딩 — 폰트: Black Han Sans(한글 디스플레이) / Montserrat 700·900(숫자·타이머·아이브로우) / Noto Sans KR 400·700(본문), Google Fonts 1개 link + 폴백 스택.
+  3D: CSS 3D만 사용(스크래치 카드 perspective 틸트 + translateZ 두께층/그림자/포일/컷 선). WebGL·외부 스크립트 없음, 컨페티는 자체 캔버스(60개).
+  설정: <script> 첫 줄 window.TAXCUT_CONFIG — RESERVATION_MODE 'auto'|'webhook'|'local', RESERVATION_ENDPOINT(Apps Script 웹앱 URL), WEBHOOK_JSON(true면 application/json+cors), KAKAO_URL, EVENT_MINUTES.
+  ENDPOINT가 비어 있으면 local 모드(이 기기 localStorage 'taxcut_reservations'에 저장, 화면에 테스트 모드 배지).
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>택스컷 첫달 0원</title>
+<meta name="description" content="첫 창업 사장님을 위한 세무 기장 서비스 택스컷. 이 페이지에서 30분 안에 상담 및 계약 완료 시 첫 달 기장료 무료. 카톡 한 줄로 세무사와 상담하세요.">
+<meta name="theme-color" content="#16243A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Montserrat:wght@700;900&family=Noto+Sans+KR:wght@400;700&display=swap">
+<style>

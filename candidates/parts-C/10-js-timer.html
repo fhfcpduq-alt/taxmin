@@ -1,0 +1,29 @@
+/* 00 timer bar */
+var tbar=$('#tbar'),tLbl=$('#tLbl'),tLive=$('#tLive'),tBarEl=$('#tBar'),tTip=$('#tTip'),digits=$$('#tNum .d');
+var lastStr='',lastMin=-1,warned=false,live=false;
+function setLine(p){tBarEl.style.transform='scaleX('+p+')';tTip.style.transform='translateX('+(-(1-p)*100)+'%)'}
+function renderTimer(){
+  var r=remaining();
+  if(r<=0){if(!S.ended||!tbar.classList.contains('ended'))endEvent();return}
+  if(live)setLine(r/TOTAL);
+  var m=Math.floor(r/60),s=r%60,str=(m<10?'0':'')+m+(s<10?'0':'')+s;
+  if(str!==lastStr){for(var i=0;i<4;i++){if(digits[i].textContent!==str.charAt(i))digits[i].textContent=str.charAt(i)}lastStr=str}
+  var mc=Math.ceil(r/60);
+  if(mc!==lastMin){lastMin=mc;tLive.textContent='남은 시간 약 '+mc+'분'}
+  if(r<300&&!warned){warned=true;tbar.classList.add('warn');tLbl.textContent='5분 남았어요 — 카톡 한 줄이면 돼요'}
+}
+function endEvent(){
+  S.ended=true;
+  tbar.classList.remove('warn');tbar.classList.add('ended');
+  tLbl.textContent='이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  tLive.textContent='이벤트 시간이 종료되었어요. 그래도 상담은 가능해요';
+  setLine(0);
+  hSec.value='0';
+  if(S.revealed&&S.code){applyCode();endMark.hidden=false}
+  else{face.classList.add('ended');applyCode()}
+}
+renderTimer();
+setTimeout(function(){live=true;tbar.classList.add('live');renderTimer()},1000);
+setInterval(renderTimer,1000);
+D.addEventListener('visibilitychange',function(){if(!D.hidden)renderTimer()});
+W.addEventListener('pageshow',renderTimer);

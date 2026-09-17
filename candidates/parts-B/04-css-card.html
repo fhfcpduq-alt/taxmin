@@ -1,0 +1,69 @@
+/* ===== 스크래치 카드 (3D 물체) ===== */
+.card-scene{perspective:900px;perspective-origin:50% 40%;width:min(368px,100%);position:relative}
+.card-float{transform-style:preserve-3d;will-change:transform}
+.is-idle .card-float{animation:floaty 6s ease-in-out infinite}
+.card-float.is-held{animation:none}
+@keyframes floaty{0%,100%{transform:translateY(0) rotateY(0)}50%{transform:translateY(-4px) rotateY(3deg)}}
+.card{position:relative;aspect-ratio:8/5;width:100%;border-radius:14px;transform-style:preserve-3d;will-change:transform;transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg));--gx:0;--gy:0}
+.card.press{animation:press .28s ease-out}
+@keyframes press{0%{transform:translateZ(0)}40%{transform:translateZ(-12px) rotateX(1.5deg)}100%{transform:translateZ(0)}}
+.card-thick{position:absolute;inset:0;border-radius:14px;background:var(--navy-950);border:1px solid var(--navy-700);transform:translateZ(-6px)}
+.card-thick.mid{background:var(--navy-800);border-color:var(--navy-500);transform:translateZ(-3px)}
+.card-shadow{position:absolute;inset:8% 5% 2%;border-radius:14px;background:var(--navy-950);filter:blur(18px);opacity:.8;transform:translateZ(-30px)}
+.card-face{position:absolute;inset:0;border-radius:14px;overflow:hidden;background:var(--paper);color:var(--navy-900);display:grid;grid-template-columns:40px 1fr;transform:translateZ(0)}
+.card-stub{border-right:2px dashed var(--paper-line);position:relative;background:var(--paper-2)}
+.card-stub span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;font-family:var(--font-num);font-weight:700;font-size:8px;letter-spacing:.3em;color:var(--paper-mute)}
+.card-main{position:relative;padding:12px 14px 12px 16px;display:flex;flex-direction:column;min-width:0}
+.card-top{display:flex;align-items:center;justify-content:space-between}
+.card-top .eyebrow{margin:0;font-size:10px;color:var(--green-ink)}
+.card-top .eyebrow::before{display:none}
+.card-top .badge{width:24px;height:24px}
+.face-title{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:22px;line-height:1.1;margin-top:6px}
+.face-live{display:flex;flex-direction:column;flex:1;min-height:0}
+.face-zero{font-size:56px;line-height:1;display:inline-block;position:relative;margin-top:2px;align-self:flex-start}
+.face-zero .won{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:.5em}
+.face-zero::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:5px;background:var(--green-ink);transform:scaleX(0);transform-origin:left center;transition:transform .3s cubic-bezier(.2,.8,.2,1) .35s}
+.is-revealed .face-zero::after{transform:scaleX(1)}
+.face-code{margin-top:auto;display:flex;align-items:center;gap:8px;border:1.5px dashed var(--navy-700);padding:6px 8px 6px 10px;font-size:13px;color:var(--paper-mute)}
+.face-code .num{font-size:18px;color:var(--navy-900)}
+.face-code button{margin-left:auto;font-size:12px;font-weight:700;color:var(--navy-900);border:1.5px solid var(--navy-700);padding:5px 8px;line-height:1;background:var(--paper)}
+.face-code button:active{background:var(--paper-2)}
+.face-foot{font-size:12px;color:var(--paper-mute);margin-top:6px;line-height:1.3}
+.face-ended{display:none;font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:20px;line-height:1.2;margin-top:10px;color:var(--navy-900)}
+.is-ended:not(.has-coupon) .face-live{display:none}
+.is-ended:not(.has-coupon) .face-ended{display:block}
+.face-mark{display:none;position:absolute;right:14px;top:42px;font-size:11px;font-weight:700;color:var(--paper-mute);border:1.5px solid var(--paper-line);padding:3px 6px;line-height:1;background:var(--paper)}
+.is-ended.has-coupon .face-mark{display:block}
+.card-stamp{position:absolute;right:8%;bottom:12%;transform:rotate(-8deg) scale(2);opacity:0;font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:22px;line-height:1;color:var(--navy-900);background:var(--green);padding:9px 14px 10px;border:3px solid var(--navy-900);box-shadow:inset 0 0 0 2px var(--green);letter-spacing:.02em;pointer-events:none;white-space:nowrap;will-change:transform,opacity}
+.card-stamp.hit{opacity:1;transform:rotate(-8deg) scale(1);transition:transform .25s cubic-bezier(.2,1.6,.4,1),opacity .08s ease}
+.card-stamp.set{opacity:1;transform:rotate(-8deg) scale(1)}
+.card-foil{position:absolute;inset:0;width:100%;height:100%;border-radius:14px;transform:translateZ(14px);touch-action:none;cursor:crosshair;transition:opacity .35s ease .1s;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.is-revealed .card-foil{opacity:0;pointer-events:none}
+.card-prompt{position:absolute;inset:0;transform:translateZ(15px);pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--navy-900);transition:opacity .15s ease;padding:0 16px}
+.card-prompt strong{font-family:var(--font-display);font-weight:400;font-synthesis:none;font-size:24px;line-height:1.1}
+.card-prompt i{display:block;width:48px;height:3px;background:var(--green-ink);transform:rotate(var(--cut-angle));margin:10px 0}
+.card-prompt small{font-size:12px;color:var(--navy-700);font-weight:700}
+.is-scratched .card-prompt,.is-revealed .card-prompt{opacity:0}
+.card-glare{position:absolute;inset:0;border-radius:14px;overflow:hidden;pointer-events:none;transform:translateZ(15.5px)}
+.card-glare::before{content:"";position:absolute;left:-50%;top:-50%;width:200%;height:200%;background:linear-gradient(115deg,transparent 36%,rgba(255,255,255,.06) 44%,rgba(255,255,255,.12) 49%,rgba(255,255,255,.12) 51%,rgba(255,255,255,.06) 56%,transparent 64%);transform:translate(calc(var(--gx) * -22%),calc(var(--gy) * -22%));will-change:transform}
+.is-revealed .card-glare::before{opacity:.6}
+.card-hint{position:absolute;left:18%;top:62%;width:28px;height:28px;transform:translateZ(16px);pointer-events:none;opacity:0;will-change:transform,opacity}
+.card-hint.play{animation:hintDrag 1.2s cubic-bezier(.4,0,.2,1) both}
+@keyframes hintDrag{0%{opacity:0;transform:translateZ(16px) translate(0,0)}15%{opacity:1;transform:translateZ(16px) translate(6px,-4px)}85%{opacity:1;transform:translateZ(16px) translate(170px,-100px)}100%{opacity:0;transform:translateZ(16px) translate(180px,-106px)}}
+.card-cut{position:absolute;inset:0;width:100%;height:100%;transform:translateZ(28px);pointer-events:none;overflow:visible;opacity:0}
+.card-cut line{stroke:var(--green);stroke-width:4;stroke-linecap:round;stroke-dasharray:700;stroke-dashoffset:700}
+.card-cut.draw{opacity:1}
+.card-cut.draw line{stroke-dashoffset:0;transition:stroke-dashoffset .35s cubic-bezier(.2,.8,.2,1)}
+.card-cut.fade{opacity:0;transition:opacity .25s ease}
+.card-fallback{display:none;position:absolute;inset:0;transform:translateZ(16px);align-items:center;justify-content:center;background:var(--foil-mid);color:var(--navy-900);font-weight:700;font-size:16px;border-radius:14px}
+.no-canvas .card-fallback{display:flex}
+.no-canvas .card-foil,.no-canvas .card-prompt,.no-canvas .card-hint{display:none}
+.is-revealed .card-fallback{display:none}
+.confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3}
+@supports not (transform-style:preserve-3d){
+  .card,.card-float{transform:none!important;animation:none!important}
+  .card-thick,.card-shadow{display:none}
+  .card-foil,.card-prompt,.card-cut,.card-glare,.card-hint,.card-fallback{transform:none}
+}
+@media (max-width:359px){.face-title{font-size:19px}.face-zero{font-size:46px}.card-prompt strong{font-size:21px}.card-stamp{font-size:18px}}
+@media (min-width:1024px){.card-scene{width:420px}.card{aspect-ratio:420/248}}

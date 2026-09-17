@@ -1,0 +1,138 @@
+
+/* ================= 06 예약 폼 + 저장 어댑터 ================= */
+var form = $('resForm'), submitBtn = $('submitBtn'), formFail = $('formFail'), successPanel = $('successPanel');
+var fName = $('f_name'), fPhone = $('f_phone'), fSales = $('f_sales'), fBiz = $('f_biz'), fBizOther = $('f_bizOther');
+var fReg = $('f_reg'), fNoReg = $('f_noReg'), fSlot = $('f_slot'), fMemo = $('f_memo'), fAgree = $('f_agree');
+function resolvedMode(){ var m = CFG.RESERVATION_MODE; if (m === 'auto') m = CFG.RESERVATION_ENDPOINT ? 'webhook' : 'local'; return m; }
+if (resolvedMode() === 'local') page.classList.add('is-local');
+function setInvalid(group, field, bad){
+  group.classList.toggle('is-invalid', bad);
+  if (field) { if (bad) field.setAttribute('aria-invalid', 'true'); else field.removeAttribute('aria-invalid'); }
+}
+function digitsOf(v){ return (v || '').replace(/\D/g, '').slice(0, 11); }
+function formatPhone(d){
+  if (d.length <= 3) return d;
+  if (d.length <= 7) return d.slice(0, 3) + '-' + d.slice(3);
+  if (d.length === 10) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6);
+  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+}
+function validPhone(){ return /^010\d{7,8}$/.test(digitsOf(fPhone.value)); }
+fPhone.addEventListener('input', function(){ fPhone.value = formatPhone(digitsOf(fPhone.value)); });
+fPhone.addEventListener('blur', function(){ if (fPhone.value) setInvalid($('g_phone'), fPhone, !validPhone()); });
+fBiz.addEventListener('change', function(){
+  var other = fBiz.value === '기타';
+  $('g_bizOther').classList.toggle('show', other); fBizOther.required = other;
+  if (!other) setInvalid($('g_bizOther'), fBizOther, false);
+});
+fNoReg.addEventListener('change', function(){
+  fReg.disabled = fNoReg.checked; fReg.required = !fNoReg.checked;
+  if (fNoReg.checked) { fReg.value = ''; setInvalid($('g_reg'), fReg, false); }
+});
+function validate(){
+  var firstBad = null;
+  function chk(group, field, ok){ setInvalid(group, field, !ok); if (!ok && !firstBad) firstBad = field; }
+  chk($('g_name'), fName, fName.value.trim().length > 0);
+  chk($('g_phone'), fPhone, validPhone());
+  chk($('g_sales'), fSales, !!fSales.value);
+  chk($('g_biz'), fBiz, !!fBiz.value);
+  if (fBiz.value === '기타') chk($('g_bizOther'), fBizOther, fBizOther.value.trim().length > 0);
+  chk($('g_reg'), fReg, fNoReg.checked || !!fReg.value);
+  chk($('g_slot'), fSlot, !!fSlot.value);
+  chk($('g_agree'), fAgree, fAgree.checked);
+  return firstBad;
+}
+function sourceOf(){
+  return safe(function(){
+    var u = new URLSearchParams(win.location.search).get('utm_source');
+    if (u) return u;
+    return doc.referrer ? new URL(doc.referrer).hostname : '';
+  }, '');
+}
+function sendReservation(data){
+  return new Promise(function(resolve, reject){
+    try {
+      var mode = resolvedMode();
+      if (mode === 'local') {
+        var arr = store.getJSON('taxcut_reservations', []); if (!Array.isArray(arr)) arr = [];
+        arr.push(data); store.set('taxcut_reservations', JSON.stringify(arr));
+        resolve({ ok: true, mode: 'local' }); return;
+      }
+      if (!CFG.RESERVATION_ENDPOINT) throw new Error('no endpoint');
+      if (CFG.WEBHOOK_JSON) {
+        fetch(CFG.RESERVATION_ENDPOINT, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+          .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json().catch(function(){ return { ok: true }; }); })
+          .then(function(j){ if (j && j.ok === false) throw new Error('server'); resolve({ ok: true, mode: 'webhook' }); })
+          .catch(reject);
+      } else {
+        fetch(CFG.RESERVATION_ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data) })
+          .then(function(){ resolve({ ok: true, mode: 'webhook' }); }).catch(reject);
+      }
+    } catch (e) { reject(e); }
+  });
+}
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  var bad = validate();
+  if (bad) { safe(function(){ bad.focus(); }); return; }
+  formFail.classList.remove('show');
+  $('f_coupon').value = state.ended ? '' : state.coupon;
+  $('f_seconds').value = String(state.ended ? 0 : remaining());
+  $('f_source').value = sourceOf();
+  $('f_submitted').value = new Date().toISOString();
+  var data = {
+    name: fName.value.trim(), phone: fPhone.value, sales: fSales.value,
+    biz: fBiz.value === '기타' ? '기타: ' + fBizOther.value.trim() : fBiz.value,
+    regDate: fNoReg.checked ? '' : fReg.value, noReg: fNoReg.checked,
+    slot: fSlot.value, memo: fMemo.value.trim(), agree: true,
+    coupon: $('f_coupon').value, secondsLeft: Number($('f_seconds').value),
+    source: $('f_source').value, submittedAt: $('f_submitted').value,
+    page: safe(function(){ return win.location.href; }, '')
+  };
+  submitBtn.disabled = true; var prevLabel = submitBtn.textContent; submitBtn.textContent = '보내는 중…';
+  sendReservation(data).then(function(){
+    form.hidden = true; successPanel.classList.add('show');
+    safe(function(){ $('successTitle').focus(); });
+  }, function(){
+    submitBtn.disabled = false; submitBtn.textContent = prevLabel;
+    formFail.classList.add('show');
+  });
+});
+
+/* ================= 스크롤 옵저버 / 하단 바 ================= */
+var seenIO = safe(function(){
+  return new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if (en.isIntersecting) { en.target.classList.add('is-seen'); seenIO.unobserve(en.target); } });
+  }, { threshold: .5 });
+}, null);
+$$('[data-seen]').forEach(function(el){ if (seenIO) seenIO.observe(el); else el.classList.add('is-seen'); });
+
+var bbar = $('bbar'), pastCard = false, focusHide = false, kbHide = false, blockHide = false, blockSet = {};
+function syncBar(){ bbar.classList.toggle('show', pastCard && !focusHide && !kbHide && !blockHide); }
+var cardIO = safe(function(){
+  return new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ pastCard = !en.isIntersecting && en.boundingClientRect.top < 0; });
+    syncBar();
+  }, { threshold: 0 });
+}, null);
+if (cardIO) cardIO.observe(scene);
+var blockIO = safe(function(){
+  return new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ blockSet[en.target.id] = en.isIntersecting; });
+    blockHide = Object.keys(blockSet).some(function(k){ return blockSet[k]; });
+    syncBar();
+  }, { threshold: 0 });
+}, null);
+if (blockIO) { blockIO.observe($('reserve')); blockIO.observe($('privacy')); }
+form.addEventListener('focusin', function(){ focusHide = true; syncBar(); });
+form.addEventListener('focusout', function(){
+  setTimeout(function(){ if (!form.contains(doc.activeElement)) { focusHide = false; syncBar(); } }, 80);
+});
+var vv = win.visualViewport, baseH = win.innerHeight;
+if (vv) vv.addEventListener('resize', function(){
+  if (vv.height > baseH) baseH = vv.height;
+  kbHide = vv.height < baseH - 120; syncBar();
+});
+})();
+</script>
+</body>
+</html>

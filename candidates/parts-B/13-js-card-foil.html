@@ -1,0 +1,126 @@
+
+/* ================= 스크래치 카드: 포일 / 틸트 / 긁기 ================= */
+var scene = $('cardScene'), cardFloat = $('cardFloat'), card = $('card'), foil = $('foil');
+var cardPrompt = $('cardPrompt'), cardHint = $('cardHint'), cardCut = $('cardCut'), cardStamp = $('cardStamp');
+var ctx = safe(function(){ return foil.getContext('2d', { willReadFrequently: true }); }, null);
+var off = doc.createElement('canvas');
+var octx = safe(function(){ return off.getContext('2d', { willReadFrequently: true }); }, null);
+if (!ctx || !octx) { ctx = null; page.classList.add('no-canvas'); }
+var dpr = Math.min(win.devicePixelRatio || 1, 1.5);
+var tokens = safe(function(){ return getComputedStyle(doc.documentElement); }, null);
+function tok(name, fb){ var v = tokens ? tokens.getPropertyValue(name).trim() : ''; return v || fb; }
+var scratched = false, foilW = 0, foilH = 0;
+
+function paintFoil(){
+  if (!ctx) return;
+  var w = foil.clientWidth, h = foil.clientHeight;
+  if (!w || !h) return;
+  foilW = w; foilH = h;
+  foil.width = Math.round(w * dpr); foil.height = Math.round(h * dpr);
+  off.width = Math.max(1, Math.round(foil.width / 4)); off.height = Math.max(1, Math.round(foil.height / 4));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  var g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, tok('--foil-hi', '#E9EDF3')); g.addColorStop(.5, tok('--foil-mid', '#C7CDD8')); g.addColorStop(1, tok('--foil-lo', '#AEB6C4'));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(11,21,38,.07)'; ctx.lineWidth = 1; ctx.beginPath();
+  for (var x = -h; x < w; x += 4) { ctx.moveTo(x, 0); ctx.lineTo(x + h, h); }
+  ctx.stroke();
+  ctx.save();
+  ctx.fillStyle = 'rgba(11,21,38,.06)'; ctx.font = '700 9px Montserrat, "Arial Black", Arial, sans-serif';
+  ctx.translate(w / 2, h / 2); ctx.rotate(-5 * Math.PI / 180); ctx.translate(-w / 2, -h / 2);
+  for (var ty = -10; ty < h + 20; ty += 22) { for (var tx = -30 + (Math.floor(ty / 22) % 2) * 27; tx < w + 30; tx += 54) { ctx.fillText('TAXCUT', tx, ty); } }
+  ctx.restore();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+}
+
+/* ---- 틸트 (단일 rAF 루프에서 스크래치와 배칭) ---- */
+var tx = 0, ty = 0, ttx = 0, tty = 0, held = false, rafId = 0, strokes = [], brush = 22;
+function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+function applyTilt(){
+  card.style.setProperty('--tx', tx.toFixed(2) + 'deg');
+  card.style.setProperty('--ty', ty.toFixed(2) + 'deg');
+  card.style.setProperty('--gx', (ty / 10).toFixed(3));
+  card.style.setProperty('--gy', (-tx / 8).toFixed(3));
+}
+function wake(){ if (!rafId && !doc.hidden) rafId = requestAnimationFrame(tick); }
+function tick(){
+  rafId = 0;
+  if (strokes.length && ctx) {
+    ctx.lineWidth = brush * 2; ctx.beginPath();
+    for (var i = 0; i < strokes.length; i++) { var s = strokes[i]; ctx.moveTo(s[0], s[1]); ctx.lineTo(s[2], s[3]); }
+    ctx.stroke(); strokes.length = 0;
+  }
+  var dx = ttx - tx, dy = tty - ty;
+  if (Math.abs(dx) > .03 || Math.abs(dy) > .03) { tx += dx * .12; ty += dy * .12; applyTilt(); wake(); }
+  else if (dx || dy) { tx = ttx; ty = tty; applyTilt(); }
+}
+function holdCard(on){
+  held = on;
+  if (on) { ttx = tty = tx = ty = 0; applyTilt(); cardFloat.classList.add('is-held'); }
+  else { cardFloat.classList.remove('is-held'); }
+}
+scene.addEventListener('pointermove', function(e){
+  if (held || e.pointerType !== 'mouse') return;
+  var r = scene.getBoundingClientRect();
+  var nx = clamp((e.clientX - r.left) / r.width * 2 - 1, -1, 1), ny = clamp((e.clientY - r.top) / r.height * 2 - 1, -1, 1);
+  ttx = clamp(-ny * 8, -8, 8); tty = clamp(nx * 10, -10, 10); wake();
+});
+scene.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse' && !held) { ttx = tty = 0; wake(); } });
+var iosPerm = safe(function(){ return typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'; }, false);
+if (!iosPerm && !reduced && win.DeviceOrientationEvent) {
+  var base = null;
+  win.addEventListener('deviceorientation', function(e){
+    if (held || doc.hidden || e.beta === null || e.gamma === null) return;
+    if (!base) { base = { b: e.beta, g: e.gamma }; return; }
+    var rb = e.beta - base.b, rg = e.gamma - base.g;
+    if (Math.abs(rb) < 2) rb = 0; if (Math.abs(rg) < 2) rg = 0;
+    ttx = clamp(-rb, -20, 20) * .4; tty = clamp(rg, -20, 20) * .5; wake();
+  }, true);
+}
+doc.addEventListener('visibilitychange', function(){
+  if (doc.hidden) { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } } else { wake(); }
+});
+
+/* ---- 긁기 ---- */
+var scratching = false, sx = 1, sy = 1, rx = 0, ry = 0, lastX = 0, lastY = 0, moves = 0, lastProg = 0, lastInput = Date.now();
+function checkProgress(){
+  if (!ctx || state.revealed) return 0;
+  octx.clearRect(0, 0, off.width, off.height);
+  octx.drawImage(foil, 0, 0, off.width, off.height);
+  var d = octx.getImageData(0, 0, off.width, off.height).data, clear = 0, n = d.length / 4;
+  for (var i = 3; i < d.length; i += 4) { if (d[i] < 128) clear++; }
+  var p = clear / n;
+  if (p >= .10) page.classList.add('is-scratched');
+  if (p >= .45) reveal(false);
+  return p;
+}
+foil.addEventListener('pointerdown', function(e){
+  if (state.revealed || !ctx) return;
+  e.preventDefault();
+  scratching = true; scratched = true; moves = 0; lastInput = Date.now();
+  holdCard(true); stopHint();
+  var r = foil.getBoundingClientRect();
+  rx = r.left; ry = r.top; sx = foilW / r.width; sy = foilH / r.height;
+  brush = e.pointerType === 'mouse' ? 16 : 22;
+  safe(function(){ foil.setPointerCapture(e.pointerId); });
+  lastX = (e.clientX - rx) * sx; lastY = (e.clientY - ry) * sy;
+  strokes.push([lastX, lastY, lastX + .01, lastY]); wake();
+});
+foil.addEventListener('pointermove', function(e){
+  if (!scratching) return;
+  var x = (e.clientX - rx) * sx, y = (e.clientY - ry) * sy;
+  strokes.push([lastX, lastY, x, y]); lastX = x; lastY = y; moves++; wake();
+  var now = Date.now();
+  if (moves >= 3 && now - lastProg > 120) { lastProg = now; checkProgress(); }
+});
+function endScratch(){
+  if (!scratching) return;
+  scratching = false; holdCard(false); lastInput = Date.now();
+  if (moves >= 3) { tick(); checkProgress(); }
+}
+foil.addEventListener('pointerup', endScratch);
+foil.addEventListener('pointercancel', endScratch);
+foil.addEventListener('touchmove', function(e){ e.preventDefault(); }, { passive: false });
+foil.addEventListener('contextmenu', function(e){ e.preventDefault(); });

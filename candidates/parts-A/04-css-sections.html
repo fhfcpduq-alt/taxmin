@@ -1,0 +1,148 @@
+/* ===== 03 왜 택스컷 ===== */
+.why-list{display:grid;gap:32px;margin-top:28px}
+.why-item{position:relative;padding-top:14px}
+.why-item::before{
+  content:"";position:absolute;left:0;top:0;width:28px;height:2px;background:var(--green);
+  transform:skewY(var(--cut-angle)) scaleX(0);transform-origin:left center;transition:transform .3s var(--ease-cut);
+}
+.why-item.is-in::before{transform:skewY(var(--cut-angle)) scaleX(1)}
+.why-item .idx{
+  position:absolute;right:0;top:6px;font-size:36px;color:var(--green);opacity:.4;line-height:1;pointer-events:none;
+}
+.why-item h3{font-size:22px;color:var(--ink);margin-bottom:8px;padding-right:56px}
+.why-item h3 a{color:inherit;text-decoration:none;background-image:linear-gradient(var(--green),var(--green));background-repeat:no-repeat;background-size:100% 2px;background-position:0 100%}
+.why-item h3 a:hover{color:var(--green)}
+.why-item p{max-width:34ch;color:var(--ink-soft)}
+@media (min-width:768px){
+  .why-list{grid-template-columns:1fr 1fr;gap:1px;background:var(--navy-700);border:1px solid var(--navy-700)}
+  .why-item{background:var(--navy-900);padding:28px 24px 32px}
+  .why-item::before{left:24px;top:14px}
+  .why-item .idx{right:24px;top:18px}
+}
+
+/* ===== 04 진행 절차 ===== */
+.how{background:var(--navy-800)}
+.steps{position:relative;margin:28px 0 20px;padding-left:36px}
+.steps::before{
+  content:"";position:absolute;left:8px;top:10px;bottom:10px;width:3px;background:var(--green);
+  transform:scaleY(0);transform-origin:top;transition:transform .6s var(--ease-cut);
+}
+.steps.is-in::before{transform:scaleY(1)}
+.step{position:relative;padding-bottom:32px}
+.step:last-child{padding-bottom:0}
+.step::before{
+  content:"";position:absolute;left:-36px;top:12px;width:19px;height:19px;background:var(--navy-800);
+  border:3px solid var(--green);border-radius:0;transform:rotate(45deg) scale(.7);
+}
+.step .no{font-size:36px;color:var(--green);line-height:1;margin-bottom:6px}
+.step h3{font-size:22px;color:var(--ink);margin-bottom:6px}
+.step p{color:var(--ink-soft);max-width:34ch}
+.how-note{font-size:13px;color:var(--ink-mute);margin-bottom:16px}
+@media (min-width:768px){
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;padding-left:0;padding-top:28px}
+  .steps::before{left:0;right:0;top:8px;bottom:auto;height:3px;width:auto;transform:scaleX(0);transform-origin:left}
+  .steps.is-in::before{transform:scaleX(1)}
+  .step{padding-bottom:0}
+  .step::before{left:0;top:-29px}
+}
+
+/* ===== 05 FAQ ===== */
+.faq-list{margin-top:8px;border-top:1px solid var(--paper-line)}
+.faq-list details{border-bottom:1px solid var(--paper-line)}
+.faq-list summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  min-height:56px;padding:12px 0;font-weight:700;font-size:16px;color:var(--navy-900);
+}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary .mark{
+  flex:none;width:16px;height:2px;background:var(--green-ink);transform:rotate(45deg);transition:transform .15s ease;
+}
+.faq-list details[open]{background:var(--paper-2)}
+.faq-list details[open] summary{padding-left:12px;padding-right:12px}
+.faq-list details[open] summary .mark{transform:rotate(90deg)}
+.faq-list details p{padding:0 12px 16px;font-size:15px;line-height:1.6;color:var(--paper-mute);max-width:60ch}
+
+/* ===== 06 최종 CTA ===== */
+.final{display:grid}
+.final-a{background:var(--navy-900)}
+.final-a .sec-sub{color:var(--ink-soft);margin-bottom:24px}
+.final-b{background:var(--paper);color:var(--navy-900)}
+.final-b .sec-title{color:var(--navy-900);display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.coupon-pill{
+  display:none;align-items:center;height:26px;padding:0 10px;border:1.5px dashed var(--green-ink);
+  font-family:var(--font-num);font-weight:900;font-size:13px;color:var(--navy-900);letter-spacing:0;
+}
+.coupon-pill.is-on{display:inline-flex}
+.mode-pill{display:none;background:var(--paper-2);color:var(--paper-mute);font-size:12px;padding:4px 10px;margin:4px 0 12px;width:max-content;max-width:100%}
+.mode-pill.is-on{display:inline-block}
+@media (min-width:1024px){
+  .final{grid-template-columns:5fr 7fr}
+}
+
+/* 폼 */
+.form{margin-top:20px;display:grid;gap:18px;max-width:560px}
+.field{display:grid;gap:6px}
+.field label,.field .lbl{font-size:14px;font-weight:700;color:var(--navy-900)}
+.field input[type=text],.field input[type=tel],.field input[type=date],.field select,.field textarea{
+  width:100%;min-height:48px;padding:10px 12px;border:1.5px solid var(--navy-700);border-radius:6px;
+  background:var(--paper-2);color:var(--navy-900);font:inherit;font-size:16px;appearance:none;-webkit-appearance:none;
+}
+.field select{
+  background-image:linear-gradient(45deg,transparent 50%,var(--navy-700) 50%),linear-gradient(135deg,var(--navy-700) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 21px,calc(100% - 14px) 21px;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px;
+}
+.field textarea{min-height:64px;resize:vertical}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{outline:2px solid var(--green-ink);outline-offset:2px}
+.field input:disabled{opacity:.5}
+.field.is-invalid input,.field.is-invalid select{border-color:var(--error)}
+.field .err{display:none;font-size:13px;color:var(--error)}
+.field.is-invalid .err{display:block}
+.check{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--navy-900);cursor:pointer}
+.check input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--green-ink)}
+.check-note{font-size:12px;color:var(--paper-mute);line-height:1.5;margin-left:30px}
+.check-note a{color:var(--navy-900)}
+.field-other{display:none}
+.field-other.is-on{display:grid}
+.form .btn-primary{margin-top:6px}
+.form-panel{display:none;margin-top:20px;max-width:560px}
+.form-panel.is-on{display:block}
+.form-panel h3{font-size:24px;color:var(--navy-900);margin-bottom:14px}
+.form-panel h3:focus{outline:none}
+.form-panel p{color:var(--paper-mute);margin-bottom:16px}
+
+/* ===== 07 푸터 ===== */
+.footer{background:var(--navy-950);color:var(--ink-mute);padding:48px 0 96px;font-size:13px}
+.footer .wordmark{width:90px;height:auto;margin-bottom:10px}
+.footer .firm{color:var(--ink-soft);margin-bottom:20px}
+.trust{display:grid;gap:4px;margin-bottom:20px}
+.footer-links{display:flex;flex-wrap:wrap;gap:14px 20px;margin-bottom:24px}
+.footer-links .cut-link{font-size:13px}
+.privacy{border-top:1px solid var(--navy-700);padding-top:20px;margin-bottom:20px}
+.privacy h3{font-size:14px;color:var(--ink-soft);margin-bottom:8px;font-family:var(--font-body)}
+.privacy li{margin-bottom:4px}
+.notice h3{font-size:12px;color:var(--ink-soft);margin-bottom:6px;font-family:var(--font-body)}
+.notice ol{margin:0;padding-left:18px;font-size:12px;color:var(--ink-mute)}
+.notice li{margin-bottom:3px}
+@media (min-width:768px){.footer{padding-bottom:48px}}
+
+/* ===== 08 하단 고정 CTA 바 ===== */
+.bottom-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--navy-800);border-top:1px solid var(--navy-700);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;
+  transform:translateY(110%);transition:transform .2s ease;
+}
+.bottom-bar.is-on{transform:translateY(0)}
+.bottom-bar.is-off{transform:translateY(110%)}
+.bottom-bar .btn{min-height:44px;font-size:15px;padding:0 12px}
+.bottom-bar .btn-kakao{flex:0 0 58%}
+.bottom-bar .btn-outline{flex:1}
+.bottom-bar .btn-kakao svg{width:20px;height:20px}
+@media (min-width:768px){.bottom-bar{display:none}}
+
+/* 토스트 */
+.toast{
+  position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;transform:translate(-50%,8px);
+  background:var(--paper);color:var(--navy-900);font-weight:700;font-size:14px;padding:10px 16px;opacity:0;pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease;
+}
+.toast.is-on{opacity:1;transform:translate(-50%,0)}

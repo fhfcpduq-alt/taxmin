@@ -1,0 +1,90 @@
+/* scroll observers: one IO for section reveals (once), threshold .5 with a tall-section escape hatch */
+var IO=W.IntersectionObserver;
+if(IO){
+  var secIO=new IO(function(en){en.forEach(function(x){
+    if(x.isIntersecting&&(x.intersectionRatio>=.5||x.boundingClientRect.height>W.innerHeight*.8)){x.target.classList.add('in');secIO.unobserve(x.target)}
+  })},{threshold:[.15,.5]});
+  $$('.io').forEach(function(el){secIO.observe(el)});
+}else{$$('.io').forEach(function(el){el.classList.add('in')})}
+/* 08 bottom bar: hidden on first screen, slides up after the card leaves, slides down around the form/privacy/keyboard */
+var bbar=$('#bbar'),blk={card:true,focus:false,kb:false,zone:0};
+function bbarUpdate(){bbar.classList.toggle('show',!(blk.card||blk.focus||blk.kb||blk.zone>0))}
+if(IO){
+  new IO(function(en){blk.card=en[0].isIntersecting;bbarUpdate()},{threshold:0}).observe(scene);
+  var zoneIO=new IO(function(en){en.forEach(function(x){var k=x.target.id;var was=!!zoneSet[k];zoneSet[k]=x.isIntersecting;if(was!==x.isIntersecting)blk.zone+=x.isIntersecting?1:-1});bbarUpdate()},{threshold:0});
+  var zoneSet={};
+  ['reserve','privacy','okPanel'].forEach(function(id){zoneIO.observe($('#'+id))});
+}else{blk.card=false;bbarUpdate()}
+var form=$('#form');
+form.addEventListener('focusin',function(){blk.focus=true;bbarUpdate()});
+form.addEventListener('focusout',function(){setTimeout(function(){blk.focus=form.contains(D.activeElement);bbarUpdate()},50)});
+if(W.visualViewport){
+  var vh0=W.visualViewport.height;
+  W.visualViewport.addEventListener('resize',function(){var h=W.visualViewport.height;if(h>vh0)vh0=h;blk.kb=h<vh0-150;bbarUpdate()});
+  W.addEventListener('orientationchange',function(){setTimeout(function(){vh0=W.visualViewport.height},400)});
+}
+/* 06-B reservation form: validation, auto-hyphen, storage adapter */
+var MODE=C.RESERVATION_MODE==='auto'?(C.RESERVATION_ENDPOINT?'webhook':'local'):C.RESERVATION_MODE;
+if(MODE==='local')$('#testPill').hidden=false;
+var fName=$('#f-name'),fTel=$('#f-tel'),fRev=$('#f-rev'),fBiz=$('#f-biz'),fBizEtc=$('#f-bizEtc'),bizWrap=$('#bizEtcWrap'),fDate=$('#f-date'),fNoReg=$('#f-noReg'),fTime=$('#f-time'),fMemo=$('#f-memo'),fAgree=$('#f-agree'),sbtn=$('#sbtn'),okPanel=$('#okPanel'),failPanel=$('#failPanel');
+$('#h-src').value=safe(function(){var m=/[?&]utm_source=([^&#]*)/.exec(W.location.search);if(m)return decodeURIComponent(m[1]).slice(0,80);var ref=D.referrer;if(ref)return ref.replace(/^https?:\/\//,'').split('/')[0];return 'direct'},'direct');
+function fmtTel(v){var d=v.replace(/\D/g,'').slice(0,11);if(d.length<4)return d;if(d.length<8)return d.slice(0,3)+'-'+d.slice(3);if(d.length<11)return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);return d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7)}
+function telOk(v){return /^010\d{7,8}$/.test(v.replace(/\D/g,''))}
+fTel.addEventListener('input',function(){var f=fmtTel(fTel.value);if(f!==fTel.value)fTel.value=f});
+function mark(el,bad){var f=el.closest('.f');if(f)f.classList.toggle('bad',!!bad);el.setAttribute('aria-invalid',bad?'true':'false');return !bad}
+fTel.addEventListener('blur',function(){if(fTel.value)mark(fTel,!telOk(fTel.value))});
+fBiz.addEventListener('change',function(){var etc=fBiz.value==='기타';bizWrap.hidden=!etc;if(etc)safe(function(){fBizEtc.focus({preventScroll:true})})});
+fNoReg.addEventListener('change',function(){fDate.disabled=fNoReg.checked;fDate.required=!fNoReg.checked;if(fNoReg.checked){fDate.value='';mark(fDate,false)}});
+function validate(){
+  var ok=true,first=null,chk=function(el,bad){if(!mark(el,bad)){ok=false;if(!first)first=el}};
+  chk(fName,!fName.value.trim());
+  chk(fTel,!telOk(fTel.value));
+  chk(fRev,!fRev.value);
+  chk(fBiz,!fBiz.value);
+  chk(fDate,!fNoReg.checked&&!fDate.value);
+  chk(fTime,!fTime.value);
+  chk(fAgree,!fAgree.checked);
+  if(first)safe(function(){first.focus()});
+  return ok;
+}
+function save(data){
+  return new Promise(function(res,rej){
+    try{
+      if(MODE==='local'){
+        var arr=safe(function(){return JSON.parse(store.get('taxcut_reservations')||'[]')},[]);
+        if(!Array.isArray(arr))arr=[];
+        arr.push(data);store.set('taxcut_reservations',JSON.stringify(arr));res(true);return;
+      }
+      if(!C.RESERVATION_ENDPOINT||typeof W.fetch!=='function')throw new Error('no endpoint');
+      var opt=C.WEBHOOK_JSON
+        ?{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}
+        :{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data)};
+      W.fetch(C.RESERVATION_ENDPOINT,opt).then(function(r){if(C.WEBHOOK_JSON&&!r.ok)throw new Error('status '+r.status);res(true)}).catch(rej);
+    }catch(err){rej(err)}
+  });
+}
+var sending=false;
+form.addEventListener('submit',function(e){
+  e.preventDefault();
+  if(sending||!validate())return;
+  var sec=remaining();
+  hSec.value=String(S.ended?0:sec);
+  hCoupon.value=(S.revealed&&S.code&&!S.ended)?S.code:'';
+  $('#h-at').value=new Date().toISOString();
+  var data={name:fName.value.trim(),tel:fTel.value,revenue:fRev.value,industry:fBiz.value==='기타'&&fBizEtc.value.trim()?'기타: '+fBizEtc.value.trim():fBiz.value,
+    regDate:fNoReg.checked?'':fDate.value,notRegistered:fNoReg.checked,time:fTime.value,memo:fMemo.value.trim(),agree:true,
+    coupon:hCoupon.value,secondsLeft:+hSec.value,source:$('#h-src').value,submittedAt:$('#h-at').value,page:safe(function(){return W.location.href.split('#')[0]},''),mode:MODE};
+  sending=true;sbtn.disabled=true;sbtn.textContent='보내는 중…';failPanel.hidden=true;
+  save(data).then(function(){
+    sending=false;form.hidden=true;okPanel.hidden=false;
+    safe(function(){okPanel.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})});
+    setTimeout(function(){safe(function(){$('#okH').focus({preventScroll:true})})},RM?50:400);
+  },function(){
+    sending=false;sbtn.disabled=false;sbtn.textContent='예약 신청하기';failPanel.hidden=false;
+    safe(function(){failPanel.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})});
+  });
+});
+})();
+</script>
+</body>
+</html>

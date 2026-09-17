@@ -1,0 +1,103 @@
+<script>
+window.TAXCUT_CONFIG = { KAKAO_URL:'https://pf.kakao.com/_Mxojqs/chat', EVENT_MINUTES:30, RESERVATION_MODE:'auto', RESERVATION_ENDPOINT:'', WEBHOOK_JSON:false, YOUTUBE_URL:'https://www.youtube.com/@taxcut_min', SITE_URL:'https://taxmin.kr' };
+(function(){
+'use strict';
+var CFG = window.TAXCUT_CONFIG;
+var doc = document, win = window;
+var page = doc.getElementById('page');
+function $(id){ return doc.getElementById(id); }
+function $$(sel, root){ return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
+function safe(fn, fallback){ try { return fn(); } catch (e) { return fallback; } }
+var reduced = safe(function(){ return win.matchMedia('(prefers-reduced-motion: reduce)').matches; }, false);
+var inApp = /Instagram|FBAN|FBAV|KAKAOTALK|DaangnMarket|TowneersApp|Daangn/i.test(navigator.userAgent || '');
+
+/* ---- guarded helpers: storage / clipboard / vibrate ---- */
+var mem = {};
+var store = {
+  get: function(k){ return safe(function(){ var v = win.localStorage.getItem(k); return v === null ? (k in mem ? mem[k] : null) : v; }, (k in mem ? mem[k] : null)); },
+  set: function(k, v){ mem[k] = v; safe(function(){ win.localStorage.setItem(k, v); }); },
+  getJSON: function(k, fb){ var v = store.get(k); if (v === null) return fb; return safe(function(){ return JSON.parse(v); }, fb); }
+};
+function copyText(text){
+  function legacy(){
+    return safe(function(){
+      var ta = doc.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+      doc.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, 99999);
+      var ok = doc.execCommand('copy'); doc.body.removeChild(ta); return !!ok;
+    }, false);
+  }
+  return new Promise(function(resolve){
+    var used = safe(function(){
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ resolve(true); }, function(){ resolve(legacy()); });
+        return true;
+      }
+      return false;
+    }, false);
+    if (!used) resolve(legacy());
+  });
+}
+function vibrate(ms){ safe(function(){ if (navigator.vibrate) navigator.vibrate(ms); }); }
+function genCode(){
+  var n = safe(function(){ var a = new Uint16Array(1); win.crypto.getRandomValues(a); return a[0] % 9000 + 1000; }, null);
+  if (n === null) n = Math.floor(Math.random() * 9000) + 1000;
+  return 'TC-' + n;
+}
+var toastEl = $('toast'), toastTimer = 0;
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2000);
+}
+function flashLabel(btn, text, ms){
+  var prev = btn.getAttribute('data-label') || btn.textContent;
+  btn.setAttribute('data-label', prev); btn.textContent = text;
+  setTimeout(function(){ btn.textContent = prev; }, ms || 1500);
+}
+
+/* ---- 공유 상태 ---- */
+var state = {
+  total: (CFG.EVENT_MINUTES || 30) * 60,
+  start: 0, secondsLeft: 0,
+  ended: false, revealed: false, coupon: ''
+};
+var startRaw = parseInt(store.get('taxcut_event_start'), 10);
+if (!startRaw || isNaN(startRaw) || startRaw > Date.now()) { startRaw = Date.now(); store.set('taxcut_event_start', String(startRaw)); }
+state.start = startRaw;
+state.coupon = store.get('taxcut_coupon') || '';
+state.revealed = store.get('taxcut_revealed') === '1';
+
+function fillCodes(code){
+  $$('[data-code]').forEach(function(el){ el.textContent = code; });
+  $('f_coupon').value = state.ended ? '' : code;
+}
+function ensureCoupon(){
+  if (state.ended) return '';
+  if (!state.coupon) { state.coupon = genCode(); store.set('taxcut_coupon', state.coupon); }
+  page.classList.add('has-coupon');
+  fillCodes(state.coupon);
+  return state.coupon;
+}
+if (state.coupon) { page.classList.add('has-coupon'); fillCodes(state.coupon); }
+
+/* ---- 카카오 링크 규칙 + 예약 스크롤 ---- */
+$$('[data-kakao]').forEach(function(a){
+  a.setAttribute('href', CFG.KAKAO_URL);
+  if (inApp) { a.removeAttribute('target'); a.removeAttribute('rel'); }
+  else { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); }
+  a.addEventListener('click', function(){
+    if (state.revealed && state.coupon) { copyText(state.coupon).then(function(ok){ if (ok) toast('쿠폰코드 복사됨'); }); }
+  });
+});
+$$('[data-youtube]').forEach(function(a){ a.setAttribute('href', CFG.YOUTUBE_URL); });
+$$('[data-site]').forEach(function(a){ a.setAttribute('href', CFG.SITE_URL); });
+function goReserve(e){
+  if (e) e.preventDefault();
+  var sec = $('reserve');
+  sec.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+  setTimeout(function(){ safe(function(){ $('f_name').focus({ preventScroll: true }); }); }, reduced ? 50 : 450);
+}
+$$('[data-reserve]').forEach(function(a){ a.addEventListener('click', goReserve); });
+$$('[data-tocard]').forEach(function(a){
+  a.addEventListener('click', function(e){ e.preventDefault(); $('cardScene').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' }); });
+});
